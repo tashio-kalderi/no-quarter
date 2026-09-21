@@ -16,6 +16,12 @@
       "Magic": "Magic"
     },
     "Check": "Check",
+    "RollMode": {
+      "Prompt": "How is the roll made?",
+      "Normal": "Normal",
+      "Advantage": "Advantage",
+      "Disadvantage": "Disadvantage"
+    },
     "NoUsesLeft": "{name} has no uses left this combat.",
     "Chat": {
       "Roll": "Roll",

@@ -1,4 +1,4 @@
-import { rollSuccess } from '../helpers/success.mjs';
+import { askRollMode, rollSuccess } from '../helpers/success.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
 /**
@@ -69,30 +69,40 @@ export class NoQuarterItem extends Item {
           </div>`,
         });
       }
+      const isMonster = item.actor?.type === 'npc';
+
       // A monster ability with limited uses can only be rolled that many times
       // per combat.
       const { uses, used } = item.system;
-      if (item.actor?.type === 'npc' && uses) {
-        if (used >= uses) {
-          return ui.notifications.warn(
-            game.i18n.format('NOQUARTER.NoUsesLeft', { name: item.name })
-          );
-        }
-        await item.update({ 'system.used': used + 1 });
+      const limited = isMonster && uses;
+      if (limited && used >= uses) {
+        return ui.notifications.warn(
+          game.i18n.format('NOQUARTER.NoUsesLeft', { name: item.name })
+        );
       }
 
       // A monster ability shows its damage type and range after the name (the
       // stat block has the chances), and its effect under the roll.
-      const isMonster = item.actor?.type === 'npc';
       const typeKey = CONFIG.NOQUARTER.damageTypes[item.system.damageType];
       const tag = isMonster
         ? [typeKey ? game.i18n.localize(typeKey) : '', item.system.range].filter(Boolean).join(', ')
         : undefined;
       const note = isMonster ? item.system.effect : undefined;
+
+      // Ask how the roll is made; closing the dialog cancels it without using up a use.
+      const mode = await askRollMode({
+        label: item.name,
+        chances: item.system.chances,
+        tag,
+      });
+      if (!mode) return;
+      if (limited) await item.update({ 'system.used': used + 1 });
+
       return rollSuccess({
         actor: item.actor,
         note,
         tag,
+        mode,
         label: item.name,
         chances: item.system.chances,
         // Only the basic abilities have a damage value for now.

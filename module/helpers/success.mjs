@@ -70,9 +70,54 @@ export function successDegree(natural, chances, wounds = 0) {
 }
 
 /**
+ * The text shown in brackets after a name: the success chances, unless a tag
+ * (such as a monster ability's damage type and range) replaces them.
+ * @param {{regular: number, greater: number, extreme: number}} chances
+ * @param {string} [tag]
+ * @returns {string}   Empty when there is nothing to show
+ */
+function bracketText(chances, tag) {
+  if (tag === undefined) return `(${chances.regular}/${chances.greater}/${chances.extreme})`;
+  return tag ? `(${tag})` : '';
+}
+
+/**
+ * Ask how a roll is made: normally, with advantage, or with disadvantage.
+ * Meant to grow into the place where optional abilities (such as ones that
+ * cost stamina) are chosen.
+ * @param {object} options
+ * @param {string} options.label    The name of the stat or ability being rolled
+ * @param {{regular: number, greater: number, extreme: number}} options.chances
+ * @param {string} [options.tag]    Shown instead of the chances, see rollSuccess
+ * @returns {Promise<'normal'|'advantage'|'disadvantage'|null>}   Null if the dialog is closed
+ */
+export async function askRollMode({ label, chances, tag }) {
+  const esc = foundry.utils.escapeHTML;
+  const bracket = bracketText(chances, tag);
+  const button = (action, isDefault = false) => ({
+    action,
+    label: game.i18n.localize(NOQUARTER.rollModes[action]),
+    default: isDefault,
+    callback: () => action,
+  });
+
+  return foundry.applications.api.DialogV2.wait({
+    window: { title: label },
+    content: `<p class="no-quarter-roll-prompt"><strong>${esc(label)}</strong>${bracket ? ` ${esc(bracket)}` : ''}</p>
+      <p>${game.i18n.localize('NOQUARTER.RollMode.Prompt')}</p>`,
+    buttons: [button('normal', true), button('advantage'), button('disadvantage')],
+    rejectClose: false,
+  });
+}
+
+/**
  * Roll d100 against a set of success chances and post the result to chat.
  * The message shows the name and chances, the degree of success, the die roll
  * and, when a base damage is given, the damage dealt.
+ *
+ * With advantage the d100 is rolled twice and the lower result is used (lower
+ * is better); with disadvantage it is rolled twice and the higher is used.
+ * Wounds apply to both rolls before they are compared.
  * @param {object} options
  * @param {Actor} [options.actor]   The actor the roll is made for
  * @param {string} options.label    The name of the stat or ability rolled
@@ -80,15 +125,25 @@ export function successDegree(natural, chances, wounds = 0) {
  * @param {number} [options.damage]   Base damage; the degree of success adds to it
  * @param {string} [options.note]   Plain text shown under the roll, such as a monster ability's range and damage
  * @param {string} [options.tag]   Text shown in brackets after the name instead of the success chances, such as a monster ability's damage type and range
+ * @param {'normal'|'advantage'|'disadvantage'} [options.mode='normal']
  * @returns {Promise<Roll>}
  */
-export async function rollSuccess({ actor, label, chances, damage, note, tag }) {
-  const roll = await new Roll('1d100').evaluate();
-  const natural = roll.total;
+export async function rollSuccess({ actor, label, chances, damage, note, tag, mode = 'normal' }) {
+  const roll = await new Roll(mode === 'normal' ? '1d100' : '2d100').evaluate();
   const wounds = actor?.usesWounds ? actor.system.wounds : 0;
-  const total = woundedRoll(natural, wounds);
+
+  // Both natural results, in the order they were rolled.
+  const naturals = roll.dice[0].results.map((r) => r.result);
+
+  // Apply the wounds to every roll, then keep the best (advantage) or worst
+  // (disadvantage) one. Ties are broken by the natural roll, so a natural 1
+  // or 100 is never passed over.
+  const rolls = naturals
+    .map((natural) => ({ natural, total: woundedRoll(natural, wounds) }))
+    .sort((a, b) => a.total - b.total || a.natural - b.natural);
+  const { natural, total } = mode === 'disadvantage' ? rolls.at(-1) : rolls[0];
+
   const degree = successDegree(natural, chances, wounds);
-  const { regular, greater, extreme } = chances;
   const result = game.i18n.localize(NOQUARTER.successDegrees[degree]);
 
   const bonus = NOQUARTER.damageBonus[degree];
@@ -100,11 +155,8 @@ export async function rollSuccess({ actor, label, chances, damage, note, tag }) 
 
   const noteHtml = note ? `<div class="roll-effect">${foundry.utils.escapeHTML(note)}</div>` : '';
 
-  const chancesHtml = tag === undefined
-    ? ` <span class="roll-chances">(${regular}/${greater}/${extreme})</span>`
-    : tag
-      ? ` <span class="roll-chances">(${foundry.utils.escapeHTML(tag)})</span>`
-      : '';
+  const bracket = bracketText(chances, tag);
+  const chancesHtml = bracket ? ` <span class="roll-chances">${foundry.utils.escapeHTML(bracket)}</span>` : '';
 
   const woundNote = wounds
     ? ` <span class="roll-wounds">(${game.i18n.format(
@@ -113,10 +165,16 @@ export async function rollSuccess({ actor, label, chances, damage, note, tag }) 
       )})</span>`
     : '';
 
+  const modeHtml =
+    mode === 'normal'
+      ? ''
+      : `<div class="roll-mode">${game.i18n.localize(NOQUARTER.rollModes[mode])}: ${naturals.join(', ')}</div>`;
+
   const content = `<div class="no-quarter-roll">
     <div class="roll-title"><strong>${foundry.utils.escapeHTML(label)}</strong>${chancesHtml}</div>
     <div class="roll-result degree-${degree}">${result}</div>
     <div class="roll-total">${game.i18n.localize('NOQUARTER.Chat.Roll')}: <strong>${total}</strong>${woundNote}</div>
+    ${modeHtml}
     ${noteHtml}
     ${damageHtml}
   </div>`;

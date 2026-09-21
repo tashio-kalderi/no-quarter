@@ -74,3 +74,14 @@ NOQUARTER.damageTypes = {
   physical: 'NOQUARTER.DamageType.Physical',
   magic: 'NOQUARTER.DamageType.Magic',
 };
+
+/**
+ * How a roll can be made. Advantage rolls twice and keeps the lower result
+ * (lower is better); disadvantage rolls twice and keeps the higher.
+ * @type {Object}
+ */
+NOQUARTER.rollModes = {
+  normal: 'NOQUARTER.RollMode.Normal',
+  advantage: 'NOQUARTER.RollMode.Advantage',
+  disadvantage: 'NOQUARTER.RollMode.Disadvantage',
+};
