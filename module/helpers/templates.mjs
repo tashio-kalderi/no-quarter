@@ -13,5 +13,9 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/no-quarter/templates/actor/parts/actor-effects.hbs',
     // Item partials
     'systems/no-quarter/templates/item/parts/item-effects.hbs',
+    // Combat tracker.
+    'systems/no-quarter/templates/combat/header.hbs',
+    'systems/no-quarter/templates/combat/tracker.hbs',
+    'systems/no-quarter/templates/combat/footer.hbs',
   ]);
 };

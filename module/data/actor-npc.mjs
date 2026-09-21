@@ -43,7 +43,7 @@ export default class NoQuarterNPC extends NoQuarterActorBase {
   }
 
   getRollData() {
-    // Monsters have no stats, but the initiative formula uses the agility rank.
+    // Monsters have no stats, but formulas that use the agility rank still need to evaluate.
     return { ...super.getRollData(), lvl: this.level, stats: { agility: { value: 0 } } };
   }
 }

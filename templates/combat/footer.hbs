@@ -1,0 +1,19 @@
+<nav class="combat-controls" data-tooltip-direction="UP">
+    {{~#if hasCombat~}}
+
+    {{!-- GM Controls. Turns are not taken in a fixed order and rounds are not used, so there is no previous or next turn or round. --}}
+    {{#if user.isGM}}
+    {{#if combat.round}}
+    <button type="button" class="combat-control combat-control-lg" data-action="endCombat">
+        <i class="fa-solid fa-xmark" inert></i>
+        <span>{{ localize "COMBAT.End" }}</span>
+    </button>
+    {{else}}
+    <button type="button" class="combat-control combat-control-lg" data-action="startCombat">
+        <i class="fa-solid fa-swords" inert></i>
+        <span>{{ localize "COMBAT.Begin" }}</span>
+    </button>
+    {{/if}}
+    {{/if}}
+    {{/if}}
+</nav>

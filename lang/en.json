@@ -23,6 +23,31 @@
       "Disadvantage": "Disadvantage"
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
+    "Turn": {
+      "Side": { "players": "Players", "monsters": "Monsters" },
+      "SideUp": "{side}' turn",
+      "Up": "Up",
+      "WhoFirst": "Who attacks first?",
+      "Attack": "{side} attack",
+      "WaitingForGM": "Waiting for the GM to say who attacks first.",
+      "GiveTurn": "Give the turn to the {side}",
+      "InProgress": "In Combat",
+      "Start": "Start turn",
+      "End": "End turn",
+      "Cancel": "Cancel turn",
+      "MarkDone": "Mark turn as done",
+      "Done": "Has gone",
+      "Reopen": "Let them go again",
+      "Blocked": {
+        "NotStarted": "The combat has not started.",
+        "Defeated": "That combatant is defeated.",
+        "AlreadyGone": "That combatant has already gone.",
+        "SomeoneActive": "Someone is already taking their turn.",
+        "NoSide": "The GM has not said who attacks first yet.",
+        "NotYourSide": "It is not your side's turn.",
+        "NobodyReady": "Nobody on that side can go."
+      }
+    },
     "Chat": {
       "Roll": "Roll",
       "WoundOne": "rolled {roll}, 1 wound",

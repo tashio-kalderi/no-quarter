@@ -1,0 +1,122 @@
+// Combat tracker: turns are taken by side rather than by initiative.
+.combat-sidebar {
+  // The tracker part is one element holding both sides. It scrolls, not each list.
+  .turn-tracker {
+    flex: 1;
+    overflow: hidden auto;
+
+    .combat-tracker {
+      flex: none;
+      overflow: visible;
+    }
+  }
+
+  // Whose turn it is, or the GM's "who attacks first?" prompt.
+  .turn-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 6px 8px;
+    margin: 0 0 4px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    background: rgba(60, 140, 60, 0.25);
+
+    &.undeclared {
+      background: rgba(200, 150, 30, 0.3);
+    }
+
+    .turn-declare {
+      display: flex;
+      gap: 6px;
+    }
+
+    .turn-declare-button {
+      width: auto;
+      line-height: 1.6;
+      padding: 0 10px;
+    }
+  }
+
+  .turn-group {
+    margin-bottom: 6px;
+
+    // The side that is up is marked, so it is clear who picks the next turn.
+    &.current .turn-group-header {
+      border-bottom-color: rgb(60, 140, 60);
+    }
+  }
+
+  .turn-group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 2px 4px;
+    font-size: var(--font-size-14);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+
+    .turn-group-name {
+      flex: 1;
+    }
+
+    .turn-group-up {
+      padding: 0 6px;
+      font-size: var(--font-size-12);
+      border-radius: 8px;
+      color: #fff;
+      background: rgb(60, 140, 60);
+    }
+
+    .turn-group-give {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 0 4px;
+    }
+  }
+
+  // The turn buttons replace the initiative column.
+  .combat-tracker .turn-controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    min-width: 28px;
+  }
+
+  .combat-tracker .turn-control {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+
+    &.turn-start,
+    &.turn-end {
+      color: rgb(60, 140, 60);
+    }
+
+    &.turn-cancel {
+      color: rgb(170, 50, 50);
+    }
+
+    &:disabled {
+      opacity: 0.35;
+    }
+  }
+
+  .combat-tracker .turn-done {
+    color: rgb(60, 140, 60);
+  }
+
+  // Who has gone this cycle is dimmed, so the choices left stand out.
+  .combat-tracker .combatant.turn-done {
+    opacity: 0.6;
+  }
+}

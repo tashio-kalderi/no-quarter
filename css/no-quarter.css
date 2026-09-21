@@ -232,6 +232,103 @@
   background: rgba(170, 50, 50, 0.45);
 }
 
+/* Combat tracker */
+.combat-sidebar .turn-tracker {
+  flex: 1;
+  overflow: hidden auto;
+}
+.combat-sidebar .turn-tracker .combat-tracker {
+  flex: none;
+  overflow: visible;
+}
+.combat-sidebar .turn-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 6px 8px;
+  margin: 0 0 4px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  background: rgba(60, 140, 60, 0.25);
+}
+.combat-sidebar .turn-banner.undeclared {
+  background: rgba(200, 150, 30, 0.3);
+}
+.combat-sidebar .turn-banner .turn-declare {
+  display: flex;
+  gap: 6px;
+}
+.combat-sidebar .turn-banner .turn-declare-button {
+  width: auto;
+  line-height: 1.6;
+  padding: 0 10px;
+}
+.combat-sidebar .turn-group {
+  margin-bottom: 6px;
+}
+.combat-sidebar .turn-group.current .turn-group-header {
+  border-bottom-color: rgb(60, 140, 60);
+}
+.combat-sidebar .turn-group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 2px 4px;
+  font-size: var(--font-size-14);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+.combat-sidebar .turn-group-header .turn-group-name {
+  flex: 1;
+}
+.combat-sidebar .turn-group-header .turn-group-up {
+  padding: 0 6px;
+  font-size: var(--font-size-12);
+  border-radius: 8px;
+  color: #fff;
+  background: rgb(60, 140, 60);
+}
+.combat-sidebar .turn-group-header .turn-group-give {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 4px;
+}
+.combat-sidebar .combat-tracker .turn-controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 28px;
+}
+.combat-sidebar .combat-tracker .turn-control {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+.combat-sidebar .combat-tracker .turn-control.turn-start, .combat-sidebar .combat-tracker .turn-control.turn-end {
+  color: rgb(60, 140, 60);
+}
+.combat-sidebar .combat-tracker .turn-control.turn-cancel {
+  color: rgb(170, 50, 50);
+}
+.combat-sidebar .combat-tracker .turn-control:disabled {
+  opacity: 0.35;
+}
+.combat-sidebar .combat-tracker .turn-done {
+  color: rgb(60, 140, 60);
+}
+.combat-sidebar .combat-tracker .combatant.turn-done {
+  opacity: 0.6;
+}
+
 /* Styles limited to No Quarter sheets */
 .no-quarter .item-form {
   font-family: "Roboto", sans-serif;

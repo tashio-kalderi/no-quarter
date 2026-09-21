@@ -24,7 +24,7 @@
       "thumbnail": "systems/no-quarter/assets/anvil-impact.png"
     }
   ],
-  "version": "0.1.1",
+  "version": "0.2.0",
   "compatibility": {
     "minimum": 14,
     "verified": "14.368",
@@ -58,7 +58,7 @@
     }
   },
   "manifest": "https://github.com/tashio-kalderi/no-quarter/releases/latest/download/system.json",
-  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.1.1/no-quarter.zip",
+  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.2.0/no-quarter.zip",
   "background": "systems/no-quarter/assets/anvil-impact.png",
   "grid": {
     "distance": 5,

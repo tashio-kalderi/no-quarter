@@ -4,10 +4,13 @@ import { NoQuarterItem } from './documents/item.mjs';
 // Import sheet classes.
 import { NoQuarterActorSheet } from './sheets/actor-sheet.mjs';
 import { NoQuarterItemSheet } from './sheets/item-sheet.mjs';
+// Import application classes.
+import { NoQuarterCombatTracker } from './applications/combat-tracker.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { NOQUARTER } from './helpers/config.mjs';
 import { registerWoundBadge } from './helpers/token-badge.mjs';
+import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
 
@@ -30,14 +33,10 @@ Hooks.once('init', function () {
   // Show wounds on tokens.
   registerWoundBadge();
 
-  /**
-   * Set an initiative formula for the system
-   * @type {String}
-   */
-  CONFIG.Combat.initiative = {
-    formula: '1d10 + @stats.agility.value',
-    decimals: 2,
-  };
+  // There is no initiative roll. Each round the GM declares which side goes
+  // first and the sides then take turns, see helpers/turns.mjs.
+  CONFIG.ui.combat = NoQuarterCombatTracker;
+  registerTurnOrder();
 
   // Define custom Document and DataModel classes.
   // The types themselves are declared under `documentTypes` in system.json.
@@ -88,6 +87,9 @@ Handlebars.registerHelper('toLowerCase', function (str) {
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {
+  // The GM's client unlocks sides and passes the turn between them.
+  registerTurnReferee();
+
   // Limited-use monster abilities come back when a combat ends.
   Hooks.on('deleteCombat', (combat) => {
     if (!game.users.activeGM?.isSelf) return;
