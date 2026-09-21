@@ -1,0 +1,127 @@
+<h3 class="abilities-title">Abilities</h3>
+<ol class="abilities-list">
+  <li class="ability-row ability-header">
+    <div>Name</div>
+    <div>Stat</div>
+    <div>Rank</div>
+    <div>Reg/Great/Ext</div>
+    <div>Stam</div>
+    <div>Effect/Notes</div>
+    <div class="item-controls">
+      <a
+        class="item-control item-create"
+        title="{{localize 'DOCUMENT.Create' type='ability'}}"
+        data-type="ability"
+      >
+        <i class="fas fa-plus"></i>
+        {{localize 'DOCUMENT.New' type='ability'}}
+      </a>
+    </div>
+  </li>
+  {{#each abilities as |item|}}
+    <li class="item ability-row" data-item-id="{{item._id}}">
+      <div class="item-name">
+        <a class="rollable" data-roll-type="item">
+          <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
+        </a>
+        {{#if item.basic}}
+          <h4>{{item.name}}</h4>
+        {{else}}
+          {{!-- Abilities other than the basic ones are filled in by hand. --}}
+          <input
+            type="text"
+            class="ability-field ability-name"
+            data-field="name"
+            value="{{item.name}}"
+            {{#unless @root.editable}}disabled{{/unless}}
+          />
+        {{/if}}
+      </div>
+      {{#if item.basic}}
+        <div class="ability-stat">{{localize (lookup @root.config.statAbbreviations item.system.stat)}}</div>
+      {{else}}
+        <div>
+          <select
+            class="ability-field ability-stat"
+            data-field="stat"
+            {{#unless @root.editable}}disabled{{/unless}}
+          >
+            {{selectOptions @root.config.statAbbreviations selected=item.system.stat localize=true blank="-"}}
+          </select>
+        </div>
+      {{/if}}
+      <div>
+        <input
+          type="text"
+          class="ability-field"
+          data-field="rank"
+          data-dtype="Number"
+          data-nullable="true"
+          data-min="0"
+          data-max="{{@root.config.successRules.maxRank}}"
+          value="{{item.system.rank}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      {{#if item.chances}}
+        <div class="ability-chances rollable" data-roll-type="item">
+          <span class="chance">{{item.chances.regular}}</span>/<span class="chance">{{item.chances.greater}}</span>/<span class="chance">{{item.chances.extreme}}</span>
+        </div>
+      {{else}}
+        {{!-- No stat means a passive ability: no success chance. --}}
+        <div class="ability-passive">{{localize 'NOQUARTER.Passive'}}</div>
+      {{/if}}
+      <div>
+        <input
+          type="text"
+          class="ability-field"
+          data-field="staminaCost"
+          data-dtype="Number"
+          data-nullable="true"
+          data-min="0"
+          value="{{item.system.staminaCost}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      <div class="ability-effect">
+        {{#if item.basic}}
+          <span class="ability-damage-label">Damage (base 1)</span>
+          <input
+            type="text"
+            class="ability-field ability-damage"
+            data-field="damage"
+            data-dtype="Number"
+            data-min="0"
+            title="Damage"
+            value="{{item.system.damage}}"
+            {{#unless @root.editable}}disabled{{/unless}}
+          />
+        {{else}}
+          <input
+            type="text"
+            class="ability-field"
+            data-field="effect"
+            value="{{item.system.effect}}"
+            {{#unless @root.editable}}disabled{{/unless}}
+          />
+        {{/if}}
+      </div>
+      <div class="item-controls">
+        <a
+          class="item-control item-edit"
+          title="{{localize 'DOCUMENT.Edit' type='ability'}}"
+        >
+          <i class="fas fa-edit"></i>
+        </a>
+        {{#unless item.basic}}
+          <a
+            class="item-control item-delete"
+            title="{{localize 'DOCUMENT.Delete' type='ability'}}"
+          >
+            <i class="fas fa-trash"></i>
+          </a>
+        {{/unless}}
+      </div>
+    </li>
+  {{/each}}
+</ol>

@@ -1,0 +1,121 @@
+<form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
+
+  {{!-- Sheet Header --}}
+  <header class="sheet-header">
+    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+    <div class="header-fields">
+      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+      {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+      use both the "grid" and "grid-Ncol" class where "N" can be any number
+      from 1 to 12 and will create that number of columns.  --}}
+      <div class="resources grid grid-4col">
+
+        {{!-- "flex-group-center" is also defined in the _grid.scss file
+        and it will add a small amount of padding, a border, and will
+        center all of its child elements content and text. --}}
+        <div class="resource flex-group-center">
+          <label for="system.health.value" class="resource-label">Health</label>
+          <div class="resource-content flexrow flex-center flex-between">
+          <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
+          <span> / </span>
+          <input type="text" disabled="true" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+          </div>
+        </div>
+
+        <div class="resource flex-group-center">
+          <label for="system.stamina.value" class="resource-label">Stamina</label>
+          <div class="resource-content flexrow flex-center flex-between">
+          <input type="text" name="system.stamina.value" value="{{system.stamina.value}}" data-dtype="Number"/>
+          <span> / </span>
+          <input type="text" disabled="true" name="system.stamina.max" value="{{system.stamina.max}}" data-dtype="Number"/>
+          </div>
+        </div>
+
+        <div class="resource flex-group-center">
+          <label for="system.wounds" class="resource-label">Wounds</label>
+          <div class="resource-content flexrow flex-center flex-between">
+            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
+          </div>
+        </div>
+
+        <div class="resource flex-group-center">
+          <label for="system.attributes.level.value" class="resource-label">Level</label>
+          <div class="resource-content flexrow flex-center flex-between">
+          <input type="text" name="system.attributes.level.value" value="{{system.attributes.level.value}}" data-dtype="Number"/>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  {{!-- Sheet Tab Navigation --}}
+  <nav class="sheet-tabs tabs" data-group="primary">
+    {{!-- Default tab is specified in actor-sheet.mjs --}}
+    <a class="item" data-tab="abilities">Abilities</a>
+    <a class="item" data-tab="description">Description</a>
+    <a class="item" data-tab="items">Items</a>
+    <a class="item" data-tab="spells">Spells</a>
+    <a class="item" data-tab="effects">Effects</a>
+  </nav>
+
+  {{!-- Sheet Body --}}
+  <section class="sheet-body">
+
+    {{!-- Stats and Abilities Tab --}}
+    <div class="tab abilities-tab" data-group="primary" data-tab="abilities">
+      <section class="flexcol">
+        <aside class="sidebar">
+
+          {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+          use both the "grid" and "grid-Ncol" class where "N" can be any number
+          from 1 to 12 and will create that number of columns.  --}}
+          <h3 class="stats-title">Stats</h3>
+          <div class="stats flexcol">
+            <div class="stats-header">
+              <span>Name</span>
+              <span>Rank</span>
+              <span>Reg/Great/Ext</span>
+            </div>
+            {{#each system.stats as |stat key|}}
+            <div class="stat flexrow flex-group-center">
+              <label for="system.stats.{{key}}.value" class="resource-label rollable flexlarge align-left" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">{{localize (lookup @root.config.stats key)}}</label>
+              <input type="text" name="system.stats.{{key}}.value" value="{{stat.value}}" data-dtype="Number"/>
+              <span class="stat-chances rollable" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}"><span class="chance">{{stat.target.regular}}</span>/<span class="chance">{{stat.target.greater}}</span>/<span class="chance">{{stat.target.extreme}}</span></span>
+            </div>
+            {{/each}}
+          </div>
+        </aside>
+
+        {{!-- The abilities list sits below the stats --}}
+        <section class="main">
+          {{!-- This is a Handlebars partial. They're stored in the `/parts` folder next to this sheet, and defined in module/helpers/templates.mjs --}}
+          {{> "systems/no-quarter/templates/actor/parts/actor-abilities.hbs"}}
+        </section>
+
+      </section>
+    </div>
+
+    {{!-- Biography Tab --}}
+    <div class="tab biography" data-group="primary" data-tab="description">
+      {{!-- Editors must receive enriched text data from getData to properly handle rolls --}}
+      {{editor enrichedBiography target="system.biography" engine="prosemirror" button=true editable=editable}}
+    </div>
+
+    {{!-- Owned Items Tab --}}
+    <div class="tab items" data-group="primary" data-tab="items">
+       {{> "systems/no-quarter/templates/actor/parts/actor-items.hbs"}}
+    </div>
+
+    {{!-- Owned Spells Tab --}}
+    <div class="tab spells" data-group="primary" data-tab="spells">
+      {{> "systems/no-quarter/templates/actor/parts/actor-spells.hbs"}}
+    </div>
+
+    {{!-- Active Effects Tab --}}
+    <div class="tab effects flexcol" data-group="primary" data-tab="effects">
+      {{> "systems/no-quarter/templates/actor/parts/actor-effects.hbs"}}
+    </div>
+
+  </section>
+</form>

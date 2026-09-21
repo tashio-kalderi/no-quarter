@@ -1,0 +1,43 @@
+// Chat card for stat and ability rolls.
+.no-quarter-roll {
+  .roll-title {
+    margin-bottom: 4px;
+  }
+
+  // The bracketed text after a name (success chances, or a monster ability's
+  // damage type and range) is never bold.
+  .roll-chances {
+    font-weight: normal;
+  }
+
+  .roll-result {
+    padding: 4px 8px;
+    margin-bottom: 4px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.08);
+
+    &.degree-regular,
+    &.degree-greater,
+    &.degree-extreme,
+    &.degree-criticalSuccess {
+      background: rgba(60, 140, 60, 0.25);
+    }
+
+    &.degree-extreme,
+    &.degree-criticalSuccess {
+      background: rgba(60, 140, 60, 0.45);
+    }
+
+    &.degree-failure,
+    &.degree-criticalFailure {
+      background: rgba(170, 50, 50, 0.25);
+    }
+
+    &.degree-criticalFailure {
+      background: rgba(170, 50, 50, 0.45);
+    }
+  }
+}

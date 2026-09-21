@@ -1,0 +1,65 @@
+{
+  "NOQUARTER": {
+    "Stat": {
+      "Might": { "long": "Might", "abbr": "mig" },
+      "Mind": { "long": "Mind", "abbr": "min" },
+      "Agility": { "long": "Agility", "abbr": "agi" },
+      "Personality": { "long": "Personality", "abbr": "per" }
+    },
+    "SheetLabels": {
+      "Actor": "No Quarter Actor Sheet",
+      "Item": "No Quarter Item Sheet"
+    },
+    "Passive": "Passive",
+    "DamageType": {
+      "Physical": "Physical",
+      "Magic": "Magic"
+    },
+    "Check": "Check",
+    "NoUsesLeft": "{name} has no uses left this combat.",
+    "Chat": {
+      "Roll": "Roll",
+      "WoundOne": "rolled {roll}, 1 wound",
+      "WoundMany": "rolled {roll}, {count} wounds",
+      "Damage": "Damage"
+    },
+    "BasicAbility": {
+      "Melee": "Basic Melee Attack",
+      "Ranged": "Basic Ranged Attack",
+      "Magic": "Basic Magic Attack"
+    },
+    "Item": {
+      "Spell": {
+        "SpellLVL": "Level {level} Spells",
+        "AddLVL": "Add LVL {level}"
+      }
+    },
+    "Success": {
+      "CriticalSuccess": "Critical Success",
+      "Extreme": "Extreme Success",
+      "Greater": "Great Success",
+      "Regular": "Success",
+      "Failure": "Failure",
+      "CriticalFailure": "Critical Failure"
+    },
+    "Effect": {
+      "Source": "Source",
+      "Toggle": "Toggle Effect",
+      "Temporary": "Temporary Effects",
+      "Passive": "Passive Effects",
+      "Inactive": "Inactive Effects"
+    }
+  },
+
+  "TYPES": {
+    "Actor": {
+      "character": "Character",
+      "npc": "NPC"
+    },
+    "Item": {
+      "item": "Item",
+      "ability": "Ability",
+      "spell": "Spell"
+    }
+  }
+}

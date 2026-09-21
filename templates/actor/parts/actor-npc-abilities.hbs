@@ -1,0 +1,111 @@
+{{!-- A monster's abilities: name, damage type, range, uses per combat and the
+damage/effect. Every one is rolled against the monster's own Stats line. --}}
+<h3 class="abilities-title">Abilities</h3>
+<ol class="abilities-list monster-abilities">
+  <li class="ability-row ability-header">
+    <div>Name</div>
+    <div>Type</div>
+    <div>Range</div>
+    <div title="Uses left this combat / times it can be used in one combat">
+      Uses
+      <a class="uses-reset" title="Restore all uses"><i class="fas fa-rotate-left"></i></a>
+    </div>
+    <div>Damage/Effect</div>
+    <div class="item-controls">
+      <a
+        class="item-control item-create"
+        title="{{localize 'DOCUMENT.Create' type='ability'}}"
+        data-type="ability"
+      >
+        <i class="fas fa-plus"></i>
+        {{localize 'DOCUMENT.New' type='ability'}}
+      </a>
+    </div>
+  </li>
+  {{#each abilities as |item|}}
+    <li class="item ability-row" data-item-id="{{item._id}}">
+      <div class="item-name">
+        <a class="rollable" data-roll-type="item">
+          <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
+        </a>
+        <input
+          type="text"
+          class="ability-field ability-name"
+          data-field="name"
+          value="{{item.name}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      <div>
+        <select
+          class="ability-field"
+          data-field="damageType"
+          {{#unless @root.editable}}disabled{{/unless}}
+        >
+          {{selectOptions @root.config.damageTypes selected=item.system.damageType localize=true blank="-"}}
+        </select>
+      </div>
+      <div>
+        <input
+          type="text"
+          class="ability-field"
+          data-field="range"
+          placeholder="30 ft."
+          value="{{item.system.range}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      <div class="ability-uses">
+        {{#if item.system.uses}}
+          <input
+            type="text"
+            class="ability-field"
+            data-field="remaining"
+            data-dtype="Number"
+            data-nullable="true"
+            data-min="0"
+            data-max="{{item.system.uses}}"
+            title="Uses left this combat (empty to remove the limit)"
+            value="{{item.system.remaining}}"
+            {{#unless @root.editable}}disabled{{/unless}}
+          />
+          <span>/</span>
+        {{/if}}
+        <input
+          type="text"
+          class="ability-field"
+          data-field="uses"
+          data-dtype="Number"
+          data-nullable="true"
+          data-min="1"
+          title="Times it can be used in one combat (empty for unlimited)"
+          value="{{item.system.uses}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      <div class="ability-effect">
+        <input
+          type="text"
+          class="ability-field"
+          data-field="effect"
+          value="{{item.system.effect}}"
+          {{#unless @root.editable}}disabled{{/unless}}
+        />
+      </div>
+      <div class="item-controls">
+        <a
+          class="item-control item-edit"
+          title="{{localize 'DOCUMENT.Edit' type='ability'}}"
+        >
+          <i class="fas fa-edit"></i>
+        </a>
+        <a
+          class="item-control item-delete"
+          title="{{localize 'DOCUMENT.Delete' type='ability'}}"
+        >
+          <i class="fas fa-trash"></i>
+        </a>
+      </div>
+    </li>
+  {{/each}}
+</ol>

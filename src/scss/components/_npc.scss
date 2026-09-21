@@ -1,0 +1,60 @@
+// Monster sheet: the stat block lines in the header, and the monster ability
+// list (name | type | range | uses | damage/effect).
+.npc-identity,
+.npc-defenses {
+  margin: 4px 0;
+
+  input[type='text'] {
+    min-width: 0;
+  }
+}
+
+// The wounds checkbox (and the count beside it, for bosses) sit in the middle.
+.npc-wounds {
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  input[type='checkbox'] {
+    margin: 0;
+  }
+
+  input[type='text'] {
+    flex: none;
+    width: 3rem;
+    text-align: center;
+  }
+}
+
+// Health, PDR and MDR are narrow; the Stats line needs room for three numbers.
+.npc-defenses {
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 1.7fr;
+}
+
+.monster-abilities {
+  .ability-uses {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .uses-reset {
+    margin-left: 4px;
+  }
+
+  .ability-row {
+    grid-template-columns: minmax(0, 1.4fr) 5.5rem 4.5rem 5.5rem minmax(0, 2.5fr) 3.4rem;
+  }
+
+  // Only the narrow uses column is centered over its box.
+  .ability-header {
+    > :nth-child(3),
+    > :nth-child(5) {
+      text-align: left;
+    }
+
+    > :nth-child(4) {
+      text-align: center;
+    }
+  }
+}

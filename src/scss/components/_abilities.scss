@@ -1,0 +1,108 @@
+// Abilities list: name | stat | rank | success chances | stamina | effect/notes.
+// Every row uses the same fixed column layout so the columns line up.
+.abilities-title {
+  margin: 12px 0 4px;
+}
+
+.abilities-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .ability-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 3.6rem 3rem 5.5rem 3rem minmax(0, 2fr) 3.4rem;
+    align-items: center;
+    column-gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  }
+
+  .ability-header {
+    font-size: 0.85em;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+
+    // Center the narrow input columns (rank, stamina) over their boxes.
+    > :nth-child(3),
+    > :nth-child(5) {
+      text-align: center;
+    }
+  }
+
+  .item-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+
+    h4 {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .ability-stat {
+    text-transform: uppercase;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  .ability-name {
+    text-align: left;
+  }
+
+  input {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ability-field[data-field='effect'] {
+    text-align: left;
+  }
+
+  // Effect/Notes cell of the basic abilities: label followed by a damage box.
+  .ability-effect {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .ability-damage-label {
+    white-space: nowrap;
+  }
+
+  .ability-damage {
+    flex: none;
+    width: 3rem;
+  }
+
+  .item-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+}
+
+.ability-passive {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.ability-chances {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+// Each chance sits in a fixed-width, right-aligned slot so the slashes line
+// up between rows whether a number has one digit or two.
+.chance {
+  display: inline-block;
+  min-width: 2ch;
+  text-align: right;
+}

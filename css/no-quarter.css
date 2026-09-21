@@ -1,0 +1,556 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+/* Global styles */
+.window-app {
+  font-family: "Roboto", sans-serif;
+}
+
+.rollable:hover, .rollable:focus {
+  color: #000;
+  text-shadow: 0 0 10px red;
+  cursor: pointer;
+}
+
+.grid,
+.grid-2col {
+  display: grid;
+  grid-column: span 2/span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+  padding: 0;
+}
+
+.grid-3col {
+  grid-column: span 3/span 3;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-4col {
+  grid-column: span 4/span 4;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-5col {
+  grid-column: span 5/span 5;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.grid-6col {
+  grid-column: span 6/span 6;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.grid-7col {
+  grid-column: span 7/span 7;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.grid-8col {
+  grid-column: span 8/span 8;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.grid-9col {
+  grid-column: span 9/span 9;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+}
+
+.grid-10col {
+  grid-column: span 10/span 10;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+
+.grid-11col {
+  grid-column: span 11/span 11;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+}
+
+.grid-12col {
+  grid-column: span 12/span 12;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.grid-start-2 {
+  grid-column-start: 2;
+}
+
+.grid-start-3 {
+  grid-column-start: 3;
+}
+
+.grid-start-4 {
+  grid-column-start: 4;
+}
+
+.grid-start-5 {
+  grid-column-start: 5;
+}
+
+.grid-start-6 {
+  grid-column-start: 6;
+}
+
+.grid-start-7 {
+  grid-column-start: 7;
+}
+
+.grid-start-8 {
+  grid-column-start: 8;
+}
+
+.grid-start-9 {
+  grid-column-start: 9;
+}
+
+.grid-start-10 {
+  grid-column-start: 10;
+}
+
+.grid-start-11 {
+  grid-column-start: 11;
+}
+
+.grid-start-12 {
+  grid-column-start: 12;
+}
+
+.grid-span-2 {
+  grid-column-end: span 2;
+}
+
+.grid-span-3 {
+  grid-column-end: span 3;
+}
+
+.grid-span-4 {
+  grid-column-end: span 4;
+}
+
+.grid-span-5 {
+  grid-column-end: span 5;
+}
+
+.grid-span-6 {
+  grid-column-end: span 6;
+}
+
+.grid-span-7 {
+  grid-column-end: span 7;
+}
+
+.grid-span-8 {
+  grid-column-end: span 8;
+}
+
+.grid-span-9 {
+  grid-column-end: span 9;
+}
+
+.grid-span-10 {
+  grid-column-end: span 10;
+}
+
+.grid-span-11 {
+  grid-column-end: span 11;
+}
+
+.grid-span-12 {
+  grid-column-end: span 12;
+}
+
+.flex-group-center,
+.flex-group-left,
+.flex-group-right {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.flex-group-left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.flex-group-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.flexshrink {
+  flex: 0;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flexlarge {
+  flex: 2;
+}
+
+.align-left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.align-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.align-center {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Chat cards */
+.no-quarter-roll .roll-title {
+  margin-bottom: 4px;
+}
+.no-quarter-roll .roll-chances {
+  font-weight: normal;
+}
+.no-quarter-roll .roll-result {
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.no-quarter-roll .roll-result.degree-regular, .no-quarter-roll .roll-result.degree-greater, .no-quarter-roll .roll-result.degree-extreme, .no-quarter-roll .roll-result.degree-criticalSuccess {
+  background: rgba(60, 140, 60, 0.25);
+}
+.no-quarter-roll .roll-result.degree-extreme, .no-quarter-roll .roll-result.degree-criticalSuccess {
+  background: rgba(60, 140, 60, 0.45);
+}
+.no-quarter-roll .roll-result.degree-failure, .no-quarter-roll .roll-result.degree-criticalFailure {
+  background: rgba(170, 50, 50, 0.25);
+}
+.no-quarter-roll .roll-result.degree-criticalFailure {
+  background: rgba(170, 50, 50, 0.45);
+}
+
+/* Styles limited to No Quarter sheets */
+.no-quarter .item-form {
+  font-family: "Roboto", sans-serif;
+}
+.no-quarter .sheet-header {
+  flex: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+.no-quarter .sheet-header .profile-img {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 10px;
+}
+.no-quarter .sheet-header .header-fields {
+  flex: 1;
+}
+.no-quarter .sheet-header h1.charname {
+  height: 50px;
+  padding: 0px;
+  margin: 5px 0;
+  border-bottom: 0;
+}
+.no-quarter .sheet-header h1.charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.no-quarter .sheet-tabs {
+  flex: 0;
+}
+.no-quarter .sheet-body,
+.no-quarter .sheet-body .tab,
+.no-quarter .sheet-body .tab .editor {
+  height: 100%;
+}
+.no-quarter .tox .tox-editor-container {
+  background: #fff;
+}
+.no-quarter .tox .tox-edit-area {
+  padding: 0 8px;
+}
+.no-quarter .stats-title {
+  margin: 0 0 4px;
+}
+.no-quarter .stats {
+  display: grid;
+  max-width: 16rem;
+  margin-bottom: 12px;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.no-quarter .stats .stat,
+.no-quarter .stats .stats-header {
+  display: contents;
+}
+.no-quarter .stats .stats-header span {
+  font-size: 0.85em;
+  font-weight: bold;
+  text-align: left;
+}
+.no-quarter .stats .stats-header span:nth-child(2) {
+  text-align: center;
+}
+.no-quarter .stats .resource-label {
+  text-align: left;
+}
+.no-quarter .stats input {
+  width: 2.75rem;
+  text-align: center;
+}
+.no-quarter .stats .stat-chances {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.no-quarter .abilities-title {
+  margin: 12px 0 4px;
+}
+.no-quarter .abilities-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.no-quarter .abilities-list .ability-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 3.6rem 3rem 5.5rem 3rem minmax(0, 2fr) 3.4rem;
+  align-items: center;
+  column-gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+.no-quarter .abilities-list .ability-header {
+  font-size: 0.85em;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+.no-quarter .abilities-list .ability-header > :nth-child(3),
+.no-quarter .abilities-list .ability-header > :nth-child(5) {
+  text-align: center;
+}
+.no-quarter .abilities-list .item-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.no-quarter .abilities-list .item-name h4 {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.no-quarter .abilities-list .ability-stat {
+  text-transform: uppercase;
+}
+.no-quarter .abilities-list select {
+  width: 100%;
+}
+.no-quarter .abilities-list .ability-name {
+  text-align: left;
+}
+.no-quarter .abilities-list input {
+  width: 100%;
+  text-align: center;
+}
+.no-quarter .abilities-list .ability-field[data-field=effect] {
+  text-align: left;
+}
+.no-quarter .abilities-list .ability-effect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.no-quarter .abilities-list .ability-damage-label {
+  white-space: nowrap;
+}
+.no-quarter .abilities-list .ability-damage {
+  flex: none;
+  width: 3rem;
+}
+.no-quarter .abilities-list .item-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.no-quarter .ability-passive {
+  font-style: italic;
+  opacity: 0.7;
+}
+.no-quarter .ability-chances {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.no-quarter .chance {
+  display: inline-block;
+  min-width: 2ch;
+  text-align: right;
+}
+.no-quarter .npc-identity,
+.no-quarter .npc-defenses {
+  margin: 4px 0;
+}
+.no-quarter .npc-identity input[type=text],
+.no-quarter .npc-defenses input[type=text] {
+  min-width: 0;
+}
+.no-quarter .npc-wounds {
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.no-quarter .npc-wounds input[type=checkbox] {
+  margin: 0;
+}
+.no-quarter .npc-wounds input[type=text] {
+  flex: none;
+  width: 3rem;
+  text-align: center;
+}
+.no-quarter .npc-defenses {
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 1.7fr;
+}
+.no-quarter .monster-abilities .ability-uses {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.no-quarter .monster-abilities .uses-reset {
+  margin-left: 4px;
+}
+.no-quarter .monster-abilities .ability-row {
+  grid-template-columns: minmax(0, 1.4fr) 5.5rem 4.5rem 5.5rem minmax(0, 2.5fr) 3.4rem;
+}
+.no-quarter .monster-abilities .ability-header > :nth-child(3),
+.no-quarter .monster-abilities .ability-header > :nth-child(5) {
+  text-align: left;
+}
+.no-quarter .monster-abilities .ability-header > :nth-child(4) {
+  text-align: center;
+}
+.no-quarter .resource-label {
+  font-weight: bold;
+}
+.no-quarter .items-header {
+  height: 28px;
+  margin: 2px 0;
+  padding: 0;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px groove #eeede0;
+  font-weight: bold;
+}
+.no-quarter .items-header > * {
+  font-size: 14px;
+  text-align: center;
+}
+.no-quarter .items-header .item-name {
+  font-weight: bold;
+  padding-left: 5px;
+  text-align: left;
+  display: flex;
+}
+.no-quarter .items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  color: #444;
+}
+.no-quarter .items-list .item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.no-quarter .items-list .item-name {
+  flex: 2;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-align: left;
+  align-items: center;
+  display: flex;
+}
+.no-quarter .items-list .item-name h3, .no-quarter .items-list .item-name h4 {
+  margin: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+.no-quarter .items-list .item-controls {
+  display: flex;
+  flex: 0 0 100px;
+  justify-content: flex-end;
+}
+.no-quarter .items-list .item-controls a {
+  font-size: 12px;
+  text-align: center;
+  margin: 0 6px;
+}
+.no-quarter .items-list .item {
+  align-items: center;
+  padding: 0 2px;
+  border-bottom: 1px solid #c9c7b8;
+}
+.no-quarter .items-list .item:last-child {
+  border-bottom: none;
+}
+.no-quarter .items-list .item .item-name {
+  color: #191813;
+}
+.no-quarter .items-list .item .item-name .item-image {
+  flex: 0 0 30px;
+  height: 30px;
+  background-size: 30px;
+  border: none;
+  margin-right: 5px;
+}
+.no-quarter .items-list .item-prop {
+  text-align: center;
+  border-left: 1px solid #c9c7b8;
+  border-right: 1px solid #c9c7b8;
+  font-size: 12px;
+}
+.no-quarter .items-list .items-header {
+  height: 28px;
+  margin: 2px 0;
+  padding: 0;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px groove #eeede0;
+  font-weight: bold;
+}
+.no-quarter .items-list .items-header > * {
+  font-size: 12px;
+  text-align: center;
+}
+.no-quarter .items-list .items-header .item-name {
+  padding-left: 5px;
+  text-align: left;
+}
+.no-quarter .item-formula {
+  flex: 0 0 200px;
+  padding: 0 8px;
+}
+.no-quarter .effects .item .effect-source,
+.no-quarter .effects .item .effect-duration,
+.no-quarter .effects .item .effect-controls {
+  text-align: center;
+  border-left: 1px solid #c9c7b8;
+  border-right: 1px solid #c9c7b8;
+  font-size: 12px;
+}
+.no-quarter .effects .item .effect-controls {
+  border: none;
+}

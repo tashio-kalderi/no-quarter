@@ -1,0 +1,69 @@
+{
+  "id": "no-quarter",
+  "title": "No Quarter",
+  "description": "The No Quarter system for FoundryVTT!",
+  "authors": [
+    {
+      "name": "Tashio",
+      "discord": "tashio"
+    },
+    {
+      "name": "The DM Lair",
+      "discord": "thedmlair"
+    }
+  ],
+  "url": "https://github.com/tashio-kalderi/no-quarter",
+  "license": "LICENSE.txt",
+  "readme": "README.md",
+  "bugs": "https://github.com/tashio-kalderi/no-quarter/issues",
+  "changelog": "CHANGELOG.md",
+  "media": [
+    {
+      "type": "setup",
+      "url": "systems/no-quarter/assets/anvil-impact.png",
+      "thumbnail": "systems/no-quarter/assets/anvil-impact.png"
+    }
+  ],
+  "version": "0.1",
+  "compatibility": {
+    "minimum": 14,
+    "verified": "14.368",
+    "maximum": "14"
+  },
+  "esmodules": [
+    "module/no-quarter.mjs"
+  ],
+  "styles": [
+    "css/no-quarter.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [],
+  "packFolders": [],
+  "socket": false,
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "npc": {}
+    },
+    "Item": {
+      "item": {},
+      "ability": {},
+      "spell": {}
+    }
+  },
+  "manifest": "https://github.com/tashio-kalderi/no-quarter/releases/latest/download/system.json",
+  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.1/no-quarter.zip",
+  "background": "systems/no-quarter/assets/anvil-impact.png",
+  "grid": {
+    "distance": 5,
+    "units": "ft"
+  },
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "stamina"
+}

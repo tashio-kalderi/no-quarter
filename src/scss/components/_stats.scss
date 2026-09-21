@@ -1,0 +1,46 @@
+// Stat list: name | rank | success chances (Regular/Greater/Extreme).
+// The rows use `display: contents` so all rows share the same three columns
+// and stay aligned regardless of the text in each row.
+.stats-title {
+  margin: 0 0 4px;
+}
+
+.stats {
+  display: grid;
+  max-width: 16rem;
+  margin-bottom: 12px;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+
+  .stat,
+  .stats-header {
+    display: contents;
+  }
+
+  .stats-header span {
+    font-size: 0.85em;
+    font-weight: bold;
+    text-align: left;
+
+    // The rank column is centered over its input boxes.
+    &:nth-child(2) {
+      text-align: center;
+    }
+  }
+
+  .resource-label {
+    text-align: left;
+  }
+
+  input {
+    width: 2.75rem;
+    text-align: center;
+  }
+
+  .stat-chances {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}

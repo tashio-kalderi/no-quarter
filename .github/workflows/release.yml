@@ -1,0 +1,38 @@
+name: Release
+
+# Publishing a GitHub release (tagged like v0.1) builds the system zip and
+# attaches it, along with a system.json whose version and download link match
+# the tag. Foundry installs from the "latest" release's system.json.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set the version and download link from the release tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          REPO="https://github.com/${GITHUB_REPOSITORY}"
+          jq --arg version "$VERSION" \
+             --arg manifest "$REPO/releases/latest/download/system.json" \
+             --arg download "$REPO/releases/download/${GITHUB_REF_NAME}/no-quarter.zip" \
+             '.version = $version | .manifest = $manifest | .download = $download' \
+             system.json > system.tmp
+          mv system.tmp system.json
+
+      - name: Zip the system
+        run: zip -r no-quarter.zip system.json README.md LICENSE.txt CHANGELOG.md assets css lang module templates
+
+      - name: Attach the files to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            system.json
+            no-quarter.zip
