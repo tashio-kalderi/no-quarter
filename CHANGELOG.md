@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.2.2
+
+- Character sheet: Health, Stamina and Wounds moved out of the header to a new Vitals list next to Stats, alongside a new Speed field. The header now has Race, Gender and Alignment text fields where those used to sit.
+- Movement ruler: while it's a combatant's active turn, their token's movement line and grid highlight are colored green up to their Speed, yellow up to double Speed, and red beyond that. Starting a turn resets the token's movement history so the coloring reflects only that turn's movement.
+- Canceling a turn now puts the token back where it stood when the turn started, undoing any movement made during it.
+- The Reg/Great/Ext success chances (Stats and Abilities) are now read-only boxes styled like the Health/Stamina max field, with the header labels lined up against the boxes below them.
+
 ## 0.2.1
 
 - Condition markers are now stackable. In the Token HUD, left-click a status effect to add a stack (creating it if it isn't already active); right-click removes one, clearing the condition once it reaches 0. The current count shows as a badge on the icon.

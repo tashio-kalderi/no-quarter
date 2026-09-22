@@ -12,6 +12,7 @@ import { NOQUARTER } from './helpers/config.mjs';
 import { registerWoundBadge } from './helpers/token-badge.mjs';
 import { registerStackableConditions, registerConditionTurnEffects } from './helpers/conditions.mjs';
 import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
+import { registerMovementRuler } from './helpers/movement-ruler.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
 
@@ -42,6 +43,10 @@ Hooks.once('init', function () {
   // first and the sides then take turns, see helpers/turns.mjs.
   CONFIG.ui.combat = NoQuarterCombatTracker;
   registerTurnOrder();
+
+  // Color a combatant's movement ruler green/yellow/red against their Speed
+  // stat while it's their active turn.
+  registerMovementRuler();
 
   // Define custom Document and DataModel classes.
   // The types themselves are declared under `documentTypes` in system.json.

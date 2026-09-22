@@ -14,28 +14,18 @@
         and it will add a small amount of padding, a border, and will
         center all of its child elements content and text. --}}
         <div class="resource flex-group-center">
-          <label for="system.health.value" class="resource-label">Health</label>
-          <div class="resource-content flexrow flex-center flex-between">
-          <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
-          <span> / </span>
-          <input type="text" disabled="true" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
-          </div>
+          <label for="system.race" class="resource-label">Race</label>
+          <input type="text" name="system.race" value="{{system.race}}"/>
         </div>
 
         <div class="resource flex-group-center">
-          <label for="system.stamina.value" class="resource-label">Stamina</label>
-          <div class="resource-content flexrow flex-center flex-between">
-          <input type="text" name="system.stamina.value" value="{{system.stamina.value}}" data-dtype="Number"/>
-          <span> / </span>
-          <input type="text" disabled="true" name="system.stamina.max" value="{{system.stamina.max}}" data-dtype="Number"/>
-          </div>
+          <label for="system.gender" class="resource-label">Gender</label>
+          <input type="text" name="system.gender" value="{{system.gender}}"/>
         </div>
 
         <div class="resource flex-group-center">
-          <label for="system.wounds" class="resource-label">Wounds</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
-          </div>
+          <label for="system.alignment" class="resource-label">Alignment</label>
+          <input type="text" name="system.alignment" value="{{system.alignment}}"/>
         </div>
 
         <div class="resource flex-group-center">
@@ -66,24 +56,80 @@
     <div class="tab abilities-tab" data-group="primary" data-tab="abilities">
       <section class="flexcol">
         <aside class="sidebar">
+          <div class="stats-and-vitals flexrow">
 
-          {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
-          use both the "grid" and "grid-Ncol" class where "N" can be any number
-          from 1 to 12 and will create that number of columns.  --}}
-          <h3 class="stats-title">Stats</h3>
-          <div class="stats flexcol">
-            <div class="stats-header">
-              <span>Name</span>
-              <span>Rank</span>
-              <span>Reg/Great/Ext</span>
+            {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+            use both the "grid" and "grid-Ncol" class where "N" can be any number
+            from 1 to 12 and will create that number of columns.  --}}
+            <div class="stats-column">
+              <h3 class="stats-title">Stats</h3>
+              <div class="stats flexcol">
+                <div class="stats-header">
+                  <span>Name</span>
+                  <span>Rank</span>
+                  {{!-- Shares .stat-chances' layout with the rows below so the "/"s line up. --}}
+                  <div class="stat-chances">
+                    <span class="chance-label">Reg</span>
+                    <span>/</span>
+                    <span class="chance-label">Great</span>
+                    <span>/</span>
+                    <span class="chance-label">Ext</span>
+                  </div>
+                </div>
+                {{#each system.stats as |stat key|}}
+                <div class="stat flexrow flex-group-center">
+                  <label for="system.stats.{{key}}.value" class="resource-label rollable flexlarge align-left" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">{{localize (lookup @root.config.stats key)}}</label>
+                  <input type="text" name="system.stats.{{key}}.value" value="{{stat.value}}" data-dtype="Number"/>
+                  <div class="stat-chances rollable" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">
+                    <input type="text" class="chance-box" value="{{stat.target.regular}}" readonly tabindex="-1"/>
+                    <span>/</span>
+                    <input type="text" class="chance-box" value="{{stat.target.greater}}" readonly tabindex="-1"/>
+                    <span>/</span>
+                    <input type="text" class="chance-box" value="{{stat.target.extreme}}" readonly tabindex="-1"/>
+                  </div>
+                </div>
+                {{/each}}
+              </div>
             </div>
-            {{#each system.stats as |stat key|}}
-            <div class="stat flexrow flex-group-center">
-              <label for="system.stats.{{key}}.value" class="resource-label rollable flexlarge align-left" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">{{localize (lookup @root.config.stats key)}}</label>
-              <input type="text" name="system.stats.{{key}}.value" value="{{stat.value}}" data-dtype="Number"/>
-              <span class="stat-chances rollable" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}"><span class="chance">{{stat.target.regular}}</span>/<span class="chance">{{stat.target.greater}}</span>/<span class="chance">{{stat.target.extreme}}</span></span>
+
+            {{!-- Vitals: the resources moved out of the sheet header so they sit next to Stats.
+            This mirrors the Stats column's structure (heading, then a blank header row) so the
+            four rows below line up with the four stat rows. --}}
+            <div class="vitals-column">
+              <h3 class="stats-title">Vitals</h3>
+              <div class="vitals flexcol">
+                <div class="vitals-header">&nbsp;</div>
+
+                <div class="vital flexrow flex-group-left">
+                  <label for="system.speed" class="resource-label align-left">Speed:</label>
+                  <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+                </div>
+
+                <div class="vital flexrow flex-group-left">
+                  <label for="system.wounds" class="resource-label align-left">Wounds:</label>
+                  <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
+                </div>
+
+                <div class="vital flexrow flex-group-left">
+                  <label for="system.health.value" class="resource-label align-left">Health:</label>
+                  <div class="resource-content flexrow flex-center flex-between">
+                    <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
+                    <span> / </span>
+                    <input type="text" disabled="true" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+                  </div>
+                </div>
+
+                <div class="vital flexrow flex-group-left">
+                  <label for="system.stamina.value" class="resource-label align-left">Stamina:</label>
+                  <div class="resource-content flexrow flex-center flex-between">
+                    <input type="text" name="system.stamina.value" value="{{system.stamina.value}}" data-dtype="Number"/>
+                    <span> / </span>
+                    <input type="text" disabled="true" name="system.stamina.max" value="{{system.stamina.max}}" data-dtype="Number"/>
+                  </div>
+                </div>
+              </div>
             </div>
-            {{/each}}
+
           </div>
         </aside>
 

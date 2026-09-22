@@ -141,11 +141,15 @@ export async function endTurn(combatant) {
 
 /**
  * Back out of a turn that was started by mistake. The combatant can go later
- * and the turn does not pass to the other side.
+ * and the turn does not pass to the other side. Any movement made during the
+ * turn is undone, putting the token back where it stood when the turn started
+ * (its movement history was cleared at that point, see the `updateCombatant`
+ * hook below), since a cancelled turn should leave no trace.
  * @param {Combatant} combatant
  */
 export async function cancelTurn(combatant) {
   if (!canControl(combatant) || getTurnState(combatant) !== TURN_STATES.ACTIVE) return;
+  await combatant.token?.revertRecordedMovement();
   return setTurnState(combatant, TURN_STATES.READY);
 }
 
@@ -237,7 +241,12 @@ export function registerTurnReferee() {
 
   Hooks.on('updateCombatant', (combatant, changed) => {
     if (!isReferee()) return;
-    const finished = changed.flags?.[SCOPE]?.turnState === TURN_STATES.DONE;
+    const turnState = changed.flags?.[SCOPE]?.turnState;
+    // Starting a turn clears the token's movement history, so the movement
+    // ruler's Speed-based coloring (see helpers/movement-ruler.mjs) reflects
+    // only what's moved on this turn.
+    if (turnState === TURN_STATES.ACTIVE) combatant.combat.clearMovementHistories([combatant]);
+    const finished = turnState === TURN_STATES.DONE;
     refereeSides(combatant.combat, finished ? getSide(combatant) : null);
   });
 

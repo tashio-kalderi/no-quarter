@@ -419,12 +419,39 @@
 .no-quarter .tox .tox-edit-area {
   padding: 0 8px;
 }
+.no-quarter .stats-and-vitals {
+  align-items: flex-start;
+  gap: 16px;
+}
+.no-quarter .vitals {
+  gap: 6px;
+}
+.no-quarter .vitals .vitals-header {
+  font-size: 0.85em;
+  font-weight: bold;
+  visibility: hidden;
+}
+.no-quarter .vital {
+  gap: 8px;
+}
+.no-quarter .vital .resource-label {
+  flex: 0 0 4.5rem;
+}
+.no-quarter .vital input {
+  flex: 0 0 3rem;
+  width: 3rem;
+  text-align: center;
+}
+.no-quarter .vital .resource-content {
+  flex: 0 0 auto;
+  gap: 4px;
+}
 .no-quarter .stats-title {
   margin: 0 0 4px;
 }
 .no-quarter .stats {
   display: grid;
-  max-width: 16rem;
+  max-width: 20rem;
   margin-bottom: 12px;
   grid-template-columns: 1fr auto auto;
   align-items: center;
@@ -443,6 +470,9 @@
 .no-quarter .stats .stats-header span:nth-child(2) {
   text-align: center;
 }
+.no-quarter .stats .stats-header .chance-label {
+  text-align: center;
+}
 .no-quarter .stats .resource-label {
   text-align: left;
 }
@@ -451,6 +481,9 @@
   text-align: center;
 }
 .no-quarter .stats .stat-chances {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -464,7 +497,7 @@
 }
 .no-quarter .abilities-list .ability-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) 3.6rem 3rem 5.5rem 3rem minmax(0, 2fr) 3.4rem;
+  grid-template-columns: minmax(0, 1.4fr) 3.6rem 3rem 8.3rem 3rem minmax(0, 2fr) 3.4rem;
   align-items: center;
   column-gap: 8px;
   padding: 3px 0;
@@ -530,6 +563,10 @@
   opacity: 0.7;
 }
 .no-quarter .ability-chances {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -582,6 +619,21 @@
 }
 .no-quarter .resource-label {
   font-weight: bold;
+}
+.no-quarter input.chance-box {
+  flex: none;
+  width: 2.6rem;
+  text-align: center;
+  cursor: default;
+  user-select: none;
+  --input-background-color: var(--color-cool-5);
+  --input-border-color: var(--color-cool-4);
+  --input-text-color: var(--color-light-4);
+}
+.no-quarter span.chance-label {
+  flex: none;
+  width: 2.6rem;
+  text-align: center;
 }
 .no-quarter .items-header {
   height: 28px;

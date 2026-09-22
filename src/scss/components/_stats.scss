@@ -1,3 +1,44 @@
+// Stats and the vitals list (Speed/Wounds/Health/Stamina) sit side by side.
+.stats-and-vitals {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+// The vitals list stacks label/input rows vertically instead of the
+// header's 4-column grid. The heading and header spacer match the Stats
+// column's so its four rows line up with the four stat rows.
+.vitals {
+  gap: 6px;
+
+  .vitals-header {
+    font-size: 0.85em;
+    font-weight: bold;
+    visibility: hidden;
+  }
+}
+
+.vital {
+  gap: 8px;
+
+  // Foundry's core styles grow labels and inputs to fill a flexrow. Pin the
+  // label to a fixed width (rather than its own text width) so every input
+  // lines up in a column instead of following the length of its label.
+  .resource-label {
+    flex: 0 0 4.5rem;
+  }
+
+  input {
+    flex: 0 0 3rem;
+    width: 3rem;
+    text-align: center;
+  }
+
+  .resource-content {
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+}
+
 // Stat list: name | rank | success chances (Regular/Greater/Extreme).
 // The rows use `display: contents` so all rows share the same three columns
 // and stay aligned regardless of the text in each row.
@@ -7,7 +48,7 @@
 
 .stats {
   display: grid;
-  max-width: 16rem;
+  max-width: 20rem;
   margin-bottom: 12px;
   grid-template-columns: 1fr auto auto;
   align-items: center;
@@ -30,6 +71,12 @@
     }
   }
 
+  // Overrides .stats-header span's text-align: left above, which otherwise
+  // wins on specificity over _resource.scss's shared .chance-label rule.
+  .stats-header .chance-label {
+    text-align: center;
+  }
+
   .resource-label {
     text-align: left;
   }
@@ -39,7 +86,12 @@
     text-align: center;
   }
 
+  // The .chance-box boxes themselves are styled in _resource.scss, shared
+  // with the Abilities list's success chances.
   .stat-chances {
+    display: flex;
+    align-items: center;
+    gap: 2px;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }

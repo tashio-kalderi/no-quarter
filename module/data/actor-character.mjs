@@ -13,6 +13,12 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
       max: new fields.NumberField({ ...requiredInteger, initial: 3 }),
     });
 
+    schema.speed = new fields.NumberField({ ...requiredInteger, initial: 30, min: 0 });
+
+    schema.race = new fields.StringField({ required: true, blank: true });
+    schema.gender = new fields.StringField({ required: true, blank: true });
+    schema.alignment = new fields.StringField({ required: true, blank: true });
+
     // Iterate over stat names and create a new SchemaField for each.
     schema.stats = new fields.SchemaField(
       Object.keys(NOQUARTER.stats).reduce((obj, stat) => {

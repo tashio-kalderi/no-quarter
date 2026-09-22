@@ -4,7 +4,14 @@
     <div>Name</div>
     <div>Stat</div>
     <div>Rank</div>
-    <div>Reg/Great/Ext</div>
+    {{!-- Shares .ability-chances' layout with the rows below so the "/"s line up. --}}
+    <div class="ability-chances">
+      <span class="chance-label">Reg</span>
+      <span>/</span>
+      <span class="chance-label">Great</span>
+      <span>/</span>
+      <span class="chance-label">Ext</span>
+    </div>
     <div>Stam</div>
     <div>Effect/Notes</div>
     <div class="item-controls">
@@ -65,7 +72,13 @@
       </div>
       {{#if item.chances}}
         <div class="ability-chances rollable" data-roll-type="item">
-          <span class="chance">{{item.chances.regular}}</span>/<span class="chance">{{item.chances.greater}}</span>/<span class="chance">{{item.chances.extreme}}</span>
+          {{!-- Styled like the read-only Health/Stamina max boxes: readonly (not disabled) so
+          clicking still bubbles up to the rollable div above. --}}
+          <input type="text" class="chance-box" value="{{item.chances.regular}}" readonly tabindex="-1"/>
+          <span>/</span>
+          <input type="text" class="chance-box" value="{{item.chances.greater}}" readonly tabindex="-1"/>
+          <span>/</span>
+          <input type="text" class="chance-box" value="{{item.chances.extreme}}" readonly tabindex="-1"/>
         </div>
       {{else}}
         {{!-- No stat means a passive ability: no success chance. --}}
