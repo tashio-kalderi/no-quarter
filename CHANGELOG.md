@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.2.1
+
+- Condition markers are now stackable. In the Token HUD, left-click a status effect to add a stack (creating it if it isn't already active); right-click removes one, clearing the condition once it reaches 0. The current count shows as a badge on the icon.
+- Bleeding: deals damage equal to its stack count at the start of the bleeding character's turn, and loses one stack at the end of it. Canceling a turn (or having it interrupted, e.g. by combat moving on) undoes any health and wounds change it caused.
+- Blind: a duration in turns rather than a severity, losing one stack at the end of each turn. Gives a -10 success penalty to stat and ability checks; the roll dialog shows a checkbox (checked by default) so a check that doesn't rely on sight can opt out.
+- Poisoned: a duration in turns like Blind. Forces every stat and ability check to be made with disadvantage while it's active, with no opting out.
+- Burning: an on/off condition that lasts until healed or cured (not yet implemented). Gives a flat -25 success penalty to checks; the roll dialog lets you decline that penalty instead, at the cost of 1 damage.
+
 ## 0.2.0
 
 - Turn order: there is no initiative roll any more. When the combat begins the GM declares which side attacks first, and the sides then alternate turns; there are no rounds. The side that is up chooses who goes, and a combatant cannot go again until everyone else on their side has gone, at which point that side unlocks. Character actors are always on the players' side, and monsters are on the monsters' side unless their token is friendly (an ally).

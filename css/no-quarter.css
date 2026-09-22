@@ -204,6 +204,23 @@
 }
 
 /* Chat cards */
+.no-quarter-roll-penalty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.no-quarter-roll-penalty-hint {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.no-quarter-roll-forced {
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
 .no-quarter-roll .roll-title {
   margin-bottom: 4px;
 }
@@ -327,6 +344,33 @@
 }
 .combat-sidebar .combat-tracker .combatant.turn-done {
   opacity: 0.6;
+}
+
+/* Token HUD condition stacks */
+.nq-effect-wrapper {
+  position: relative;
+  display: inline-block;
+  width: var(--effect-size, 24px);
+  height: var(--effect-size, 24px);
+}
+
+.nq-stack-badge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  min-width: 12px;
+  height: 12px;
+  padding: 0 2px;
+  border-radius: 999px;
+  background: #8b0000;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-size: 9px;
+  line-height: 10px;
+  text-align: center;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Styles limited to No Quarter sheets */

@@ -20,7 +20,9 @@
       "Prompt": "How is the roll made?",
       "Normal": "Normal",
       "Advantage": "Advantage",
-      "Disadvantage": "Disadvantage"
+      "Disadvantage": "Disadvantage",
+      "Forced": "{condition} forces this roll to be made with disadvantage.",
+      "IgnoreCost": "(unchecking deals {cost} damage)"
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
     "Turn": {
@@ -79,6 +81,11 @@
       "Temporary": "Temporary Effects",
       "Passive": "Passive Effects",
       "Inactive": "Inactive Effects"
+    },
+    "Condition": {
+      "Blind": "Blind",
+      "Poisoned": "Poisoned",
+      "Burning": "Burning"
     }
   },
 

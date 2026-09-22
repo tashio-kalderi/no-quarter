@@ -1,4 +1,5 @@
 import { NOQUARTER } from './config.mjs';
+import { activeRollPenalties, activeForcedDisadvantage } from './conditions.mjs';
 
 /**
  * Build the Regular/Greater/Extreme chances from a Regular chance. Greater and
@@ -83,27 +84,74 @@ function bracketText(chances, tag) {
 
 /**
  * Ask how a roll is made: normally, with advantage, or with disadvantage.
+ * When the actor has an active condition that penalizes rolls (such as
+ * Blind or Burning), also asks whether that penalty applies to this
+ * particular roll, as a checkbox above the mode buttons, checked by default -
+ * most rolls are affected, but a roll that doesn't rely on sight can opt out.
+ * Some penalties (such as Burning) cost self-damage to opt out of instead of
+ * being free to decline; that's noted next to the checkbox. When the actor
+ * has a condition that forces disadvantage (such as Poisoned), Normal and
+ * Advantage are disabled instead - there is no opting out of that one.
  * Meant to grow into the place where optional abilities (such as ones that
  * cost stamina) are chosen.
  * @param {object} options
  * @param {string} options.label    The name of the stat or ability being rolled
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {string} [options.tag]    Shown instead of the chances, see rollSuccess
- * @returns {Promise<'normal'|'advantage'|'disadvantage'|null>}   Null if the dialog is closed
+ * @param {Actor} [options.actor]   The actor the roll is made for, to check for penalizing conditions
+ * @returns {Promise<{mode: 'normal'|'advantage'|'disadvantage', penalty: number, cost: number}|null>}   Null if the dialog is closed
  */
-export async function askRollMode({ label, chances, tag }) {
+export async function askRollMode({ label, chances, tag, actor }) {
   const esc = foundry.utils.escapeHTML;
   const bracket = bracketText(chances, tag);
+  const penalties = activeRollPenalties(actor);
+  const penaltyRows = Object.entries(penalties)
+    .map(([id, penalty]) => {
+      const hint = penalty.ignoreCost
+        ? ` <span class="no-quarter-roll-penalty-hint">${esc(
+            game.i18n.format('NOQUARTER.RollMode.IgnoreCost', { cost: penalty.ignoreCost })
+          )}</span>`
+        : '';
+      return `<label class="no-quarter-roll-penalty">
+        <input type="checkbox" name="penalty-${id}" checked>
+        ${esc(game.i18n.localize(penalty.label))}${hint}
+      </label>`;
+    })
+    .join('');
+
+  const forced = activeForcedDisadvantage(actor);
+  const forcedDisadvantage = Object.keys(forced).length > 0;
+  const forcedRows = Object.values(forced)
+    .map(
+      (condition) =>
+        `<p class="no-quarter-roll-forced">${esc(
+          game.i18n.format('NOQUARTER.RollMode.Forced', { condition: game.i18n.localize(condition.label) })
+        )}</p>`
+    )
+    .join('');
+
   const button = (action, isDefault = false) => ({
     action,
     label: game.i18n.localize(NOQUARTER.rollModes[action]),
-    default: isDefault,
-    callback: () => action,
+    default: forcedDisadvantage ? action === 'disadvantage' : isDefault,
+    disabled: forcedDisadvantage && action !== 'disadvantage',
+    callback: (event, target, dialog) => {
+      let penalty = 0;
+      let cost = 0;
+      for (const [id, entry] of Object.entries(penalties)) {
+        const checked = dialog.element.querySelector(`[name="penalty-${id}"]`)?.checked;
+        if (checked) penalty += entry.amount;
+        else if (entry.ignoreCost) cost += entry.ignoreCost;
+      }
+      return { mode: action, penalty, cost };
+    },
   });
 
   return foundry.applications.api.DialogV2.wait({
     window: { title: label },
     content: `<p class="no-quarter-roll-prompt"><strong>${esc(label)}</strong>${bracket ? ` ${esc(bracket)}` : ''}</p>
+      ${forcedRows}
+      ${penaltyRows}
       <p>${game.i18n.localize('NOQUARTER.RollMode.Prompt')}</p>`,
     buttons: [button('normal', true), button('advantage'), button('disadvantage')],
     rejectClose: false,

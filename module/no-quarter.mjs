@@ -10,6 +10,7 @@ import { NoQuarterCombatTracker } from './applications/combat-tracker.mjs';
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { NOQUARTER } from './helpers/config.mjs';
 import { registerWoundBadge } from './helpers/token-badge.mjs';
+import { registerStackableConditions, registerConditionTurnEffects } from './helpers/conditions.mjs';
 import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
@@ -32,6 +33,10 @@ Hooks.once('init', function () {
 
   // Show wounds on tokens.
   registerWoundBadge();
+
+  // Some status effects in the Token HUD stack instead of being a plain
+  // on/off toggle; see module/helpers/conditions.mjs.
+  registerStackableConditions();
 
   // There is no initiative roll. Each round the GM declares which side goes
   // first and the sides then take turns, see helpers/turns.mjs.
@@ -89,6 +94,10 @@ Handlebars.registerHelper('toLowerCase', function (str) {
 Hooks.once('ready', function () {
   // The GM's client unlocks sides and passes the turn between them.
   registerTurnReferee();
+
+  // The GM's client applies each stackable condition's start/end-of-turn
+  // effect (e.g. Bleeding damage) as combatants start and finish their turn.
+  registerConditionTurnEffects();
 
   // Limited-use monster abilities come back when a combat ends.
   Hooks.on('deleteCombat', (combat) => {

@@ -1,4 +1,5 @@
 import { askRollMode, rollSuccess } from '../helpers/success.mjs';
+import { applyRollPenalty, applyIgnoreCost } from '../helpers/conditions.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
 /**
@@ -90,21 +91,23 @@ export class NoQuarterItem extends Item {
       const note = isMonster ? item.system.effect : undefined;
 
       // Ask how the roll is made; closing the dialog cancels it without using up a use.
-      const mode = await askRollMode({
+      const asked = await askRollMode({
         label: item.name,
         chances: item.system.chances,
         tag,
+        actor: item.actor,
       });
-      if (!mode) return;
+      if (!asked) return;
       if (limited) await item.update({ 'system.used': used + 1 });
+      await applyIgnoreCost(item.actor, asked.cost);
 
       return rollSuccess({
         actor: item.actor,
         note,
         tag,
-        mode,
+        mode: asked.mode,
         label: item.name,
-        chances: item.system.chances,
+        chances: applyRollPenalty(item.system.chances, asked.penalty),
         // Only the basic abilities have a damage value for now.
         damage: item.system.basicKey ? item.system.damage : undefined,
       });

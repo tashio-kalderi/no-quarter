@@ -1,4 +1,5 @@
 import { askRollMode, rollSuccess } from '../helpers/success.mjs';
+import { applyRollPenalty, applyIgnoreCost } from '../helpers/conditions.mjs';
 
 // Actors whose basic abilities are currently being created, so that several
 // sheet renders in a row don't create them twice.
@@ -180,22 +181,24 @@ export class NoQuarterActor extends Actor {
     if (this.type === 'npc') {
       const label = game.i18n.localize('NOQUARTER.Check');
       const chances = this.system.chances;
-      const mode = await askRollMode({ label, chances });
-      if (!mode) return;
-      return rollSuccess({ actor: this, label, chances, mode });
+      const asked = await askRollMode({ label, chances, actor: this });
+      if (!asked) return;
+      await applyIgnoreCost(this, asked.cost);
+      return rollSuccess({ actor: this, label, chances: applyRollPenalty(chances, asked.penalty), mode: asked.mode });
     }
 
     const stat = this.system.stats?.[key];
     if (!stat) return;
 
     const label = game.i18n.localize(CONFIG.NOQUARTER.stats[key]);
-    const mode = await askRollMode({ label, chances: stat.target });
-    if (!mode) return;
+    const asked = await askRollMode({ label, chances: stat.target, actor: this });
+    if (!asked) return;
+    await applyIgnoreCost(this, asked.cost);
     return rollSuccess({
       actor: this,
       label,
-      chances: stat.target,
-      mode,
+      chances: applyRollPenalty(stat.target, asked.penalty),
+      mode: asked.mode,
     });
   }
 }

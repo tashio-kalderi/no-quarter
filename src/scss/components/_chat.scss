@@ -1,3 +1,25 @@
+// A condition's opt-out penalty checkbox in the roll-mode prompt (e.g. Blind).
+.no-quarter-roll-penalty {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+// The self-damage cost of unchecking a penalty (e.g. Burning), shown after
+// its label.
+.no-quarter-roll-penalty-hint {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+// A condition forcing disadvantage in the roll-mode prompt (e.g. Poisoned),
+// with no opt-out - informational only, so no checkbox.
+.no-quarter-roll-forced {
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
 // Chat card for stat and ability rolls.
 .no-quarter-roll {
   .roll-title {
