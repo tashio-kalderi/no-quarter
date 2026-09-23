@@ -101,8 +101,9 @@ export function startTurnBlocker(combatant) {
   if (findActive(combat)) return 'NOQUARTER.Turn.Blocked.SomeoneActive';
   const side = getActiveSide(combat);
   if (!side) return 'NOQUARTER.Turn.Blocked.NoSide';
-  // The GM can start anyone, to fix mistakes or move things along.
-  if (side !== getSide(combatant) && !game.user.isGM) return 'NOQUARTER.Turn.Blocked.NotYourSide';
+  // This holds for the GM too. To fix a mistake the GM hands the turn to the
+  // other side first (see `declareSide`).
+  if (side !== getSide(combatant)) return 'NOQUARTER.Turn.Blocked.NotYourSide';
   return null;
 }
 
