@@ -52,7 +52,7 @@
     {{!-- Abilities Tab --}}
     <div class="tab abilities-tab" data-group="primary" data-tab="abilities">
       {{!-- The stat block: health, damage reduction and the success chances used by every ability. --}}
-      <div class="resources npc-defenses grid grid-4col">
+      <div class="resources npc-defenses grid grid-5col">
         <div class="resource flex-group-center">
           <label for="system.health.value" class="resource-label">Health</label>
           <div class="resource-content flexrow flex-center flex-between">
@@ -73,6 +73,19 @@
           <label for="system.mdr" class="resource-label" title="Magical damage reduction">MDR</label>
           <div class="resource-content flexrow flex-center">
             <input type="text" name="system.mdr" value="{{system.mdr}}" data-dtype="Number"/>
+          </div>
+        </div>
+
+        <div class="resource flex-group-center">
+          <label for="system.speed" class="resource-label">Speed</label>
+          <div class="resource-content flexrow flex-center">
+            {{!-- Restrained locks Speed at 0; the disabled box isn't submitted, so the base value survives. --}}
+            {{#if system.restrained}}
+            <input type="text" disabled="true" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
+                   data-tooltip="{{ localize "EFFECT.StatusRestrained" }}"/>
+            {{else}}
+            <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+            {{/if}}
           </div>
         </div>
 

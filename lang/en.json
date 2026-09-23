@@ -22,6 +22,8 @@
       "Advantage": "Advantage",
       "Disadvantage": "Disadvantage",
       "Forced": "{condition} forces this roll to be made with disadvantage.",
+      "ForcedAdvantage": "{condition} grants this roll advantage (uses 1 stack).",
+      "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally ({advantage} still uses 1 stack).",
       "IgnoreCost": "(unchecking deals {cost} damage)"
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
@@ -85,7 +87,8 @@
     "Condition": {
       "Blind": "Blind",
       "Poisoned": "Poisoned",
-      "Burning": "Burning"
+      "Burning": "Burning",
+      "Blessed": "Blessed"
     }
   },
 

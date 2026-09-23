@@ -15,6 +15,8 @@ export default class NoQuarterActorBase extends foundry.abstract.TypeDataModel {
     // Gained each time health reaches 0 (see NoQuarterActor#_preUpdate).
     schema.wounds = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
 
+    schema.speed = new fields.NumberField({ ...requiredInteger, initial: 30, min: 0 });
+
     schema.biography = new fields.StringField({ required: true, blank: true });
 
     return schema;
@@ -25,6 +27,11 @@ export default class NoQuarterActorBase extends foundry.abstract.TypeDataModel {
 
     // Current health cannot exceed its maximum.
     this.health.value = Math.min(this.health.value, this.health.max);
+
+    // Restrained drops Speed to 0 while it lasts. The base value stays in
+    // `speed`, so it comes back once the condition is toggled off.
+    this.restrained = this.parent.statuses.has('restrain');
+    this.effectiveSpeed = this.restrained ? 0 : this.speed;
   }
 
   /**

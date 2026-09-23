@@ -9,11 +9,11 @@ import { TURN_STATES } from './turns.mjs';
  * the mechanism here is identical either way. Every other status effect
  * keeps Foundry's default toggle behavior untouched.
  *
- * Only the built-in "bleeding", "blind" and "poison" statuses are marked
- * stackable so far; the real condition list arrives in a later pass.
+ * Only the built-in "bleeding", "blind", "poison" and "bless" statuses are
+ * marked stackable so far; the real condition list arrives in a later pass.
  * @type {string[]}
  */
-const STACKABLE_STATUS_IDS = ['bleeding', 'blind', 'poison'];
+const STACKABLE_STATUS_IDS = ['bleeding', 'blind', 'poison', 'bless'];
 
 const FLAG_SCOPE = 'no-quarter';
 const STACKS_FLAG = 'stacks';
@@ -291,16 +291,17 @@ export function applyRollPenalty(chances, amount) {
 }
 
 /**
- * Apply the self-damage cost of ignoring a roll penalty instead of taking
- * it - e.g. gritting through Burning's pain rather than accepting its -25.
- * A no-op when there's nothing to apply.
+ * Pay what a roll's conditions cost once the roll is confirmed: the
+ * self-damage for ignoring a roll penalty instead of taking it (e.g. gritting
+ * through Burning's pain rather than accepting its -25), and one stack of
+ * each condition used up by being applied to the roll (e.g. Blessed).
  * @param {Actor} actor
- * @param {number} cost
+ * @param {{cost: number, consumed: string[]}} asked   The result of askRollMode
  * @returns {Promise<void>}
  */
-export async function applyIgnoreCost(actor, cost) {
-  if (!cost) return;
-  await actor.modifyTokenAttribute('health', -cost, true, true);
+export async function applyRollCosts(actor, { cost, consumed }) {
+  if (cost) await actor.modifyTokenAttribute('health', -cost, true, true);
+  for (const statusId of consumed) await removeStack(actor, statusId);
 }
 
 /**
@@ -323,6 +324,32 @@ export function activeForcedDisadvantage(actor) {
   if (!actor) return {};
   return Object.fromEntries(
     Object.entries(CONDITION_FORCED_DISADVANTAGE).filter(([id]) => stackCount(actor, id) > 0)
+  );
+}
+
+/**
+ * Conditions that force the next roll to be made with advantage, with no
+ * opt-out - e.g. Blessed. Unlike the duration conditions, a stack isn't lost
+ * at the end of a turn but each time it is applied to a roll (see
+ * `applyRollCosts`). Against a forced disadvantage the two cancel out and the
+ * roll is made normally; the stack is still used up. Add an entry here for
+ * future conditions with the same kind of effect.
+ * @type {Object<string, {label: string}>}
+ */
+const CONDITION_FORCED_ADVANTAGE = {
+  bless: { label: 'NOQUARTER.Condition.Blessed' },
+};
+
+/**
+ * The conditions currently forcing advantage on an actor's next roll, keyed
+ * by status id.
+ * @param {Actor} [actor]
+ * @returns {Object<string, {label: string}>}
+ */
+export function activeForcedAdvantage(actor) {
+  if (!actor) return {};
+  return Object.fromEntries(
+    Object.entries(CONDITION_FORCED_ADVANTAGE).filter(([id]) => stackCount(actor, id) > 0)
   );
 }
 

@@ -1,5 +1,5 @@
 import { askRollMode, rollSuccess } from '../helpers/success.mjs';
-import { applyRollPenalty, applyIgnoreCost } from '../helpers/conditions.mjs';
+import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
 /**
@@ -99,7 +99,7 @@ export class NoQuarterItem extends Item {
       });
       if (!asked) return;
       if (limited) await item.update({ 'system.used': used + 1 });
-      await applyIgnoreCost(item.actor, asked.cost);
+      await applyRollCosts(item.actor, asked);
 
       return rollSuccess({
         actor: item.actor,

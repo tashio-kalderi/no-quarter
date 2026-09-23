@@ -102,7 +102,13 @@
 
                 <div class="vital flexrow flex-group-left">
                   <label for="system.speed" class="resource-label align-left">Speed:</label>
+                  {{!-- Restrained locks Speed at 0; the disabled box isn't submitted, so the base value survives. --}}
+                  {{#if system.restrained}}
+                  <input type="text" disabled="true" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
+                         data-tooltip="{{ localize "EFFECT.StatusRestrained" }}"/>
+                  {{else}}
                   <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+                  {{/if}}
                 </div>
 
                 <div class="vital flexrow flex-group-left">

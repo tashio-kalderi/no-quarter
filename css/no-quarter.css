@@ -597,7 +597,7 @@
   text-align: center;
 }
 .no-quarter .npc-defenses {
-  grid-template-columns: 1.3fr 0.6fr 0.6fr 1.7fr;
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 1.7fr;
 }
 .no-quarter .monster-abilities .ability-uses {
   display: flex;

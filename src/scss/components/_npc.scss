@@ -26,9 +26,9 @@
   }
 }
 
-// Health, PDR and MDR are narrow; the Stats line needs room for three numbers.
+// Health, PDR, MDR and Speed are narrow; the Stats line needs room for three numbers.
 .npc-defenses {
-  grid-template-columns: 1.3fr 0.6fr 0.6fr 1.7fr;
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 1.7fr;
 }
 
 .monster-abilities {

@@ -40,8 +40,9 @@ function speedColor(token, waypoint) {
   const combatant = token.document.combatant;
   if (!combatant || getTurnState(combatant) !== TURN_STATES.ACTIVE) return null;
 
-  const speed = combatant.actor?.system?.speed;
-  if (!Number.isFinite(speed) || speed <= 0) return null;
+  // A Speed of 0 (e.g. Restrained) colors any movement at all red.
+  const speed = combatant.actor?.system?.effectiveSpeed;
+  if (!Number.isFinite(speed) || speed < 0) return null;
 
   const distance = waypoint.measurement?.cost;
   if (!Number.isFinite(distance)) return null;

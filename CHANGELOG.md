@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.2.3
+
+- Cornered Rats Initiative System: the GM can no longer start a combatant's turn when it isn't their side's turn, so monsters can't go during the players' turn (and vice versa). To fix a mistake, the GM hands the turn to the other side first. (#1)
+- Restrained: an on/off condition that sets the creature's Speed to 0 while active. The Speed box on the sheet shows 0 and is locked; the normal Speed comes back when the condition is removed. Any movement on a Restrained combatant's turn shows red on the movement ruler.
+- Monsters now have a Speed (default 30), shown in the stat block between MDR and Stats. The movement ruler colors monster movement against it too.
+- Blessed: a stacking condition that grants advantage on the next roll, with no opting out. It doesn't count down at the end of a turn; instead it loses one stack each time it's applied to a roll. Against a condition that forces disadvantage (such as Poisoned) the two cancel out and the roll is made normally, still using up one Blessed stack.
+
 ## 0.2.2
 
 - Character sheet: Health, Stamina and Wounds moved out of the header to a new Vitals list next to Stats, alongside a new Speed field. The header now has Race, Gender and Alignment text fields where those used to sit.
