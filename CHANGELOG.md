@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.4
+
+- Actor and item sheets rebuilt on Foundry's ApplicationV2 framework, replacing the old sheet framework that Foundry is phasing out. They look and work as before, except that they always use the light theme. Also clears the "deprecated global" warnings from the console.
+- Effects tab: effect icons show again. They had been blank since Foundry renamed the icon field.
+- Posting a passive ability (or an item with no roll formula) to chat now follows the chosen roll mode, such as GM or private roll. Before, these cards were always public.
+
 ## 0.2.3
 
 - Cornered Rats Initiative System: the GM can no longer start a combatant's turn when it isn't their side's turn, so monsters can't go during the players' turn (and vice versa). To fix a mistake, the GM hands the turn to the other side first. (#1)

@@ -1,0 +1,35 @@
+<header class="sheet-header">
+  <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage" title="{{actor.name}}" height="100" width="100"/>
+  <div class="header-fields">
+    <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+    <div class="resources npc-identity grid grid-4col">
+      <div class="resource flex-group-center">
+        <label for="system.level" class="resource-label">Level</label>
+        <div class="resource-content flexrow flex-center">
+          <input type="text" name="system.level" value="{{system.level}}" data-dtype="Number"/>
+        </div>
+      </div>
+
+      <div class="resource flex-group-center">
+        <label for="system.alignment" class="resource-label">Alignment</label>
+        <input type="text" name="system.alignment" value="{{system.alignment}}" placeholder="Neutral"/>
+      </div>
+
+      <div class="resource flex-group-center">
+        <label for="system.creatureType" class="resource-label">Creature type</label>
+        <input type="text" name="system.creatureType" value="{{system.creatureType}}" placeholder="Humanoid"/>
+      </div>
+
+      {{!-- Monsters die at 0 health. Bosses can opt in to wounds. --}}
+      <div class="resource flex-group-center">
+        <label for="system.usesWounds" class="resource-label">Wounds</label>
+        <div class="resource-content npc-wounds flexrow flex-center">
+          <input type="checkbox" name="system.usesWounds" title="Uses wounds (bosses)" {{#if system.usesWounds}}checked{{/if}}/>
+          {{#if system.usesWounds}}
+            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

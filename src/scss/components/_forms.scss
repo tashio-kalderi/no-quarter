@@ -1,5 +1,50 @@
-.item-form {
-  font-family: $font-primary;
+// ApplicationV2's form controls and headings are much larger than the old sheet
+// framework's (32px inputs; 24-48px display-font headings). These bring back the
+// old, compact sizes; colours are left to the core theme. Component styles
+// imported after this override them.
+input[type='text'],
+input[type='number'] {
+  height: 26px;
+  padding: 1px 3px;
+  line-height: inherit;
+  border-radius: 3px;
+}
+
+select {
+  height: 27px;
+  line-height: normal;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+input[type='checkbox'] {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 3px 5px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 0.5rem;
+  font-family: $font-heading;
+  font-weight: normal;
+  line-height: normal;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.25em;
+  border-bottom: 1px solid $c-underline;
+}
+
+h4 {
+  font-size: 1em;
 }
 
 .sheet-header {
@@ -36,20 +81,30 @@
 
 .sheet-tabs {
   flex: 0;
-}
+  margin: 4px 0;
+  gap: 0;
+  line-height: normal;
+  justify-content: space-around;
 
-.sheet-body,
-.sheet-body .tab,
-.sheet-body .tab .editor {
-  height: 100%;
-}
-
-.tox {
-  .tox-editor-container {
-    background: $c-white;
+  [data-tab] {
+    padding: 8px 12px;
   }
 
-  .tox-edit-area {
-    padding: 0 8px;
+  [data-tab].active,
+  [data-tab]:hover {
+    text-shadow: 0 0 10px red;
   }
+}
+
+// ApplicationV2 renders each part straight into .window-content, a flex column
+// that doesn't scroll, so the tab panes fill the rest of the window and scroll
+// themselves.
+.tab {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tab prose-mirror {
+  min-height: 100%;
 }

@@ -6,15 +6,14 @@
 // field): `readonly` rather than `disabled` so a click still bubbles up to a
 // wrapping `.rollable`, with the cursor and selection overridden so it still
 // reads as non-editable. Used for success chances next to Stats and Abilities.
+// The colours come from the core theme, which styles readonly inputs the same
+// as disabled ones.
 input.chance-box {
   flex: none;
   width: 2.6rem;
   text-align: center;
   cursor: default;
   user-select: none;
-  --input-background-color: var(--color-cool-5);
-  --input-border-color: var(--color-cool-4);
-  --input-text-color: var(--color-light-4);
 }
 
 // Matches .chance-box's width so a "Reg/Great/Ext" header lines up with the

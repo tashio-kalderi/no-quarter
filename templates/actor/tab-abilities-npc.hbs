@@ -1,0 +1,115 @@
+<section class="tab abilities-tab {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{!-- The stat block: health, damage reduction and the success chances used by every ability. --}}
+  <div class="resources npc-defenses grid grid-5col">
+    <div class="resource flex-group-center">
+      <label for="system.health.value" class="resource-label">Health</label>
+      <div class="resource-content flexrow flex-center flex-between">
+        <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
+        <span> / </span>
+        <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+      </div>
+    </div>
+
+    <div class="resource flex-group-center">
+      <label for="system.pdr" class="resource-label" title="Physical damage reduction">PDR</label>
+      <div class="resource-content flexrow flex-center">
+        <input type="text" name="system.pdr" value="{{system.pdr}}" data-dtype="Number"/>
+      </div>
+    </div>
+
+    <div class="resource flex-group-center">
+      <label for="system.mdr" class="resource-label" title="Magical damage reduction">MDR</label>
+      <div class="resource-content flexrow flex-center">
+        <input type="text" name="system.mdr" value="{{system.mdr}}" data-dtype="Number"/>
+      </div>
+    </div>
+
+    <div class="resource flex-group-center">
+      <label for="system.speed" class="resource-label">Speed</label>
+      <div class="resource-content flexrow flex-center">
+        {{!-- Restrained locks Speed at 0; the disabled box isn't submitted, so the base value survives. --}}
+        {{#if system.restrained}}
+        <input type="text" disabled="true" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
+               data-tooltip="{{ localize "EFFECT.StatusRestrained" }}"/>
+        {{else}}
+        <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- The single set of success chances used by all of the monster's abilities. --}}
+    <div class="resource flex-group-center">
+      <label class="resource-label rollable" title="Roll a check" data-action="roll" data-roll-type="stat">Stats</label>
+      <div class="resource-content flexrow flex-center flex-between">
+        <input type="text" name="system.chances.regular" value="{{system.chances.regular}}" data-dtype="Number" title="Regular"/>
+        <span> / </span>
+        <input type="text" name="system.chances.greater" value="{{system.chances.greater}}" data-dtype="Number" title="Greater"/>
+        <span> / </span>
+        <input type="text" name="system.chances.extreme" value="{{system.chances.extreme}}" data-dtype="Number" title="Extreme"/>
+      </div>
+    </div>
+  </div>
+
+  {{!-- A monster's abilities: name, damage type, range, uses per combat and the damage/effect.
+  Every one is rolled against the monster's own Stats line. Their fields have no name: they
+  belong to the ability items and are saved by the sheet's _onAbilityFieldChange. --}}
+  <h3 class="abilities-title">Abilities</h3>
+  <ol class="abilities-list monster-abilities">
+    <li class="ability-row ability-header">
+      <div>Name</div>
+      <div>Type</div>
+      <div>Range</div>
+      <div title="Uses left this combat / times it can be used in one combat">
+        Uses
+        <a class="uses-reset" data-action="resetUses" title="Restore all uses"><i class="fas fa-rotate-left"></i></a>
+      </div>
+      <div>Damage/Effect</div>
+      <div class="item-controls">
+        <a class="item-control" data-action="createItem" data-type="ability"
+           title="{{localize 'DOCUMENT.Create' type='ability'}}">
+          <i class="fas fa-plus"></i>
+          {{localize 'DOCUMENT.New' type='ability'}}
+        </a>
+      </div>
+    </li>
+    {{#each abilities as |item|}}
+      <li class="item ability-row draggable" data-item-id="{{item._id}}">
+        <div class="item-name">
+          <a class="rollable" data-action="roll" data-roll-type="item">
+            <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
+          </a>
+          <input type="text" class="ability-field ability-name" data-field="name" value="{{item.name}}"/>
+        </div>
+        <div>
+          <select class="ability-field" data-field="damageType">
+            {{selectOptions @root.config.damageTypes selected=item.system.damageType localize=true blank="-"}}
+          </select>
+        </div>
+        <div>
+          <input type="text" class="ability-field" data-field="range" placeholder="30 ft." value="{{item.system.range}}"/>
+        </div>
+        <div class="ability-uses">
+          {{#if item.system.uses}}
+            <input type="text" class="ability-field" data-field="remaining" data-dtype="Number" data-nullable="true"
+                   data-min="0" data-max="{{item.system.uses}}" title="Uses left this combat (empty to remove the limit)"
+                   value="{{item.system.remaining}}"/>
+            <span>/</span>
+          {{/if}}
+          <input type="text" class="ability-field" data-field="uses" data-dtype="Number" data-nullable="true"
+                 data-min="1" title="Times it can be used in one combat (empty for unlimited)" value="{{item.system.uses}}"/>
+        </div>
+        <div class="ability-effect">
+          <input type="text" class="ability-field" data-field="effect" value="{{item.system.effect}}"/>
+        </div>
+        <div class="item-controls">
+          <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Edit' type='ability'}}">
+            <i class="fas fa-edit"></i>
+          </a>
+          <a class="item-control" data-action="deleteItem" title="{{localize 'DOCUMENT.Delete' type='ability'}}">
+            <i class="fas fa-trash"></i>
+          </a>
+        </div>
+      </li>
+    {{/each}}
+  </ol>
+</section>

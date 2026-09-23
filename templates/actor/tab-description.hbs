@@ -1,0 +1,4 @@
+<section class="tab biography {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{!-- Editors must receive enriched text data from _preparePartContext to properly handle rolls --}}
+  {{editor enrichedBiography target="system.biography" engine="prosemirror" button=true editable=editable}}
+</section>

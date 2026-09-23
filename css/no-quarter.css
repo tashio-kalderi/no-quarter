@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 /* Global styles */
-.window-app {
+.no-quarter.application {
   font-family: "Roboto", sans-serif;
 }
 
@@ -374,8 +374,43 @@
 }
 
 /* Styles limited to No Quarter sheets */
-.no-quarter .item-form {
-  font-family: "Roboto", sans-serif;
+.no-quarter input[type=text],
+.no-quarter input[type=number] {
+  height: 26px;
+  padding: 1px 3px;
+  line-height: inherit;
+  border-radius: 3px;
+}
+.no-quarter select {
+  height: 27px;
+  line-height: normal;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+.no-quarter input[type=checkbox] {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 3px 5px;
+}
+.no-quarter h1,
+.no-quarter h2,
+.no-quarter h3,
+.no-quarter h4 {
+  margin: 0 0 0.5rem;
+  font-family: "Signika", sans-serif;
+  font-weight: normal;
+  line-height: normal;
+}
+.no-quarter h1 {
+  font-size: 2em;
+}
+.no-quarter h3 {
+  font-size: 1.25em;
+  border-bottom: 1px solid #782e22;
+}
+.no-quarter h4 {
+  font-size: 1em;
 }
 .no-quarter .sheet-header {
   flex: 0 auto;
@@ -407,17 +442,25 @@
 }
 .no-quarter .sheet-tabs {
   flex: 0;
+  margin: 4px 0;
+  gap: 0;
+  line-height: normal;
+  justify-content: space-around;
 }
-.no-quarter .sheet-body,
-.no-quarter .sheet-body .tab,
-.no-quarter .sheet-body .tab .editor {
-  height: 100%;
+.no-quarter .sheet-tabs [data-tab] {
+  padding: 8px 12px;
 }
-.no-quarter .tox .tox-editor-container {
-  background: #fff;
+.no-quarter .sheet-tabs [data-tab].active,
+.no-quarter .sheet-tabs [data-tab]:hover {
+  text-shadow: 0 0 10px red;
 }
-.no-quarter .tox .tox-edit-area {
-  padding: 0 8px;
+.no-quarter .tab {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.no-quarter .tab prose-mirror {
+  min-height: 100%;
 }
 .no-quarter .stats-and-vitals {
   align-items: flex-start;
@@ -626,9 +669,6 @@
   text-align: center;
   cursor: default;
   user-select: none;
-  --input-background-color: var(--color-cool-5);
-  --input-border-color: var(--color-cool-4);
-  --input-text-color: var(--color-light-4);
 }
 .no-quarter span.chance-label {
   flex: none;

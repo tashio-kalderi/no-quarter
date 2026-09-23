@@ -1,143 +1,153 @@
 import {
-  onManageActiveEffect,
+  effectActions,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
+const { HandlebarsApplicationMixin } = foundry.applications.api;
+const { ActorSheetV2 } = foundry.applications.sheets;
+
+const TEMPLATES = 'systems/no-quarter/templates/actor';
+
 /**
- * Extend the basic ActorSheet with some very simple modifications
- * @extends {ActorSheet}
+ * The actor sheet for characters and monsters (npc).
+ * @extends {ActorSheetV2}
  */
-export class NoQuarterActorSheet extends ActorSheet {
+export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** @override */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['no-quarter', 'sheet', 'actor'],
-      width: 660,
-      height: 600,
+  static DEFAULT_OPTIONS = {
+    // The sheet CSS is written for a light background, so don't follow the
+    // user's dark interface theme.
+    classes: ['no-quarter', 'actor', 'themed', 'theme-light'],
+    position: { width: 660, height: 600 },
+    window: { resizable: true },
+    form: { submitOnChange: true },
+    actions: {
+      createItem: NoQuarterActorSheet.#onCreateItem,
+      editItem: NoQuarterActorSheet.#onEditItem,
+      deleteItem: NoQuarterActorSheet.#onDeleteItem,
+      roll: NoQuarterActorSheet.#onRoll,
+      resetUses: NoQuarterActorSheet.#onResetUses,
+      ...effectActions,
+    },
+  };
+
+  /**
+   * The header and abilities tab are swapped for the actor's type in
+   * _configureRenderParts.
+   * @override
+   */
+  static PARTS = {
+    header: { template: `${TEMPLATES}/header-character.hbs` },
+    tabs: { template: 'templates/generic/tab-navigation.hbs' },
+    abilities: { template: `${TEMPLATES}/tab-abilities-character.hbs`, scrollable: [''] },
+    description: { template: `${TEMPLATES}/tab-description.hbs` },
+    items: { template: `${TEMPLATES}/tab-items.hbs`, scrollable: [''] },
+    spells: { template: `${TEMPLATES}/tab-spells.hbs`, scrollable: [''] },
+    effects: { template: 'systems/no-quarter/templates/shared/tab-effects.hbs', scrollable: [''] },
+  };
+
+  /** @override */
+  static TABS = {
+    primary: {
       tabs: [
-        {
-          navSelector: '.sheet-tabs',
-          contentSelector: '.sheet-body',
-          initial: 'abilities',
-        },
+        { id: 'abilities' },
+        { id: 'description' },
+        { id: 'items' },
+        { id: 'spells' },
+        { id: 'effects' },
       ],
-    });
+      initial: 'abilities',
+      labelPrefix: 'NOQUARTER.Tabs',
+    },
+  };
+
+  /* -------------------------------------------- */
+
+  /** @override */
+  _configureRenderParts(options) {
+    const parts = super._configureRenderParts(options);
+    const type = this.actor.type;
+    parts.header.template = `${TEMPLATES}/header-${type}.hbs`;
+    parts.abilities.template = `${TEMPLATES}/tab-abilities-${type}.hbs`;
+    // Monsters don't cast spells.
+    if (type === 'npc') delete parts.spells;
+    return parts;
   }
 
   /** @override */
-  get template() {
-    return `systems/no-quarter/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+  _getTabsConfig(group) {
+    const config = super._getTabsConfig(group);
+    if (group !== 'primary' || this.actor.type !== 'npc') return config;
+    return { ...config, tabs: config.tabs.filter((t) => t.id !== 'spells') };
   }
 
   /* -------------------------------------------- */
 
   /** @override */
-  async getData() {
-    // Retrieve the data structure from the base sheet. You can inspect or log
-    // the context variable to see the structure, but some key properties for
-    // sheets are the actor object, the data object, whether or not it's
-    // editable, the items array, and the effects array.
-    const context = super.getData();
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    const actor = this.actor;
 
-    const actorData = this.document;
+    // Older characters may not have the basic abilities yet.
+    if (actor.type === 'character') actor.ensureBasicAbilities();
 
-    // Add the actor's data to context.data for easier access, as well as flags.
-    context.system = actorData.system;
-    context.flags = actorData.flags;
+    return Object.assign(context, {
+      actor,
+      system: actor.system,
+      flags: actor.flags,
+      config: CONFIG.NOQUARTER,
+      ...this._prepareItems(),
+    });
+  }
 
-    // Adding a pointer to CONFIG.NOQUARTER
-    context.config = CONFIG.NOQUARTER;
+  /** @override */
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    context.tab = context.tabs[partId];
 
-    // Prepare character data and items.
-    if (actorData.type == 'character') {
-      // Older characters may not have the basic abilities yet.
-      this.actor.ensureBasicAbilities();
-      this._prepareItems(context);
-      this._prepareCharacterData(context);
+    switch (partId) {
+      case 'description':
+        // Enrichment turns text like `[[/r 1d20]]` into buttons
+        context.enrichedBiography =
+          await foundry.applications.ux.TextEditor.implementation.enrichHTML(
+            this.actor.system.biography,
+            {
+              // Whether to show secret blocks in the finished html
+              secrets: this.document.isOwner,
+              // Data to fill in for inline rolls
+              rollData: this.actor.getRollData(),
+              // Relative UUID resolution
+              relativeTo: this.actor,
+            }
+          );
+        break;
+      case 'effects':
+        // Effects stored on the actor as well as any on its items
+        context.effects = prepareActiveEffectCategories(this.actor.allApplicableEffects());
+        break;
     }
-
-    // Prepare NPC data and items.
-    if (actorData.type == 'npc') {
-      this._prepareItems(context);
-    }
-
-    // Enrich biography info for display
-    // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedBiography = await TextEditor.enrichHTML(
-      this.actor.system.biography,
-      {
-        // Whether to show secret blocks in the finished html
-        secrets: this.document.isOwner,
-        // Necessary in v11, can be removed in v12
-        async: true,
-        // Data to fill in for inline rolls
-        rollData: this.actor.getRollData(),
-        // Relative UUID resolution
-        relativeTo: this.actor,
-      }
-    );
-
-    // Prepare active effects
-    context.effects = prepareActiveEffectCategories(
-      // A generator that returns all effects stored on the actor
-      // as well as any items
-      this.actor.allApplicableEffects()
-    );
-
     return context;
   }
 
   /**
-   * Character-specific context modifications
-   *
-   * @param {object} context The context object to mutate
-   */
-  _prepareCharacterData(context) {
-    // This is where you can enrich character-specific editor fields
-    // or setup anything else that's specific to this type
-  }
-
-  /**
    * Organize and classify Items for Actor sheets.
-   *
-   * @param {object} context The context object to mutate
+   * @returns {{gear: Item[], abilities: object[], spells: Record<number, Item[]>}}
+   * @protected
    */
-  _prepareItems(context) {
-    // Initialize containers.
+  _prepareItems() {
     const gear = [];
-    const spells = {
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      7: [],
-      8: [],
-      9: [],
-    };
+    const spells = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [] };
 
-    // Iterate through items, allocating to containers
-    for (let i of context.items) {
-      i.img = i.img || Item.DEFAULT_ICON;
-      // Append to gear.
-      if (i.type === 'item') {
-        gear.push(i);
-      }
-      // Append to spells.
-      else if (i.type === 'spell') {
-        if (i.system.spellLevel != undefined) {
-          spells[i.system.spellLevel].push(i);
-        }
+    const items = this.actor.items.contents.sort((a, b) => a.sort - b.sort);
+    for (const i of items) {
+      if (i.type === 'item') gear.push(i);
+      else if (i.type === 'spell' && i.system.spellLevel != undefined) {
+        spells[i.system.spellLevel].push(i);
       }
     }
 
-    // Assign and return
-    context.gear = gear;
-    context.abilities = this._prepareAbilities();
-    context.spells = spells;
+    return { gear, abilities: this._prepareAbilities(), spells };
   }
 
   /**
@@ -145,6 +155,7 @@ export class NoQuarterActorSheet extends ActorSheet {
    * order they are configured, followed by the rest.
    *
    * @returns {object[]}
+   * @protected
    */
   _prepareAbilities() {
     const basicOrder = Object.keys(CONFIG.NOQUARTER.basicAbilities);
@@ -169,96 +180,25 @@ export class NoQuarterActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    // Render the item sheet for viewing/editing prior to the editable check.
-    html.on('click', '.item-edit', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.sheet.render(true);
-    });
-
-    // -------------------------------------------------------------
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
-
-    // Add Inventory Item
-    html.on('click', '.item-create', this._onItemCreate.bind(this));
-
-    // Delete Inventory Item
-    html.on('click', '.item-delete', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.delete();
-      li.slideUp(200, () => this.render(false));
-    });
-
-    // Active Effect management
-    html.on('click', '.effect-control', (ev) => {
-      const row = ev.currentTarget.closest('li');
-      const document =
-        row.dataset.parentId === this.actor.id
-          ? this.actor
-          : this.actor.items.get(row.dataset.parentId);
-      onManageActiveEffect(ev, document);
-    });
-
-    // Inline editing of ability fields (rank, stamina cost, effect/notes).
-    html.on('change', '.ability-field', this._onAbilityFieldChange.bind(this));
-
-    // Make a monster's limited-use abilities available again.
-    html.on('click', '.uses-reset', () => this.actor.resetAbilityUses());
-
-    // Rollable stats and abilities.
-    html.on('click', '.rollable', this._onRoll.bind(this));
-
-    // Drag events for macros.
-    if (this.actor.isOwner) {
-      let handler = (ev) => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        if (li.classList.contains('inventory-header')) return;
-        li.setAttribute('draggable', true);
-        li.addEventListener('dragstart', handler, false);
-      });
-    }
-  }
-
   /**
-   * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
-   * @param {Event} event   The originating click event
-   * @private
+   * Ability fields edited inline on the sheet belong to the ability item, not
+   * the actor, so they are saved separately instead of submitting the form.
+   * @override
    */
-  async _onItemCreate(event) {
-    event.preventDefault();
-    const header = event.currentTarget;
-    // Get the type of item to create.
-    const type = header.dataset.type;
-    // Grab any data associated with this control.
-    const data = { ...header.dataset };
-    // Initialize a default name.
-    const name = `New ${type.capitalize()}`;
-    // Prepare the item object.
-    const itemData = {
-      name: name,
-      type: type,
-      system: data,
-    };
-    // Remove the type from the dataset since it's in the itemData.type prop.
-    delete itemData.system['type'];
-
-    // Finally, create the item!
-    return await Item.create(itemData, { parent: this.actor });
+  _onChangeForm(formConfig, event) {
+    if (event.target.classList.contains('ability-field')) {
+      return this._onAbilityFieldChange(event);
+    }
+    return super._onChangeForm(formConfig, event);
   }
 
   /**
    * Save a change made to an ability's field directly on the actor sheet.
    * @param {Event} event   The originating change event
-   * @private
+   * @protected
    */
   async _onAbilityFieldChange(event) {
-    const input = event.currentTarget;
+    const input = event.target;
     const item = this.actor.items.get(input.closest('.item').dataset.itemId);
     if (!item) return;
 
@@ -281,7 +221,7 @@ export class NoQuarterActorSheet extends ActorSheet {
 
     // The name is on the item itself and can't be empty.
     if (field === 'name') {
-      if (!value.trim()) return this.render(false);
+      if (!value.trim()) return this.render();
       return item.update({ name: value });
     }
     // Emptying either uses box removes the limit, so the ability is unlimited
@@ -294,29 +234,76 @@ export class NoQuarterActorSheet extends ActorSheet {
     return item.update({ [`system.${field}`]: value });
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * Get the owned Item for the row containing an element.
+   * @param {HTMLElement} target
+   * @returns {Item|undefined}
+   */
+  #getItem(target) {
+    return this.actor.items.get(target.closest('[data-item-id]').dataset.itemId);
+  }
+
+  /**
+   * Create a new owned Item using initial data defined in the button's dataset.
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static async #onCreateItem(event, target) {
+    if (!this.isEditable) return;
+    // Anything else on the button, like data-spell-level, is system data.
+    const { action, type, ...system } = target.dataset;
+    return Item.create(
+      { name: `New ${type.capitalize()}`, type, system },
+      { parent: this.actor }
+    );
+  }
+
+  /**
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static #onEditItem(event, target) {
+    this.#getItem(target)?.sheet.render({ force: true });
+  }
+
+  /**
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static #onDeleteItem(event, target) {
+    if (!this.isEditable) return;
+    return this.#getItem(target)?.delete();
+  }
+
+  /**
+   * Make a monster's limited-use abilities available again.
+   * @this {NoQuarterActorSheet}
+   */
+  static #onResetUses() {
+    if (!this.isEditable) return;
+    return this.actor.resetAbilityUses();
+  }
+
   /**
    * Handle clickable rolls.
-   * @param {Event} event   The originating click event
-   * @private
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
    */
-  _onRoll(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const dataset = element.dataset;
+  static #onRoll(event, target) {
+    if (!this.isEditable) return;
+    const dataset = target.dataset;
 
     // Handle item rolls.
-    if (dataset.rollType) {
-      if (dataset.rollType == 'item') {
-        const itemId = element.closest('.item').dataset.itemId;
-        const item = this.actor.items.get(itemId);
-        if (item) return item.roll();
-      }
-    }
+    if (dataset.rollType == 'item') return this.#getItem(target)?.roll();
 
     // Handle stat rolls (d100 against the stat's success chances).
-    if (dataset.rollType == 'stat') {
-      return this.actor.rollStat(dataset.stat);
-    }
+    if (dataset.rollType == 'stat') return this.actor.rollStat(dataset.stat);
 
     // Handle rolls that supply the formula directly.
     if (dataset.roll) {
@@ -325,7 +312,6 @@ export class NoQuarterActorSheet extends ActorSheet {
       roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
       });
       return roll;
     }

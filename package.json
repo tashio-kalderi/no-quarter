@@ -1,6 +1,6 @@
 {
   "name": "no-quarter",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "CSS compiler for the No Quarter system",
   "scripts": {
     "build": "sass src/scss/no-quarter.scss css/no-quarter.css --style=expanded --no-source-map",

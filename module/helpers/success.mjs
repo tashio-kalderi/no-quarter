@@ -248,7 +248,6 @@ export async function rollSuccess({ actor, label, chances, damage, note, tag, mo
   await roll.toMessage({
     speaker: ChatMessage.getSpeaker({ actor }),
     content,
-    rollMode: game.settings.get('core', 'rollMode'),
   });
   return roll;
 }

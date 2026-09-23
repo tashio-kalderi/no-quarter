@@ -1,36 +1,54 @@
 /**
- * Manage Active Effect instances through an Actor or Item Sheet via effect control buttons.
- * @param {MouseEvent} event      The left-click event on the effect control
- * @param {Actor|Item} owner      The owning document which manages this effect
+ * Sheet actions for managing Active Effects from an Actor or Item sheet. Spread
+ * into a sheet's `actions` option; each handler is called with the sheet as
+ * `this` and receives the clicked element as `target`.
+ * @type {Record<string, (this: foundry.applications.api.DocumentSheetV2, event: PointerEvent, target: HTMLElement) => Promise|void>}
  */
-export function onManageActiveEffect(event, owner) {
-  event.preventDefault();
-  const a = event.currentTarget;
-  const li = a.closest('li');
-  const effect = li.dataset.effectId
-    ? owner.effects.get(li.dataset.effectId)
-    : null;
-  switch (a.dataset.action) {
-    case 'create':
-      return owner.createEmbeddedDocuments('ActiveEffect', [
-        {
-          name: game.i18n.format('DOCUMENT.New', {
-            type: game.i18n.localize('DOCUMENT.ActiveEffect'),
-          }),
-          icon: 'icons/svg/aura.svg',
-          origin: owner.uuid,
-          'duration.rounds':
-            li.dataset.effectType === 'temporary' ? 1 : undefined,
-          disabled: li.dataset.effectType === 'inactive',
-        },
-      ]);
-    case 'edit':
-      return effect.sheet.render(true);
-    case 'delete':
-      return effect.delete();
-    case 'toggle':
-      return effect.update({ disabled: !effect.disabled });
-  }
+export const effectActions = {
+  createEffect(event, target) {
+    if (!this.isEditable) return;
+    const owner = this.document;
+    const effectType = target.closest('[data-effect-type]').dataset.effectType;
+    return owner.createEmbeddedDocuments('ActiveEffect', [
+      {
+        name: game.i18n.format('DOCUMENT.New', {
+          type: game.i18n.localize('DOCUMENT.ActiveEffect'),
+        }),
+        img: 'icons/svg/aura.svg',
+        origin: owner.uuid,
+        duration: effectType === 'temporary' ? { value: 1, units: 'rounds' } : undefined,
+        disabled: effectType === 'inactive',
+      },
+    ]);
+  },
+
+  editEffect(event, target) {
+    return getEffect(this.document, target)?.sheet.render({ force: true });
+  },
+
+  deleteEffect(event, target) {
+    if (!this.isEditable) return;
+    return getEffect(this.document, target)?.delete();
+  },
+
+  toggleEffect(event, target) {
+    if (!this.isEditable) return;
+    const effect = getEffect(this.document, target);
+    return effect?.update({ disabled: !effect.disabled });
+  },
+};
+
+/**
+ * Find the Active Effect for a row on the sheet. On an actor sheet the effect
+ * may belong to one of the actor's items rather than the actor itself.
+ * @param {Actor|Item} document   The document the sheet is showing
+ * @param {HTMLElement} target    An element inside the effect's row
+ * @returns {ActiveEffect|undefined}
+ */
+function getEffect(document, target) {
+  const { effectId, parentId } = target.closest('[data-effect-id]').dataset;
+  const parent = parentId === document.id ? document : document.items?.get(parentId);
+  return parent?.effects.get(effectId);
 }
 
 /**

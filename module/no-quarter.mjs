@@ -68,12 +68,11 @@ Hooks.once('init', function () {
   CONFIG.ActiveEffect.legacyTransferral = false;
 
   // Register sheet application classes
-  Actors.unregisterSheet('core', ActorSheet);
+  const { Actors, Items } = foundry.documents.collections;
   Actors.registerSheet('no-quarter', NoQuarterActorSheet, {
     makeDefault: true,
     label: 'NOQUARTER.SheetLabels.Actor',
   });
-  Items.unregisterSheet('core', ItemSheet);
   Items.registerSheet('no-quarter', NoQuarterItemSheet, {
     makeDefault: true,
     label: 'NOQUARTER.SheetLabels.Item',

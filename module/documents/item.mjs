@@ -61,14 +61,16 @@ export class NoQuarterItem extends Item {
         const effect = item.system.effect
           ? `<div class="roll-effect">${esc(item.system.effect)}</div>`
           : '';
-        return ChatMessage.create({
-          speaker: ChatMessage.getSpeaker({ actor: item.actor }),
-          rollMode: game.settings.get('core', 'rollMode'),
-          content: `<div class="no-quarter-roll">
-            <div class="roll-title"><strong>${esc(item.name)}</strong> <span class="roll-chances">(${game.i18n.localize('NOQUARTER.Passive')})</span></div>
-            ${effect}
-          </div>`,
-        });
+        return ChatMessage.create(
+          {
+            speaker: ChatMessage.getSpeaker({ actor: item.actor }),
+            content: `<div class="no-quarter-roll">
+              <div class="roll-title"><strong>${esc(item.name)}</strong> <span class="roll-chances">(${game.i18n.localize('NOQUARTER.Passive')})</span></div>
+              ${effect}
+            </div>`,
+          },
+          { messageMode: game.settings.get('core', 'messageMode') }
+        );
       }
       const isMonster = item.actor?.type === 'npc';
 
@@ -115,17 +117,18 @@ export class NoQuarterItem extends Item {
 
     // Initialize chat data.
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
-    const rollMode = game.settings.get('core', 'rollMode');
     const label = `[${item.type}] ${item.name}`;
 
     // If there's no roll data, send a chat message.
     if (!this.system.formula) {
-      ChatMessage.create({
-        speaker: speaker,
-        rollMode: rollMode,
-        flavor: label,
-        content: item.system.description ?? '',
-      });
+      ChatMessage.create(
+        {
+          speaker: speaker,
+          flavor: label,
+          content: item.system.description ?? '',
+        },
+        { messageMode: game.settings.get('core', 'messageMode') }
+      );
     }
     // Otherwise, create a roll and send a chat message from it.
     else {
@@ -136,9 +139,9 @@ export class NoQuarterItem extends Item {
       const roll = new Roll(rollData.formula, rollData.actor);
       // If you need to store the value first, uncomment the next line.
       // const result = await roll.evaluate();
+      // toMessage applies the user's chosen message mode by default.
       roll.toMessage({
         speaker: speaker,
-        rollMode: rollMode,
         flavor: label,
       });
       return roll;

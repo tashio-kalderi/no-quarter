@@ -1,0 +1,65 @@
+<section class="tab attributes {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{#if isMonsterAbility}}
+  {{!-- A monster ability is rolled against the monster's own Stats line. --}}
+  <div class="grid grid-4col">
+    <div class="grid-span-1">
+      <label class="resource-label">Damage type</label>
+      <select name="system.damageType">
+        {{selectOptions config.damageTypes selected=system.damageType localize=true blank="-"}}
+      </select>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Range</label>
+      <input type="text" name="system.range" value="{{system.range}}" placeholder="30 ft."/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Uses per combat</label>
+      <input type="text" name="system.uses" value="{{system.uses}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Reg/Great/Ext</label>
+      <span class="ability-chances">
+        <span class="chance">{{chances.regular}}</span>/<span class="chance">{{chances.greater}}</span>/<span class="chance">{{chances.extreme}}</span>
+      </span>
+    </div>
+  </div>
+  <div class="resource">
+    <label class="resource-label">Damage/Effect</label>
+    <input type="text" name="system.effect" value="{{system.effect}}"/>
+  </div>
+  {{else}}
+  <div class="grid grid-4col">
+    <div class="grid-span-1">
+      <label class="resource-label">Stat</label>
+      <select name="system.stat" {{#if system.basicKey}}disabled{{/if}}>
+        {{selectOptions config.stats selected=system.stat localize=true blank="-"}}
+      </select>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Rank</label>
+      <input type="text" name="system.rank" value="{{system.rank}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Stamina Cost</label>
+      <input type="text" name="system.staminaCost" value="{{system.staminaCost}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Reg/Great/Ext</label>
+      <span class="ability-chances">
+        {{#if chances}}<span class="chance">{{chances.regular}}</span>/<span class="chance">{{chances.greater}}</span>/<span class="chance">{{chances.extreme}}</span>{{else}}{{localize 'NOQUARTER.Passive'}}{{/if}}
+      </span>
+    </div>
+  </div>
+  {{#if system.basicKey}}
+    <div class="resource">
+      <label class="resource-label">Damage (base 1)</label>
+      <input type="text" name="system.damage" value="{{system.damage}}" data-dtype="Number"/>
+    </div>
+  {{else}}
+    <div class="resource">
+      <label class="resource-label">Effect/Notes</label>
+      <input type="text" name="system.effect" value="{{system.effect}}"/>
+    </div>
+  {{/if}}
+  {{/if}}
+</section>

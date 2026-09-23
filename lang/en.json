@@ -10,6 +10,14 @@
       "Actor": "No Quarter Actor Sheet",
       "Item": "No Quarter Item Sheet"
     },
+    "Tabs": {
+      "abilities": "Abilities",
+      "attributes": "Attributes",
+      "description": "Description",
+      "items": "Items",
+      "spells": "Spells",
+      "effects": "Effects"
+    },
     "Passive": "Passive",
     "DamageType": {
       "Physical": "Physical",

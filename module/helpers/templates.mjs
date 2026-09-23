@@ -4,15 +4,8 @@
  * @return {Promise}
  */
 export const preloadHandlebarsTemplates = async function () {
-  return loadTemplates([
-    // Actor partials.
-    'systems/no-quarter/templates/actor/parts/actor-abilities.hbs',
-    'systems/no-quarter/templates/actor/parts/actor-npc-abilities.hbs',
-    'systems/no-quarter/templates/actor/parts/actor-items.hbs',
-    'systems/no-quarter/templates/actor/parts/actor-spells.hbs',
-    'systems/no-quarter/templates/actor/parts/actor-effects.hbs',
-    // Item partials
-    'systems/no-quarter/templates/item/parts/item-effects.hbs',
+  // Sheet templates aren't listed: ApplicationV2 sheets load their own parts.
+  return foundry.applications.handlebars.loadTemplates([
     // Combat tracker.
     'systems/no-quarter/templates/combat/header.hbs',
     'systems/no-quarter/templates/combat/tracker.hbs',
