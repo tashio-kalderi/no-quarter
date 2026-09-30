@@ -1,0 +1,87 @@
+// Profession block above the skills: a short name box, then a longer
+// description box filling the rest of the row.
+.profession {
+  margin-bottom: 8px;
+
+  h3 {
+    margin: 4px 0;
+  }
+
+  .profession-fields {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    column-gap: 8px;
+  }
+}
+
+// Skills tab: two columns of trained | name | success chances rows, grouped
+// by stat.
+.skills-title {
+  margin: 4px 0;
+}
+
+.skills-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  align-items: start;
+}
+
+.skills-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .skill-row {
+    display: grid;
+    grid-template-columns: 1.4rem minmax(0, 1fr) max-content 1.2rem;
+    align-items: center;
+    column-gap: 6px;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  }
+
+  .skill-header {
+    font-size: 0.85em;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+
+    > :first-child {
+      text-align: center;
+    }
+  }
+
+  // The stat's name above its skills, with the button to add one.
+  .skill-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+
+    h4 {
+      margin: 0;
+      font-weight: bold;
+    }
+  }
+
+  input[type='checkbox'] {
+    margin: 0;
+  }
+
+  .skill-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    input {
+      width: 100%;
+    }
+  }
+
+  .item-controls {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

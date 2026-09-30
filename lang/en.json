@@ -14,11 +14,47 @@
       "abilities": "Abilities",
       "attributes": "Attributes",
       "description": "Description",
+      "skills": "Skills",
       "items": "Items",
       "spells": "Spells",
       "effects": "Effects"
     },
     "Passive": "Passive",
+    "Profession": {
+      "Title": "Profession",
+      "Name": "Profession",
+      "Description": "Brief description"
+    },
+    "Skill": {
+      "New": "New Skill",
+      "Create": "Create Skill",
+      "Delete": "Delete Skill",
+      "Trained": "Trained",
+      "List": {
+        "Athletics": "Athletics",
+        "Construction": "Construction",
+        "Intimidation": "Intimidation",
+        "Insight": "Insight",
+        "Criminality": "Criminality",
+        "Searching": "Searching",
+        "Medicine": "Medicine",
+        "Herbalism": "Herbalism",
+        "Alchemy": "Alchemy",
+        "Magic": "Magic",
+        "History": "History",
+        "Commerce": "Commerce",
+        "Religion": "Religion",
+        "Pickpocketing": "Pickpocketing",
+        "Lockpicking": "Lockpicking",
+        "DisableTraps": "Disable Traps",
+        "Gymnastics": "Gymnastics",
+        "Stealth": "Stealth",
+        "Persuasion": "Persuasion",
+        "Deception": "Deception",
+        "Performance": "Performance",
+        "Music": "Music"
+      }
+    },
     "DamageType": {
       "Physical": "Physical",
       "Magic": "Magic"
@@ -32,7 +68,9 @@
       "Forced": "{condition} forces this roll to be made with disadvantage.",
       "ForcedAdvantage": "{condition} grants this roll advantage (uses 1 stack).",
       "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally ({advantage} still uses 1 stack).",
-      "IgnoreCost": "(unchecking deals {cost} damage)"
+      "IgnoreCost": "(unchecking deals {cost} damage)",
+      "SkillAdvantage": "Trained skills are rolled with advantage. A source of disadvantage cancels it out: choose Normal.",
+      "SkillCancelled": "The skill's advantage and {disadvantage} cancel each other out, so this roll is made normally."
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
     "Turn": {

@@ -28,19 +28,23 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       deleteItem: NoQuarterActorSheet.#onDeleteItem,
       roll: NoQuarterActorSheet.#onRoll,
       resetUses: NoQuarterActorSheet.#onResetUses,
+      createSkill: NoQuarterActorSheet.#onCreateSkill,
+      deleteSkill: NoQuarterActorSheet.#onDeleteSkill,
       ...effectActions,
     },
   };
 
   /**
    * The header and abilities tab are swapped for the actor's type in
-   * _configureRenderParts.
+   * _configureRenderParts. Characters have a Skills tab where monsters have a
+   * Description tab.
    * @override
    */
   static PARTS = {
     header: { template: `${TEMPLATES}/header-character.hbs` },
     tabs: { template: 'templates/generic/tab-navigation.hbs' },
     abilities: { template: `${TEMPLATES}/tab-abilities-character.hbs`, scrollable: [''] },
+    skills: { template: `${TEMPLATES}/tab-skills.hbs`, scrollable: [''] },
     description: { template: `${TEMPLATES}/tab-description.hbs` },
     items: { template: `${TEMPLATES}/tab-items.hbs`, scrollable: [''] },
     spells: { template: `${TEMPLATES}/tab-spells.hbs`, scrollable: [''] },
@@ -52,6 +56,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     primary: {
       tabs: [
         { id: 'abilities' },
+        { id: 'skills' },
         { id: 'description' },
         { id: 'items' },
         { id: 'spells' },
@@ -70,16 +75,26 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const type = this.actor.type;
     parts.header.template = `${TEMPLATES}/header-${type}.hbs`;
     parts.abilities.template = `${TEMPLATES}/tab-abilities-${type}.hbs`;
-    // Monsters don't cast spells.
-    if (type === 'npc') delete parts.spells;
+    for (const tab of this.#hiddenTabs()) delete parts[tab];
     return parts;
   }
 
   /** @override */
   _getTabsConfig(group) {
     const config = super._getTabsConfig(group);
-    if (group !== 'primary' || this.actor.type !== 'npc') return config;
-    return { ...config, tabs: config.tabs.filter((t) => t.id !== 'spells') };
+    if (group !== 'primary') return config;
+    const hidden = this.#hiddenTabs();
+    return { ...config, tabs: config.tabs.filter((t) => !hidden.includes(t.id)) };
+  }
+
+  /**
+   * The tabs this actor's type doesn't have.
+   * @returns {string[]}
+   */
+  #hiddenTabs() {
+    // Monsters don't cast spells or have skills; characters keep skills where
+    // monsters have their description.
+    return this.actor.type === 'npc' ? ['skills', 'spells'] : ['description'];
   }
 
   /* -------------------------------------------- */
@@ -121,6 +136,9 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
               relativeTo: this.actor,
             }
           );
+        break;
+      case 'skills':
+        context.skillColumns = this._prepareSkills();
         break;
       case 'effects':
         // Effects stored on the actor as well as any on its items
@@ -178,6 +196,50 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       });
   }
 
+  /**
+   * Group the character's skills by stat for the Skills tab: Might and Mind in
+   * the left column, Agility and Personality in the right. Within each stat
+   * the basic skills and the character's own are sorted by name together.
+   *
+   * @returns {{stat: string, label: string, skills: object[]}[][]}
+   * @protected
+   */
+  _prepareSkills() {
+    const system = this.actor.system;
+    const skills = [
+      ...Object.entries(CONFIG.NOQUARTER.basicSkills).map(([key, skill]) => ({
+        key,
+        name: game.i18n.localize(skill.name),
+        stat: skill.stat,
+        trained: system.trainedSkills[key],
+      })),
+      ...system.skills.map((skill, index) => ({
+        index,
+        custom: true,
+        ...skill,
+        // Skills added before they were grouped by stat may not have one.
+        stat: skill.stat in system.stats ? skill.stat : 'might',
+      })),
+    ];
+    // A new skill has no name yet; keep it at the bottom until it gets one.
+    const byName = (a, b) => !a.name - !b.name || a.name.localeCompare(b.name);
+
+    return [
+      ['might', 'mind'],
+      ['agility', 'personality'],
+    ].map((stats) =>
+      stats.map((stat) => ({
+        stat,
+        label: game.i18n.localize(CONFIG.NOQUARTER.stats[stat]),
+        skills: skills
+          .filter((skill) => skill.stat === stat)
+          .sort(byName)
+          // A skill uses its stat's success chances.
+          .map((skill) => ({ ...skill, chances: system.stats[stat].target })),
+      }))
+    );
+  }
+
   /* -------------------------------------------- */
 
   /**
@@ -189,7 +251,27 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     if (event.target.classList.contains('ability-field')) {
       return this._onAbilityFieldChange(event);
     }
+    if (event.target.classList.contains('skill-field')) {
+      return this._onSkillFieldChange(event);
+    }
     return super._onChangeForm(formConfig, event);
+  }
+
+  /**
+   * Save a change made to a skill. Skills are an array, which can only be
+   * updated as a whole, so their fields are saved here instead of submitting
+   * the form.
+   * @param {Event} event   The originating change event
+   * @protected
+   */
+  async _onSkillFieldChange(event) {
+    const input = event.target;
+    const index = Number(input.closest('[data-skill-index]').dataset.skillIndex);
+    const skills = this.actor.system.toObject().skills;
+    if (!skills[index]) return;
+    const field = input.dataset.field;
+    skills[index][field] = input.type === 'checkbox' ? input.checked : input.value;
+    return this.actor.update({ 'system.skills': skills });
   }
 
   /**
@@ -290,6 +372,32 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /**
+   * Add a skill of the character's own under the button's stat.
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static async #onCreateSkill(event, target) {
+    if (!this.isEditable) return;
+    const skills = this.actor.system.toObject().skills;
+    skills.push({ name: '', stat: target.dataset.stat, trained: false });
+    return this.actor.update({ 'system.skills': skills });
+  }
+
+  /**
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static async #onDeleteSkill(event, target) {
+    if (!this.isEditable) return;
+    const index = Number(target.closest('[data-skill-index]').dataset.skillIndex);
+    const skills = this.actor.system.toObject().skills;
+    skills.splice(index, 1);
+    return this.actor.update({ 'system.skills': skills });
+  }
+
+  /**
    * Handle clickable rolls.
    * @this {NoQuarterActorSheet}
    * @param {PointerEvent} event
@@ -304,6 +412,15 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
     // Handle stat rolls (d100 against the stat's success chances).
     if (dataset.rollType == 'stat') return this.actor.rollStat(dataset.stat);
+
+    // Handle skill rolls (a stat roll under the skill's name, with advantage
+    // when trained).
+    if (dataset.rollType == 'skill') {
+      return this.actor.rollStat(dataset.stat, {
+        label: dataset.label,
+        skill: dataset.trained === 'true',
+      });
+    }
 
     // Handle rolls that supply the formula directly.
     if (dataset.roll) {

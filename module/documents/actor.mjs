@@ -174,9 +174,12 @@ export class NoQuarterActor extends Actor {
    * Roll d100 against one of the actor's stats (or a monster's single set of
    * chances) and post the result.
    * @param {string} key   The stat key, such as "might"
+   * @param {object} [options]
+   * @param {string} [options.label]   A label to show instead of the stat's name, such as a skill's
+   * @param {boolean} [options.skill]   Whether this is a trained skill's roll, which has advantage
    * @returns {Promise<Roll|undefined>}
    */
-  async rollStat(key) {
+  async rollStat(key, { label: skillLabel, skill = false } = {}) {
     // A monster has a single set of chances instead of individual stats.
     if (this.type === 'npc') {
       const label = game.i18n.localize('NOQUARTER.Check');
@@ -190,8 +193,8 @@ export class NoQuarterActor extends Actor {
     const stat = this.system.stats?.[key];
     if (!stat) return;
 
-    const label = game.i18n.localize(CONFIG.NOQUARTER.stats[key]);
-    const asked = await askRollMode({ label, chances: stat.target, actor: this });
+    const label = skillLabel || game.i18n.localize(CONFIG.NOQUARTER.stats[key]);
+    const asked = await askRollMode({ label, chances: stat.target, actor: this, skill });
     if (!asked) return;
     await applyRollCosts(this, asked);
     return rollSuccess({

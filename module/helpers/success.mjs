@@ -94,6 +94,11 @@ function bracketText(chances, tag) {
  * Advantage are disabled instead - there is no opting out of that one. A
  * condition that forces advantage (such as Blessed) likewise leaves only
  * Advantage, and when both are active they cancel out, leaving only Normal.
+ * A trained skill's roll has advantage of its own, which a source of disadvantage
+ * cancels out the same way: a condition that forces disadvantage leaves only
+ * Normal, and otherwise Advantage is the default with Normal left for a
+ * situational source of disadvantage (Disadvantage itself can't be reached).
+ * Blessed isn't used up on a trained skill's roll, since the roll already has advantage.
  * Meant to grow into the place where optional abilities (such as ones that
  * cost stamina) are chosen.
  * @param {object} options
@@ -101,10 +106,11 @@ function bracketText(chances, tag) {
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {string} [options.tag]    Shown instead of the chances, see rollSuccess
  * @param {Actor} [options.actor]   The actor the roll is made for, to check for penalizing conditions
+ * @param {boolean} [options.skill]   Whether this is a trained skill's roll, which has advantage
  * @returns {Promise<{mode: 'normal'|'advantage'|'disadvantage', penalty: number, cost: number, consumed: string[]}|null>}
  *   Null if the dialog is closed. Pass the result to `applyRollCosts` once the roll goes ahead.
  */
-export async function askRollMode({ label, chances, tag, actor }) {
+export async function askRollMode({ label, chances, tag, actor, skill = false }) {
   const esc = foundry.utils.escapeHTML;
   const bracket = bracketText(chances, tag);
   const penalties = activeRollPenalties(actor);
@@ -131,7 +137,22 @@ export async function askRollMode({ label, chances, tag, actor }) {
   const advLabels = labels(forcedAdv);
   let forcedMode = null;
   let forcedRows = [];
-  if (disLabels.length && advLabels.length) {
+  // The modes that can't be picked, and the one picked by default.
+  let disabledModes = [];
+  let defaultMode = 'normal';
+  // Each forced-advantage condition loses a stack for being applied, even when
+  // cancelled out - except on a trained skill's roll, which has advantage anyway.
+  const consumed = skill ? [] : Object.keys(forcedAdv);
+  if (skill) {
+    if (disLabels.length) {
+      forcedMode = 'normal';
+      forcedRows = [game.i18n.format('NOQUARTER.RollMode.SkillCancelled', { disadvantage: disLabels.join(', ') })];
+    } else {
+      disabledModes = ['disadvantage'];
+      defaultMode = 'advantage';
+      forcedRows = [game.i18n.localize('NOQUARTER.RollMode.SkillAdvantage')];
+    }
+  } else if (disLabels.length && advLabels.length) {
     forcedMode = 'normal';
     forcedRows = [game.i18n.format('NOQUARTER.RollMode.Cancelled', {
       advantage: advLabels.join(', '),
@@ -144,15 +165,17 @@ export async function askRollMode({ label, chances, tag, actor }) {
     forcedMode = 'advantage';
     forcedRows = advLabels.map((condition) => game.i18n.format('NOQUARTER.RollMode.ForcedAdvantage', { condition }));
   }
+  if (forcedMode) {
+    disabledModes = ['normal', 'advantage', 'disadvantage'].filter((mode) => mode !== forcedMode);
+    defaultMode = forcedMode;
+  }
   const forcedHtml = forcedRows.map((text) => `<p class="no-quarter-roll-forced">${esc(text)}</p>`).join('');
-  // Each forced-advantage condition loses a stack for being applied, even when cancelled out.
-  const consumed = Object.keys(forcedAdv);
 
-  const button = (action, isDefault = false) => ({
+  const button = (action) => ({
     action,
     label: game.i18n.localize(NOQUARTER.rollModes[action]),
-    default: forcedMode ? action === forcedMode : isDefault,
-    disabled: !!forcedMode && action !== forcedMode,
+    default: action === defaultMode,
+    disabled: disabledModes.includes(action),
     callback: (event, target, dialog) => {
       let penalty = 0;
       let cost = 0;
@@ -171,7 +194,7 @@ export async function askRollMode({ label, chances, tag, actor }) {
       ${forcedHtml}
       ${penaltyRows}
       <p>${game.i18n.localize('NOQUARTER.RollMode.Prompt')}</p>`,
-    buttons: [button('normal', true), button('advantage'), button('disadvantage')],
+    buttons: [button('normal'), button('advantage'), button('disadvantage')],
     rejectClose: false,
   });
 }

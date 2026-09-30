@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.3.0
+
+- Character sheet: the Description tab is replaced by a Skills tab. Monsters keep their Description tab.
+- Skills tab: a Profession section across the top, with a short box for the profession's name and a longer one for a brief description.
+- Every character has the basic skills, grouped by stat and sorted by name: Might and Mind in the left column, Agility and Personality in the right. Intimidation appears twice on purpose, once under Might and once under Personality. Each skill has a Trained checkbox and shows its stat's Reg/Great/Ext success chances.
+- Each stat's heading has a + button to add a skill of the character's own under that stat, with an editable name and a delete button.
+- Clicking a skill's success chances rolls its stat under the skill's name. A trained skill is rolled with advantage; a source of disadvantage (such as Poisoned, or a situational one by choosing Normal) cancels it out and the roll is made normally. Blessed isn't used up on a trained skill's roll, since it already has advantage.
+
 ## 0.2.4
 
 - Actor and item sheets rebuilt on Foundry's ApplicationV2 framework, replacing the old sheet framework that Foundry is phasing out. They look and work as before, except that they always use the light theme. Also clears the "deprecated global" warnings from the console.

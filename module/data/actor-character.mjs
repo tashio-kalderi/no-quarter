@@ -33,6 +33,30 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
       }, {})
     );
 
+    schema.profession = new fields.SchemaField({
+      name: new fields.StringField({ required: true, blank: true }),
+      description: new fields.StringField({ required: true, blank: true }),
+    });
+
+    // Skills are named checks made with one of the stats; their success
+    // chances are the stat's. Every character has the basic skills, so only
+    // whether they are trained in each is stored.
+    schema.trainedSkills = new fields.SchemaField(
+      Object.keys(NOQUARTER.basicSkills).reduce((obj, key) => {
+        obj[key] = new fields.BooleanField();
+        return obj;
+      }, {})
+    );
+
+    // Skills the character has added of their own.
+    schema.skills = new fields.ArrayField(
+      new fields.SchemaField({
+        name: new fields.StringField({ required: true, blank: true }),
+        stat: new fields.StringField({ required: true, blank: true }),
+        trained: new fields.BooleanField(),
+      })
+    );
+
     schema.attributes = new fields.SchemaField({
       level: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 1 }),
