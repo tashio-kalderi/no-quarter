@@ -243,6 +243,46 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   /* -------------------------------------------- */
 
   /**
+   * Foundry only restores focus after a render to fields with an id or name.
+   * Ability and skill fields have neither, so every save (tabbing or clicking
+   * into another box) dropped focus. Find them by their row and field instead,
+   * and keep the cursor where it was.
+   * @override
+   */
+  _preSyncPartState(partId, newElement, priorElement, state) {
+    super._preSyncPartState(partId, newElement, priorElement, state);
+    const focus = priorElement.querySelector(':focus');
+    if (!focus) return;
+
+    const field = focus.dataset.field;
+    const row = focus.closest('[data-item-id], [data-skill-index]');
+    if (!state.focus && field && row) {
+      const key = row.dataset.itemId
+        ? `[data-item-id="${row.dataset.itemId}"]`
+        : `[data-skill-index="${row.dataset.skillIndex}"]`;
+      state.focus = `${key} [data-field="${field}"]`;
+    }
+    // Only text boxes have a cursor; reading it on other inputs throws.
+    try {
+      if (focus.selectionStart !== null && focus.selectionStart !== undefined) {
+        state.selection = [focus.selectionStart, focus.selectionEnd];
+      }
+    } catch {}
+  }
+
+  /** @override */
+  _syncPartState(partId, newElement, priorElement, state) {
+    super._syncPartState(partId, newElement, priorElement, state);
+    if (!state.focus || !state.selection) return;
+    const focus = newElement.querySelector(state.focus);
+    try {
+      focus?.setSelectionRange?.(...state.selection);
+    } catch {}
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Ability fields edited inline on the sheet belong to the ability item, not
    * the actor, so they are saved separately instead of submitting the form.
    * @override

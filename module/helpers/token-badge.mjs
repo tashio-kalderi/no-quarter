@@ -32,12 +32,14 @@ export function refreshWoundBadge(token) {
     token.sortableChildren = true;
   }
 
-  // Size the badge relative to the token, and keep it inside the token's
-  // bottom right corner.
-  const radius = Math.max(10, Math.min(token.w, token.h) * 0.16);
+  // Size the badge, outline included, relative to the token so it covers the
+  // same share of it at any grid size, and keep it inside the token's bottom
+  // right corner.
+  const radius = Math.min(token.w, token.h) * 0.16;
+  const outline = Math.max(1, radius * 0.15);
   badge.background
     .clear()
-    .lineStyle(2, 0xffffff, 1)
+    .lineStyle(outline, 0xffffff, 1)
     .beginFill(0x8b0000, 0.95)
     .drawCircle(0, 0, radius)
     .endFill();
@@ -46,7 +48,7 @@ export function refreshWoundBadge(token) {
   badge.label.style.fontSize = Math.round(radius * 1.3);
   badge.label.style.fill = 0xffffff;
   badge.label.style.stroke = 0x000000;
-  badge.label.style.strokeThickness = 3;
+  badge.label.style.strokeThickness = Math.max(1, radius * 0.2);
 
   badge.position.set(token.w - radius, token.h - radius);
   badge.visible = true;

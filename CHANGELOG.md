@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.3.1
+
+- Actor sheet: tabbing or clicking from one ability box to the next (or between a character's own skills) no longer drops focus out of the box, so there's no need to click back into it. The cursor also stays where it was. (#3)
+- Wound counter on tokens: now always sized to the token, so on scenes with a small grid (under 50 pixels per square) it no longer covers a large part of the token. (#2)
+
 ## 0.3.0
 
 - Character sheet: the Description tab is replaced by a Skills tab. Monsters keep their Description tab.
