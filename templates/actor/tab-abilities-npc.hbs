@@ -50,7 +50,8 @@
     </div>
   </div>
 
-  {{!-- A monster's abilities: name, damage type, range, uses per combat and the damage/effect.
+  {{!-- A monster's abilities: name, damage type, range, uses per combat, how many attacks one
+  use makes, the damage each attack deals and the effect.
   Every one is rolled against the monster's own Stats line. Their fields have no name: they
   belong to the ability items and are saved by the sheet's _onAbilityFieldChange. --}}
   <h3 class="abilities-title">Abilities</h3>
@@ -63,7 +64,9 @@
         Uses
         <a class="uses-reset" data-action="resetUses" title="Restore all uses"><i class="fas fa-rotate-left"></i></a>
       </div>
-      <div>Damage/Effect</div>
+      <div title="Attack rolls made each time the ability is used">Attacks</div>
+      <div title="Damage dealt by each attack that hits, before the bonus for a Greater or better success (empty for none)">Damage</div>
+      <div>Effect</div>
       <div class="item-controls">
         <a class="item-control" data-action="createItem" data-type="ability"
            title="{{localize 'DOCUMENT.Create' type='ability'}}">
@@ -97,6 +100,14 @@
           {{/if}}
           <input type="text" class="ability-field" data-field="uses" data-dtype="Number" data-nullable="true"
                  data-min="1" title="Times it can be used in one combat (empty for unlimited)" value="{{item.system.uses}}"/>
+        </div>
+        <div>
+          <input type="text" class="ability-field" data-field="attacks" data-dtype="Number" data-min="1"
+                 title="Attack rolls made each time the ability is used" value="{{item.system.attacks}}"/>
+        </div>
+        <div>
+          <input type="text" class="ability-field" data-field="damage" data-dtype="Number" data-nullable="true"
+                 data-min="0" title="Damage per hit (empty for none)" value="{{item.system.damage}}"/>
         </div>
         <div class="ability-effect">
           <input type="text" class="ability-field" data-field="effect" value="{{item.system.effect}}"/>

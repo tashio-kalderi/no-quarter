@@ -158,6 +158,7 @@ export class NoQuarterActor extends Actor {
             stat: basic.stat,
             rank: 0,
             staminaCost: 0,
+            damage: 1,
           },
         }))
       );

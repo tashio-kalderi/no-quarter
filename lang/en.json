@@ -108,7 +108,8 @@
       "Roll": "Roll",
       "WoundOne": "rolled {roll}, 1 wound",
       "WoundMany": "rolled {roll}, {count} wounds",
-      "Damage": "Damage"
+      "Damage": "Damage",
+      "Attack": "Attack {number}"
     },
     "BasicAbility": {
       "Melee": "Basic Melee Attack",

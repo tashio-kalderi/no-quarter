@@ -33,8 +33,18 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
       min: 0,
     });
     schema.effect = new fields.StringField({ required: true, blank: true });
-    // The damage dealt, used by the basic abilities (base 1).
-    schema.damage = new fields.NumberField({ ...requiredInteger, initial: 1, min: 0 });
+    // The damage dealt on a hit, before the bonus for a Greater or better
+    // success. The basic abilities start at 1; a monster ability can leave it
+    // empty when it only has an effect.
+    schema.damage = new fields.NumberField({
+      required: true,
+      nullable: true,
+      integer: true,
+      initial: null,
+      min: 0,
+    });
+    // Monster abilities only: how many attack rolls one use of the ability makes.
+    schema.attacks = new fields.NumberField({ ...requiredInteger, initial: 1, min: 1 });
     // Monster abilities only: the kind of damage, the range (such as "30 ft."),
     // and how many times the ability can be used in one combat (empty for
     // unlimited).
@@ -60,6 +70,17 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     schema.basicKey = new fields.StringField({ required: true, blank: true, initial: '' });
 
     return schema;
+  }
+
+  /** @override */
+  static migrateData(source, options) {
+    // Before attacks were added, damage was always stored as 1 but only the
+    // basic abilities used it. Clear it on the others so a monster ability
+    // doesn't suddenly deal 1 damage; its damage was written in its effect.
+    if (!options?.partial && source.attacks === undefined && !source.basicKey && 'damage' in source) {
+      source.damage = null;
+    }
+    return super.migrateData(source, options);
   }
 
   /** Uses left this combat, counting down from `uses`; null when unlimited. */

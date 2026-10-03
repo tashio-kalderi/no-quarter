@@ -1,5 +1,5 @@
 // Monster sheet: the stat block lines in the header, and the monster ability
-// list (name | type | range | uses | damage/effect).
+// list (name | type | range | uses | attacks | damage | effect).
 .npc-identity,
 .npc-defenses {
   margin: 4px 0;
@@ -43,17 +43,19 @@
   }
 
   .ability-row {
-    grid-template-columns: minmax(0, 1.4fr) 5.5rem 4.5rem 5.5rem minmax(0, 2.5fr) 3.4rem;
+    grid-template-columns: minmax(0, 1.4fr) 5rem 4.5rem 5rem 3.6rem 3.6rem minmax(0, 2.2fr) 3.4rem;
   }
 
-  // Only the narrow uses column is centered over its box.
+  // The narrow uses, attacks and damage columns are centered over their boxes.
   .ability-header {
     > :nth-child(3),
-    > :nth-child(5) {
+    > :nth-child(7) {
       text-align: left;
     }
 
-    > :nth-child(4) {
+    > :nth-child(4),
+    > :nth-child(5),
+    > :nth-child(6) {
       text-align: center;
     }
   }

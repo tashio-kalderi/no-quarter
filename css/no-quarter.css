@@ -248,6 +248,16 @@
 .no-quarter-roll .roll-result.degree-criticalFailure {
   background: rgba(170, 50, 50, 0.45);
 }
+.no-quarter-roll .roll-attack {
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.25);
+}
+.no-quarter-roll .roll-attack-label {
+  margin-bottom: 2px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
 
 /* Combat tracker */
 .combat-sidebar .turn-tracker {
@@ -742,13 +752,15 @@
   margin-left: 4px;
 }
 .no-quarter .monster-abilities .ability-row {
-  grid-template-columns: minmax(0, 1.4fr) 5.5rem 4.5rem 5.5rem minmax(0, 2.5fr) 3.4rem;
+  grid-template-columns: minmax(0, 1.4fr) 5rem 4.5rem 5rem 3.6rem 3.6rem minmax(0, 2.2fr) 3.4rem;
 }
 .no-quarter .monster-abilities .ability-header > :nth-child(3),
-.no-quarter .monster-abilities .ability-header > :nth-child(5) {
+.no-quarter .monster-abilities .ability-header > :nth-child(7) {
   text-align: left;
 }
-.no-quarter .monster-abilities .ability-header > :nth-child(4) {
+.no-quarter .monster-abilities .ability-header > :nth-child(4),
+.no-quarter .monster-abilities .ability-header > :nth-child(5),
+.no-quarter .monster-abilities .ability-header > :nth-child(6) {
   text-align: center;
 }
 .no-quarter .resource-label {

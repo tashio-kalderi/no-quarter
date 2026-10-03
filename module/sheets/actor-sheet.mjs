@@ -70,6 +70,16 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /* -------------------------------------------- */
 
+  /**
+   * Monster sheets open wider: their ability list has more columns.
+   * @override
+   */
+  _initializeApplicationOptions(options) {
+    options = super._initializeApplicationOptions(options);
+    if (options.document?.type === 'npc') options.position.width = 760;
+    return options;
+  }
+
   /** @override */
   _configureRenderParts(options) {
     const parts = super._configureRenderParts(options);

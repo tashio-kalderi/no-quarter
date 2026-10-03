@@ -1,4 +1,4 @@
-import { askRollMode, rollSuccess } from '../helpers/success.mjs';
+import { askRollMode, attackRolls, rollSuccess } from '../helpers/success.mjs';
 import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
@@ -26,6 +26,10 @@ export class NoQuarterItem extends Item {
 
     const range = foundry.utils.getProperty(changes, 'system.range');
     if (typeof range === 'string') foundry.utils.setProperty(changes, 'system.range', formatRange(range));
+
+    // An emptied attacks box goes back to a single attack.
+    const attacks = foundry.utils.getProperty(changes, 'system.attacks');
+    if (attacks !== undefined && !(attacks >= 1)) foundry.utils.setProperty(changes, 'system.attacks', 1);
   }
 
   /**
@@ -74,8 +78,8 @@ export class NoQuarterItem extends Item {
       }
       const isMonster = item.actor?.type === 'npc';
 
-      // A monster ability with limited uses can only be rolled that many times
-      // per combat.
+      // A monster ability with limited uses can only be used that many times
+      // per combat. Each use makes all of its attacks.
       const { uses, used } = item.system;
       const limited = isMonster && uses;
       if (limited && used >= uses) {
@@ -101,17 +105,19 @@ export class NoQuarterItem extends Item {
       });
       if (!asked) return;
       if (limited) await item.update({ 'system.used': used + 1 });
-      await applyRollCosts(item.actor, asked);
+      // Each attack counts as its own roll for the conditions' costs.
+      const attacks = attackRolls(item.actor, asked, isMonster ? item.system.attacks : 1);
+      await applyRollCosts(item.actor, attacks);
 
       return rollSuccess({
         actor: item.actor,
         note,
         tag,
-        mode: asked.mode,
+        modes: attacks.modes,
         label: item.name,
         chances: applyRollPenalty(item.system.chances, asked.penalty),
-        // Only the basic abilities have a damage value for now.
-        damage: item.system.basicKey ? item.system.damage : undefined,
+        // A character's own abilities have no damage value, only the basic ones.
+        damage: isMonster || item.system.basicKey ? item.system.damage : undefined,
       });
     }
 
