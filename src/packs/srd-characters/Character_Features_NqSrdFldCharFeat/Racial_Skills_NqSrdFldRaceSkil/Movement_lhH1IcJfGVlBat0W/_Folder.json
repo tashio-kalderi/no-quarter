@@ -3,7 +3,7 @@
   "name": "Movement",
   "type": "Item",
   "folder": "NqSrdFldRaceSkil",
-  "sorting": "m",
+  "sorting": "a",
   "sort": 200000,
   "color": null,
   "description": "",

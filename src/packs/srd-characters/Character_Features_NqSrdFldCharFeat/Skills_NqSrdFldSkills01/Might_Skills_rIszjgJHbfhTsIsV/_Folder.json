@@ -3,7 +3,7 @@
   "name": "Might Skills",
   "type": "Item",
   "folder": "NqSrdFldSkills01",
-  "sorting": "m",
+  "sorting": "a",
   "sort": 100000,
   "color": null,
   "description": "",

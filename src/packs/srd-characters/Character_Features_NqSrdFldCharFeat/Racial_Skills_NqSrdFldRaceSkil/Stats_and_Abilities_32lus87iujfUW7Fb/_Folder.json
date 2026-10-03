@@ -3,7 +3,7 @@
   "name": "Stats and Abilities",
   "type": "Item",
   "folder": "NqSrdFldRaceSkil",
-  "sorting": "m",
+  "sorting": "a",
   "sort": 300000,
   "color": null,
   "description": "",

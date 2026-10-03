@@ -3,7 +3,7 @@
   "name": "Agility Skills",
   "type": "Item",
   "folder": "NqSrdFldSkills01",
-  "sorting": "m",
+  "sorting": "a",
   "sort": 200000,
   "color": null,
   "description": "",

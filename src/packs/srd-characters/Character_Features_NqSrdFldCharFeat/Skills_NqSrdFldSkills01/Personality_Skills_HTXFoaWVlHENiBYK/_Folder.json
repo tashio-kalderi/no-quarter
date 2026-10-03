@@ -3,7 +3,7 @@
   "name": "Personality Skills",
   "type": "Item",
   "folder": "NqSrdFldSkills01",
-  "sorting": "m",
+  "sorting": "a",
   "sort": 400000,
   "color": null,
   "description": "",
