@@ -90,7 +90,7 @@ function bracketText(chances, tag) {
  * most rolls are affected, but a roll that doesn't rely on sight can opt out.
  * Some penalties (such as Burning) cost self-damage to opt out of instead of
  * being free to decline; that's noted next to the checkbox. When the actor
- * has a condition that forces disadvantage (such as Poisoned), Normal and
+ * has a condition that forces disadvantage (such as Poisoned or Restrained), Normal and
  * Advantage are disabled instead - there is no opting out of that one. A
  * condition that forces advantage (such as Blessed) likewise leaves only
  * Advantage, and when both are active they cancel out, leaving only Normal.

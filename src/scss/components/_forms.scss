@@ -62,6 +62,37 @@ h4 {
     margin-right: 10px;
   }
 
+  // The portrait with the Breather button under it (character sheet only).
+  .profile {
+    flex: 0 0 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-right: 10px;
+
+    .profile-img {
+      margin-right: 0;
+    }
+
+    // Sized and bordered like the ability and item images.
+    .breather {
+      display: flex;
+      align-self: flex-start;
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+
+      // During combat, see the actor's inStartedCombat.
+      &.disabled {
+        cursor: default;
+        opacity: 0.4;
+        filter: grayscale(1);
+      }
+    }
+  }
+
   .header-fields {
     flex: 1;
   }

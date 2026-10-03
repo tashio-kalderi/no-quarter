@@ -109,6 +109,18 @@ Hooks.once('ready', function () {
     for (const combatant of combat.combatants) combatant.actor?.resetAbilityUses();
   });
 
+  // The Breather button is disabled while a character is in a started combat,
+  // so open character sheets redraw when that might have changed.
+  const refreshCharacterSheets = () => {
+    for (const app of foundry.applications.instances.values()) {
+      if (app instanceof NoQuarterActorSheet && app.actor.type === 'character' && app.rendered) app.render();
+    }
+  };
+  Hooks.on('updateCombat', (combat, changed) => {
+    if ('round' in changed) refreshCharacterSheets();
+  });
+  for (const hook of ['deleteCombat', 'createCombatant', 'deleteCombatant']) Hooks.on(hook, refreshCharacterSheets);
+
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
 });

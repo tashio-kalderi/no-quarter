@@ -426,6 +426,29 @@
   height: 100px;
   margin-right: 10px;
 }
+.no-quarter .sheet-header .profile {
+  flex: 0 0 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-right: 10px;
+}
+.no-quarter .sheet-header .profile .profile-img {
+  margin-right: 0;
+}
+.no-quarter .sheet-header .profile .breather {
+  display: flex;
+  align-self: flex-start;
+}
+.no-quarter .sheet-header .profile .breather img {
+  width: 24px;
+  height: 24px;
+}
+.no-quarter .sheet-header .profile .breather.disabled {
+  cursor: default;
+  opacity: 0.4;
+  filter: grayscale(1);
+}
 .no-quarter .sheet-header .header-fields {
   flex: 1;
 }

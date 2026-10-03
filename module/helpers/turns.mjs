@@ -107,6 +107,26 @@ export function startTurnBlocker(combatant) {
   return null;
 }
 
+/**
+ * Why a token cannot move right now. Once a combat on its scene has started, a
+ * player can only move a token while it is the combatant taking their turn,
+ * including tokens left out of the combat. The GM can always move tokens, to
+ * set up the scene or fix a mistake.
+ * @param {TokenDocument} token
+ * @returns {string|null}  A language key, or null when it can move.
+ */
+export function movementBlocker(token) {
+  if (game.user.isGM) return null;
+  // A combat not linked to a scene covers the scenes its combatants are on.
+  const onScene = (combat) =>
+    combat.scene ? combat.scene === token.parent : combat.combatants.some((c) => c.sceneId === token.parent?.id);
+  const combats = game.combats.filter((c) => c.started && onScene(c));
+  if (!combats.length) return null;
+  const combatants = combats.flatMap((c) => c.getCombatantsByToken(token));
+  if (combatants.some((c) => getTurnState(c) === TURN_STATES.ACTIVE)) return null;
+  return 'NOQUARTER.Turn.Blocked.NotYourTurn';
+}
+
 /* -------------------------------------------- */
 /*  Actions                                     */
 /* -------------------------------------------- */
@@ -283,5 +303,14 @@ export function registerTurnOrder() {
   });
   Hooks.on('combatRound', (combat, updateData) => {
     updateData.turn = null;
+  });
+
+  // Only the client starting a move runs this hook, so each player is stopped
+  // on their own client (see `movementBlocker`).
+  Hooks.on('preMoveToken', (token) => {
+    const blocker = movementBlocker(token);
+    if (!blocker) return;
+    ui.notifications.warn(blocker, { localize: true });
+    return false;
   });
 }

@@ -306,12 +306,14 @@ export async function applyRollCosts(actor, { cost, consumed }) {
 
 /**
  * Conditions that force every roll to be made with disadvantage while
- * active, with no opt-out - e.g. Poisoned. Add an entry here for future
- * conditions with the same kind of effect.
+ * active, with no opt-out - e.g. Poisoned, or Restrained (an on/off status,
+ * which counts as a single stack). Add an entry here for future conditions
+ * with the same kind of effect.
  * @type {Object<string, {label: string}>}
  */
 const CONDITION_FORCED_DISADVANTAGE = {
   poison: { label: 'NOQUARTER.Condition.Poisoned' },
+  restrain: { label: 'EFFECT.StatusRestrained' },
 };
 
 /**

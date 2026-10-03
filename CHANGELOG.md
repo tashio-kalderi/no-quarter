@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.2
+
+- Character sheet: the basic Melee, Ranged and Magic attacks have their own icons. Existing characters' basic attacks switch over the next time their sheet is opened, unless someone already gave them a different picture.
+- Character sheet: a Breather button under the portrait. It restores Health and Stamina to full and removes every condition. Wounds stay as they are, and so does Dead, since it follows the wounds. It's greyed out and can't be used while the character is in a combat that has started.
+- Cornered Rats Initiative System: once a combat has started, players can only move a token while it's the combatant taking their turn (after Start turn, until Finish or Cancel). Moving any other token, including one left out of the combat, is blocked with a warning. The GM can still move any token. (#5)
+- Restrained: now also forces disadvantage on every stat and ability check, like Poisoned. Against Blessed the two cancel out and the roll is made normally; on a trained skill it cancels the skill's advantage. (#4)
+
 ## 0.3.1
 
 - Actor sheet: tabbing or clicking from one ability box to the next (or between a character's own skills) no longer drops focus out of the box, so there's no need to click back into it. The cursor also stays where it was. (#3)

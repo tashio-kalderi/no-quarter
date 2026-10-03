@@ -20,6 +20,11 @@
       "effects": "Effects"
     },
     "Passive": "Passive",
+    "Breather": {
+      "Label": "Breather",
+      "Hint": "Breather: Restore Health and Stamina to full and remove all conditions. Wounds stay.",
+      "InCombat": "Breather: Not available during combat."
+    },
     "Profession": {
       "Title": "Profession",
       "Name": "Profession",
@@ -95,7 +100,8 @@
         "SomeoneActive": "Someone is already taking their turn.",
         "NoSide": "The GM has not said who attacks first yet.",
         "NotYourSide": "It is not your side's turn.",
-        "NobodyReady": "Nobody on that side can go."
+        "NobodyReady": "Nobody on that side can go.",
+        "NotYourTurn": "Tokens can only be moved on their own turn, once it has been started."
       }
     },
     "Chat": {

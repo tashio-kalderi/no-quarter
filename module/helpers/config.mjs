@@ -60,9 +60,9 @@ NOQUARTER.damageBonus = {
  * @type {Object}
  */
 NOQUARTER.basicAbilities = {
-  melee: { name: 'NOQUARTER.BasicAbility.Melee', stat: 'might' },
-  ranged: { name: 'NOQUARTER.BasicAbility.Ranged', stat: 'agility' },
-  magic: { name: 'NOQUARTER.BasicAbility.Magic', stat: 'mind' },
+  melee: { name: 'NOQUARTER.BasicAbility.Melee', stat: 'might', img: 'systems/no-quarter/assets/icons/basic_melee_attack.png' },
+  ranged: { name: 'NOQUARTER.BasicAbility.Ranged', stat: 'agility', img: 'systems/no-quarter/assets/icons/basic_ranged_attack.png' },
+  magic: { name: 'NOQUARTER.BasicAbility.Magic', stat: 'mind', img: 'systems/no-quarter/assets/icons/basic_magic_attack.png' },
 };
 
 /**

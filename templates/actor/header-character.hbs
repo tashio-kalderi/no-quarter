@@ -1,5 +1,14 @@
 <header class="sheet-header">
-  <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage" title="{{actor.name}}" height="100" width="100"/>
+  <div class="profile">
+    <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage" title="{{actor.name}}" height="100" width="100"/>
+    {{#if inCombat}}
+    <a class="breather disabled" data-tooltip="{{ localize "NOQUARTER.Breather.InCombat" }}">
+    {{else}}
+    <a class="breather" data-action="breather" data-tooltip="{{ localize "NOQUARTER.Breather.Hint" }}">
+    {{/if}}
+      <img src="systems/no-quarter/assets/icons/breather.png" alt="{{ localize "NOQUARTER.Breather.Label" }}" width="24" height="24"/>
+    </a>
+  </div>
   <div class="header-fields">
     <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
     {{!-- The grid classes are defined in scss/global/_grid.scss. To use,

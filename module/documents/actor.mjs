@@ -121,29 +121,36 @@ export class NoQuarterActor extends Actor {
   }
 
   /**
-   * Give a character any of the basic abilities it is missing.
+   * Give a character any of the basic abilities it is missing. Basic abilities
+   * made before they had their own icons still show the default one, so that
+   * is swapped for theirs; a picture someone chose is left alone.
    * @returns {Promise<void>}
    */
   async ensureBasicAbilities() {
     if (this.type !== 'character' || !this.isOwner) return;
     if (creatingBasics.has(this.id)) return;
 
-    const have = new Set(
-      this.items
-        .filter((i) => i.type === 'ability' && i.system.basicKey)
-        .map((i) => i.system.basicKey)
-    );
-    const missing = Object.entries(CONFIG.NOQUARTER.basicAbilities)
+    const basics = CONFIG.NOQUARTER.basicAbilities;
+    const owned = this.items.filter((i) => i.type === 'ability' && basics[i.system.basicKey]);
+    const have = new Set(owned.map((i) => i.system.basicKey));
+    const missing = Object.entries(basics)
       .map(([key, basic], index) => ({ key, basic, index }))
       .filter(({ key }) => !have.has(key));
-    if (!missing.length) return;
+    const defaultIcon = getDocumentClass('Item').DEFAULT_ICON;
+    const iconUpdates = owned
+      .filter((i) => i.img === defaultIcon)
+      .map((i) => ({ _id: i.id, img: basics[i.system.basicKey].img }));
+    if (!missing.length && !iconUpdates.length) return;
 
     creatingBasics.add(this.id);
     try {
+      if (iconUpdates.length) await this.updateEmbeddedDocuments('Item', iconUpdates);
+      if (!missing.length) return;
       await this.createEmbeddedDocuments(
         'Item',
         missing.map(({ key, basic, index }) => ({
           name: game.i18n.localize(basic.name),
+          img: basic.img,
           type: 'ability',
           sort: index * 10,
           system: {
@@ -157,6 +164,36 @@ export class NoQuarterActor extends Actor {
     } finally {
       creatingBasics.delete(this.id);
     }
+  }
+
+  /**
+   * Whether the actor is fighting in a combat that has started. Unlike core's
+   * inCombat this doesn't depend on which combat the user is viewing, and a
+   * combat that hasn't begun yet doesn't count.
+   * @type {boolean}
+   */
+  get inStartedCombat() {
+    return game.combats.some((c) => c.started && c.getCombatantsByActor(this).length);
+  }
+
+  /**
+   * Catch a breather: health and stamina back to full and every condition
+   * cleared. Wounds stay, and so does Dead, since it follows the wounds (see
+   * syncDeath). Not available during combat.
+   * @returns {Promise<void>}
+   */
+  async takeBreather() {
+    if (this.inStartedCombat) {
+      ui.notifications.warn('NOQUARTER.Breather.InCombat', { localize: true });
+      return;
+    }
+    const updates = { 'system.health.value': this.system.health.max };
+    if (this.system.stamina) updates['system.stamina.value'] = this.system.stamina.max;
+    await this.update(updates);
+    const conditions = this.effects
+      .filter((e) => e.statuses.size && !e.statuses.has(CONFIG.specialStatusEffects.DEFEATED))
+      .map((e) => e.id);
+    if (conditions.length) await this.deleteEmbeddedDocuments('ActiveEffect', conditions);
   }
 
   /**

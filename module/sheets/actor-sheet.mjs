@@ -30,6 +30,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       resetUses: NoQuarterActorSheet.#onResetUses,
       createSkill: NoQuarterActorSheet.#onCreateSkill,
       deleteSkill: NoQuarterActorSheet.#onDeleteSkill,
+      breather: NoQuarterActorSheet.#onBreather,
       ...effectActions,
     },
   };
@@ -112,6 +113,8 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       system: actor.system,
       flags: actor.flags,
       config: CONFIG.NOQUARTER,
+      // A breather can't be taken mid-fight.
+      inCombat: actor.inStartedCombat,
       ...this._prepareItems(),
     });
   }
@@ -422,6 +425,17 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     const skills = this.actor.system.toObject().skills;
     skills.push({ name: '', stat: target.dataset.stat, trained: false });
     return this.actor.update({ 'system.skills': skills });
+  }
+
+  /**
+   * Restore health and stamina and clear conditions, see NoQuarterActor#takeBreather.
+   * @this {NoQuarterActorSheet}
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   */
+  static async #onBreather(event, target) {
+    if (!this.isEditable) return;
+    return this.actor.takeBreather();
   }
 
   /**
