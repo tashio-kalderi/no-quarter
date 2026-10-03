@@ -47,7 +47,9 @@
             <input type="text" disabled="true" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
                    data-tooltip="{{ localize "EFFECT.StatusRestrained" }}"/>
             {{else}}
-            <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+            {{!-- Shows Speed with racial skill bonuses; the sheet takes them off again when saving. --}}
+            <input type="text" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
+                   {{#if system.bonuses.speed}}data-tooltip="{{localize 'NOQUARTER.RacialSkill.SpeedTooltip' base=system.speed bonus=system.bonuses.speed}}"{{/if}}/>
             {{/if}}
           </div>
 
@@ -61,7 +63,8 @@
             <div class="resource-content flexrow flex-center flex-between">
               <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
               <span> / </span>
-              <input type="text" disabled="true" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+              <input type="text" disabled="true" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"
+                     {{#if system.bonuses.health}}data-tooltip="{{localize 'NOQUARTER.RacialSkill.MaxTooltip' bonus=system.bonuses.health}}"{{/if}}/>
             </div>
           </div>
 
@@ -70,7 +73,8 @@
             <div class="resource-content flexrow flex-center flex-between">
               <input type="text" name="system.stamina.value" value="{{system.stamina.value}}" data-dtype="Number"/>
               <span> / </span>
-              <input type="text" disabled="true" name="system.stamina.max" value="{{system.stamina.max}}" data-dtype="Number"/>
+              <input type="text" disabled="true" name="system.stamina.max" value="{{system.stamina.max}}" data-dtype="Number"
+                     {{#if system.bonuses.stamina}}data-tooltip="{{localize 'NOQUARTER.RacialSkill.MaxTooltip' bonus=system.bonuses.stamina}}"{{/if}}/>
             </div>
           </div>
         </div>

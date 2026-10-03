@@ -25,6 +25,41 @@
       "Hint": "Breather: Restore Health and Stamina to full and remove all conditions. Wounds stay.",
       "InCombat": "Breather: Not available during combat."
     },
+    "RacialSkill": {
+      "Title": "Racial Skills",
+      "Empty": "Drag racial skills here from the compendium.",
+      "CharactersOnly": "Only characters can have racial skills.",
+      "Duplicate": "This character already has that racial skill, and it can only be taken once.",
+      "Exclusive": "{name} can't be taken with any other racial skill.",
+      "Limit": "A character can only have {max} racial skills.",
+      "ChooseStat": "Which stat does {name} increase?",
+      "Choose": "Choose",
+      "AllStatsChosen": "This character already has {name} for every stat.",
+      "Choice": {
+        "stat": "A stat"
+      },
+      "Health": "{value} Health",
+      "Stamina": "{value} Stamina",
+      "Speed": "{value} Speed",
+      "Vision": "{vision} {range} ft.",
+      "SpeedTooltip": "Base {base}, +{bonus} from racial skills",
+      "MaxTooltip": "Includes +{bonus} from racial skills",
+      "Field": {
+        "Health": "Health +",
+        "Stamina": "Stamina +",
+        "Speed": "Speed +",
+        "Vision": "Vision",
+        "Repeatable": "Can be taken more than once",
+        "Exclusive": "No other racial skills",
+        "Choice": "Choose on drop",
+        "Stat": "Stat"
+      }
+    },
+    "Vision": {
+      "darkvision": "Darkvision",
+      "earthsense": "Earthsense",
+      "echolocation": "Echolocation"
+    },
     "Profession": {
       "Title": "Profession",
       "Name": "Profession",
@@ -32,33 +67,12 @@
     },
     "Skill": {
       "New": "New Skill",
-      "Create": "Create Skill",
+      "Create": "Add Skill",
       "Delete": "Delete Skill",
-      "Trained": "Trained",
-      "List": {
-        "Athletics": "Athletics",
-        "Construction": "Construction",
-        "Intimidation": "Intimidation",
-        "Insight": "Insight",
-        "Criminality": "Criminality",
-        "Searching": "Searching",
-        "Medicine": "Medicine",
-        "Herbalism": "Herbalism",
-        "Alchemy": "Alchemy",
-        "Magic": "Magic",
-        "History": "History",
-        "Commerce": "Commerce",
-        "Religion": "Religion",
-        "Pickpocketing": "Pickpocketing",
-        "Lockpicking": "Lockpicking",
-        "DisableTraps": "Disable Traps",
-        "Gymnastics": "Gymnastics",
-        "Stealth": "Stealth",
-        "Persuasion": "Persuasion",
-        "Deception": "Deception",
-        "Performance": "Performance",
-        "Music": "Music"
-      }
+      "Empty": "Drag skills here from the compendium, or add your own with +.",
+      "Duplicate": "This character already has {name}.",
+      "CharactersOnly": "Only characters have skills.",
+      "Migrated": "Skills are now items: converted the skills of {count} character(s)."
     },
     "DamageType": {
       "Physical": "Physical",
@@ -73,9 +87,7 @@
       "Forced": "{condition} forces this roll to be made with disadvantage.",
       "ForcedAdvantage": "{condition} grants this roll advantage (uses 1 stack).",
       "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally ({advantage} still uses 1 stack).",
-      "IgnoreCost": "(unchecking deals {cost} damage)",
-      "SkillAdvantage": "Trained skills are rolled with advantage. A source of disadvantage cancels it out: choose Normal.",
-      "SkillCancelled": "The skill's advantage and {disadvantage} cancel each other out, so this roll is made normally."
+      "IgnoreCost": "(unchecking deals {cost} damage)"
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
     "Turn": {
@@ -153,7 +165,9 @@
     "Item": {
       "item": "Item",
       "ability": "Ability",
-      "spell": "Spell"
+      "spell": "Spell",
+      "racialSkill": "Racial Skill",
+      "skill": "Skill"
     }
   }
 }

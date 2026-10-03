@@ -8,6 +8,10 @@ npm-debug.log
 
 # Foundry
 *.lock
+# LevelDB lock and info logs inside compendium packs (the numbered .log files are data)
+packs/*/LOCK
+packs/*/LOG
+packs/*/LOG.old
 jsconfig.json
 foundry
 

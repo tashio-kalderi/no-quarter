@@ -1,0 +1,52 @@
+<section class="tab attributes {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{!-- Applied automatically while a character has this skill. Stat increases and other
+  character creation bonuses go in the description and are allocated by hand. --}}
+  <div class="grid grid-4col">
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Health'}}</label>
+      <input type="text" name="system.health" value="{{system.health}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Stamina'}}</label>
+      <input type="text" name="system.stamina" value="{{system.stamina}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Speed'}}</label>
+      <input type="text" name="system.speed" value="{{system.speed}}" data-dtype="Number"/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Vision'}}</label>
+      <select name="system.vision">
+        {{selectOptions visionChoices selected=system.vision blank="-"}}
+      </select>
+    </div>
+  </div>
+  <div class="grid grid-2col">
+    <label class="checkbox">
+      <input type="checkbox" name="system.repeatable" {{checked system.repeatable}}/>
+      {{localize 'NOQUARTER.RacialSkill.Field.Repeatable'}}
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="system.exclusive" {{checked system.exclusive}}/>
+      {{localize 'NOQUARTER.RacialSkill.Field.Exclusive'}}
+    </label>
+  </div>
+  {{!-- The choice is asked for when the skill is dropped onto a character. Once the skill is on
+  one, what was picked can be changed here. --}}
+  <div class="grid grid-2col">
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Choice'}}</label>
+      <select name="system.choice">
+        {{selectOptions config.racialSkillChoices selected=system.choice localize=true blank="-"}}
+      </select>
+    </div>
+    {{#if (and item.actor (eq system.choice "stat"))}}
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Stat'}}</label>
+      <select name="system.stat">
+        {{selectOptions config.stats selected=system.stat localize=true blank="-"}}
+      </select>
+    </div>
+    {{/if}}
+  </div>
+</section>

@@ -9,7 +9,7 @@ const { ItemSheetV2 } = foundry.applications.sheets;
 const TEMPLATES = 'systems/no-quarter/templates/item';
 
 /**
- * The item sheet for gear, abilities and spells.
+ * The item sheet for gear, abilities, spells, racial skills and skills.
  * @extends {ItemSheetV2}
  */
 export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
@@ -50,7 +50,9 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   /** @override */
   _configureRenderParts(options) {
     const parts = super._configureRenderParts(options);
-    parts.attributes.template = `${TEMPLATES}/tab-attributes-${this.item.type}.hbs`;
+    // Skills are just a description.
+    if (this.item.type === 'skill') delete parts.attributes;
+    else parts.attributes.template = `${TEMPLATES}/tab-attributes-${this.item.type}.hbs`;
     // Only abilities have an effects tab.
     if (this.item.type !== 'ability') delete parts.effects;
     return parts;
@@ -60,8 +62,9 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   _getTabsConfig(group) {
     const config = super._getTabsConfig(group);
     if (group !== 'primary' || this.item.type === 'ability') return config;
-    // Gear and spells lead with their description.
-    const order = ['description', 'attributes'];
+    // Gear, spells and racial skills lead with their description, and skills
+    // have nothing else.
+    const order = this.item.type === 'skill' ? ['description'] : ['description', 'attributes'];
     return { ...config, tabs: order.map((id) => config.tabs.find((t) => t.id === id)) };
   }
 
@@ -78,6 +81,14 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       flags: item.flags,
       config: CONFIG.NOQUARTER,
     });
+    if (item.type === 'racialSkill') {
+      context.visionChoices = Object.fromEntries(
+        Object.entries(CONFIG.NOQUARTER.visionTypes).map(([key, { label, range }]) => [
+          key,
+          `${game.i18n.localize(label)} (${range} ft.)`,
+        ])
+      );
+    }
     if (item.type === 'ability') {
       context.chances = item.system.chances;
       // Monster abilities have a damage type, range and uses instead of a stat and rank.

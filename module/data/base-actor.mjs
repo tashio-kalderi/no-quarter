@@ -23,15 +23,27 @@ export default class NoQuarterActorBase extends foundry.abstract.TypeDataModel {
   }
 
   prepareDerivedData() {
+    this.bonuses = this.prepareBonuses();
     this.prepareResourceMaximums();
 
     // Current health cannot exceed its maximum.
     this.health.value = Math.min(this.health.value, this.health.max);
 
-    // Restrained drops Speed to 0 while it lasts. The base value stays in
-    // `speed`, so it comes back once the condition is toggled off.
+    // Speed bonuses are added on top of the stored `speed`, which stays the
+    // base value. Restrained drops Speed to 0 while it lasts; the base value
+    // comes back once the condition is toggled off.
     this.restrained = this.parent.statuses.has('restrain');
-    this.effectiveSpeed = this.restrained ? 0 : this.speed;
+    this.effectiveSpeed = this.restrained ? 0 : this.speed + this.bonuses.speed;
+  }
+
+  /**
+   * Bonuses to maximum Health and Stamina and to Speed from the actor's items,
+   * and the forms of vision they grant. None by default; characters get them
+   * from their racial skills.
+   * @returns {{health: number, stamina: number, speed: number, senses: Set<string>}}
+   */
+  prepareBonuses() {
+    return { health: 0, stamina: 0, speed: 0, senses: new Set() };
   }
 
   /**

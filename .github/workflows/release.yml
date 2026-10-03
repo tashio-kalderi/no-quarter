@@ -28,7 +28,7 @@ jobs:
           mv system.tmp system.json
 
       - name: Zip the system
-        run: zip -r no-quarter.zip system.json README.md LICENSE.txt CHANGELOG.md assets css lang module templates
+        run: zip -r no-quarter.zip system.json README.md LICENSE.txt CHANGELOG.md assets css lang module packs templates -x "packs/*/LOCK" "packs/*/LOG*"
 
       - name: Attach the files to the release
         uses: softprops/action-gh-release@v2

@@ -1,0 +1,34 @@
+{
+  "_id": "toHT9UiZg7aSIyC4",
+  "name": "Ability",
+  "type": "racialSkill",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "<p>Choose an ability and gain one rank in it. You must have the minimum stat score required to obtain this ability increase. You may take this racial ability multiple times, but each time must be for a different ability.</p>",
+    "health": 0,
+    "stamina": 0,
+    "speed": 0,
+    "vision": "",
+    "repeatable": true,
+    "exclusive": false
+  },
+  "effects": [],
+  "folder": "32lus87iujfUW7Fb",
+  "sort": 200000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!toHT9UiZg7aSIyC4"
+}

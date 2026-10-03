@@ -1,0 +1,23 @@
+{
+  "_id": "32lus87iujfUW7Fb",
+  "name": "Stats and Abilities",
+  "type": "Item",
+  "folder": "NqSrdFldRaceSkil",
+  "sorting": "m",
+  "sort": 300000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!32lus87iujfUW7Fb"
+}

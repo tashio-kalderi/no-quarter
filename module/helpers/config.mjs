@@ -66,36 +66,27 @@ NOQUARTER.basicAbilities = {
 };
 
 /**
- * The skills every character has, keyed by id, each rolled with a stat.
- * Intimidation is listed twice on purpose: once for Might, once for
- * Personality. Characters can add more of their own on the Skills tab.
- * @type {Object<string, {name: string, stat: string}>}
+ * Forms of vision a racial skill can grant, and how far each reaches in feet.
+ * See helpers/vision.mjs for how they are applied to tokens.
+ * @type {Object}
  */
-NOQUARTER.basicSkills = {
-  athletics: { name: 'NOQUARTER.Skill.List.Athletics', stat: 'might' },
-  construction: { name: 'NOQUARTER.Skill.List.Construction', stat: 'might' },
-  intimidationMight: { name: 'NOQUARTER.Skill.List.Intimidation', stat: 'might' },
-  insight: { name: 'NOQUARTER.Skill.List.Insight', stat: 'mind' },
-  criminality: { name: 'NOQUARTER.Skill.List.Criminality', stat: 'mind' },
-  searching: { name: 'NOQUARTER.Skill.List.Searching', stat: 'mind' },
-  medicine: { name: 'NOQUARTER.Skill.List.Medicine', stat: 'mind' },
-  herbalism: { name: 'NOQUARTER.Skill.List.Herbalism', stat: 'mind' },
-  alchemy: { name: 'NOQUARTER.Skill.List.Alchemy', stat: 'mind' },
-  magic: { name: 'NOQUARTER.Skill.List.Magic', stat: 'mind' },
-  history: { name: 'NOQUARTER.Skill.List.History', stat: 'mind' },
-  commerce: { name: 'NOQUARTER.Skill.List.Commerce', stat: 'mind' },
-  religion: { name: 'NOQUARTER.Skill.List.Religion', stat: 'mind' },
-  pickpocketing: { name: 'NOQUARTER.Skill.List.Pickpocketing', stat: 'agility' },
-  lockpicking: { name: 'NOQUARTER.Skill.List.Lockpicking', stat: 'agility' },
-  disableTraps: { name: 'NOQUARTER.Skill.List.DisableTraps', stat: 'agility' },
-  gymnastics: { name: 'NOQUARTER.Skill.List.Gymnastics', stat: 'agility' },
-  stealth: { name: 'NOQUARTER.Skill.List.Stealth', stat: 'agility' },
-  persuasion: { name: 'NOQUARTER.Skill.List.Persuasion', stat: 'personality' },
-  deception: { name: 'NOQUARTER.Skill.List.Deception', stat: 'personality' },
-  intimidationPersonality: { name: 'NOQUARTER.Skill.List.Intimidation', stat: 'personality' },
-  performance: { name: 'NOQUARTER.Skill.List.Performance', stat: 'personality' },
-  music: { name: 'NOQUARTER.Skill.List.Music', stat: 'personality' },
+NOQUARTER.visionTypes = {
+  darkvision: { label: 'NOQUARTER.Vision.darkvision', range: 60 },
+  earthsense: { label: 'NOQUARTER.Vision.earthsense', range: 60 },
+  echolocation: { label: 'NOQUARTER.Vision.echolocation', range: 60 },
 };
+
+/**
+ * What a racial skill can ask the player to pick when it is dropped onto a
+ * character (see NoQuarterActorSheet#_onDropItem).
+ * @type {Object}
+ */
+NOQUARTER.racialSkillChoices = {
+  stat: 'NOQUARTER.RacialSkill.Choice.stat',
+};
+
+/** How many racial skills a character can have. */
+NOQUARTER.maxRacialSkills = 3;
 
 /**
  * The kinds of damage a monster ability can deal. Monsters reduce them with

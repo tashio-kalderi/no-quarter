@@ -1,4 +1,34 @@
 <section class="tab skills-tab {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
+  {{!-- Racial skills are dragged in from the compendium; dropping one anywhere on the sheet puts
+  it here. Their Health, Stamina, Speed and vision bonuses apply automatically. --}}
+  <div class="racial-skills">
+    <h3>{{localize 'NOQUARTER.RacialSkill.Title'}}
+      <span class="racial-skills-count">{{racialSkills.length}}/{{config.maxRacialSkills}}</span>
+    </h3>
+    <ol class="racial-skills-list">
+      {{#each racialSkills as |skill|}}
+      <li class="racial-skill draggable" data-item-id="{{skill._id}}">
+        <img src="{{skill.img}}" title="{{skill.name}}" width="24" height="24"/>
+        <span class="racial-skill-name">{{skill.name}}{{#if skill.choice}}
+          <span class="racial-skill-choice">({{skill.choice}})</span>{{/if}}</span>
+        <span class="racial-skill-summary">{{skill.summary}}</span>
+        <div class="item-controls">
+          <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Update' type='Item'}}">
+            <i class="fas fa-edit"></i>
+          </a>
+          {{#if @root.editable}}
+          <a class="item-control" data-action="deleteItem" title="{{localize 'DOCUMENT.Delete' type='Item'}}">
+            <i class="fas fa-trash"></i>
+          </a>
+          {{/if}}
+        </div>
+      </li>
+      {{else}}
+      <li class="racial-skills-empty">{{localize 'NOQUARTER.RacialSkill.Empty'}}</li>
+      {{/each}}
+    </ol>
+  </div>
+
   <div class="profession">
     <h3>{{localize 'NOQUARTER.Profession.Title'}}</h3>
     <div class="profession-fields">
@@ -9,72 +39,35 @@
     </div>
   </div>
 
-  <h3 class="skills-title">{{localize 'NOQUARTER.Tabs.skills'}}</h3>
-
-  {{!-- Might and Mind on the left, Agility and Personality on the right. A skill added by the
-  character has an editable name and a delete button; its fields have no name, since the skills
-  array is saved as a whole by the sheet's _onSkillFieldChange. --}}
-  <div class="skills-columns">
-    {{#each skillColumns as |column|}}
+  {{!-- Skills are items: dragged in from the compendium, or added with + and named here. Rows
+  have no name attribute; the sheet saves the name to the skill item (_onSkillNameChange). --}}
+  <div class="skills">
+    <h3 class="skills-title">{{localize 'NOQUARTER.Tabs.skills'}}
+      {{#if @root.editable}}
+      <a class="item-control" data-action="createItem" data-type="skill" title="{{localize 'NOQUARTER.Skill.Create'}}">
+        <i class="fas fa-plus"></i>
+      </a>
+      {{/if}}
+    </h3>
     <ol class="skills-list">
-      <li class="skill-row skill-header">
-        <div><i class="fas fa-graduation-cap" data-tooltip="{{localize 'NOQUARTER.Skill.Trained'}}"></i></div>
-        <div>Name</div>
-        {{!-- Shares .ability-chances' layout with the rows below so the "/"s line up. --}}
-        <div class="ability-chances">
-          <span class="chance-label">Reg</span>
-          <span>/</span>
-          <span class="chance-label">Great</span>
-          <span>/</span>
-          <span class="chance-label">Ext</span>
-        </div>
-        <div></div>
-      </li>
-      {{#each column as |group|}}
-      <li class="skill-group">
-        <h4>{{group.label}}</h4>
-        {{#if @root.editable}}
-        <a class="item-control" data-action="createSkill" data-stat="{{group.stat}}"
-           title="{{localize 'NOQUARTER.Skill.Create'}}">
-          <i class="fas fa-plus"></i>
-        </a>
-        {{/if}}
-      </li>
-      {{#each group.skills as |skill|}}
-      <li class="skill-row" {{#if skill.custom}}data-skill-index="{{skill.index}}"{{/if}}>
-        <div>
-          {{#if skill.custom}}
-          <input type="checkbox" class="skill-field" data-field="trained" {{checked skill.trained}}/>
-          {{else}}
-          <input type="checkbox" name="system.trainedSkills.{{skill.key}}" {{checked skill.trained}}/>
-          {{/if}}
-        </div>
-        <div class="skill-name">
-          {{#if skill.custom}}
-          <input type="text" class="skill-field" data-field="name" value="{{skill.name}}"/>
-          {{else}}
-          <span>{{skill.name}}</span>
-          {{/if}}
-        </div>
-        <div class="ability-chances rollable" data-action="roll" data-roll-type="skill" data-stat="{{skill.stat}}"
-             data-label="{{skill.name}}" data-trained="{{skill.trained}}">
-          <input type="text" class="chance-box" value="{{skill.chances.regular}}" readonly tabindex="-1"/>
-          <span>/</span>
-          <input type="text" class="chance-box" value="{{skill.chances.greater}}" readonly tabindex="-1"/>
-          <span>/</span>
-          <input type="text" class="chance-box" value="{{skill.chances.extreme}}" readonly tabindex="-1"/>
-        </div>
+      {{#each skills as |skill|}}
+      <li class="skill-row draggable" data-item-id="{{skill._id}}">
+        <input type="text" class="skill-field" data-field="name" value="{{skill.name}}"
+               {{#unless @root.editable}}disabled{{/unless}}/>
         <div class="item-controls">
-          {{#if (and skill.custom @root.editable)}}
-          <a class="item-control" data-action="deleteSkill" title="{{localize 'NOQUARTER.Skill.Delete'}}">
+          <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Update' type='Item'}}">
+            <i class="fas fa-edit"></i>
+          </a>
+          {{#if @root.editable}}
+          <a class="item-control" data-action="deleteItem" title="{{localize 'NOQUARTER.Skill.Delete'}}">
             <i class="fas fa-trash"></i>
           </a>
           {{/if}}
         </div>
       </li>
-      {{/each}}
+      {{else}}
+      <li class="skills-empty">{{localize 'NOQUARTER.Skill.Empty'}}</li>
       {{/each}}
     </ol>
-    {{/each}}
   </div>
 </section>

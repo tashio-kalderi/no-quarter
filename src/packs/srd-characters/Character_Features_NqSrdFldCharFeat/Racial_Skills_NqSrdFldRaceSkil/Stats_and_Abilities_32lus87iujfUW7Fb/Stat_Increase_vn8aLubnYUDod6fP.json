@@ -1,0 +1,36 @@
+{
+  "_id": "vn8aLubnYUDod6fP",
+  "name": "Stat Increase",
+  "type": "racialSkill",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "<p>Choose one of your stats and increase it by one rank. You may take this racial ability multiple times, but each time must be for a different stat.</p>",
+    "health": 0,
+    "stamina": 0,
+    "speed": 0,
+    "vision": "",
+    "repeatable": true,
+    "exclusive": false,
+    "choice": "stat",
+    "stat": ""
+  },
+  "effects": [],
+  "folder": "32lus87iujfUW7Fb",
+  "sort": 100000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!vn8aLubnYUDod6fP"
+}

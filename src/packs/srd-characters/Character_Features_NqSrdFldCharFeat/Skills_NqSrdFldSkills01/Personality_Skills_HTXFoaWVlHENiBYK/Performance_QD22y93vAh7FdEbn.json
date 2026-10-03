@@ -1,0 +1,28 @@
+{
+  "_id": "QD22y93vAh7FdEbn",
+  "name": "Performance",
+  "type": "skill",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "description": "<p>Your ability to act like a character other than yourself.</p>"
+  },
+  "effects": [],
+  "folder": "HTXFoaWVlHENiBYK",
+  "sort": 400000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!QD22y93vAh7FdEbn"
+}

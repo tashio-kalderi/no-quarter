@@ -1,0 +1,23 @@
+{
+  "_id": "LhzO1xXR5FTOEw05",
+  "name": "Miscellaneous",
+  "type": "Item",
+  "folder": "NqSrdFldRaceSkil",
+  "sorting": "m",
+  "sort": 400000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!LhzO1xXR5FTOEw05"
+}

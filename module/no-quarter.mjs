@@ -13,6 +13,8 @@ import { registerWoundBadge } from './helpers/token-badge.mjs';
 import { registerStackableConditions, registerConditionTurnEffects } from './helpers/conditions.mjs';
 import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 import { registerMovementRuler } from './helpers/movement-ruler.mjs';
+import { registerVision } from './helpers/vision.mjs';
+import { migrateWorld } from './helpers/migrations.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
 
@@ -48,6 +50,9 @@ Hooks.once('init', function () {
   // stat while it's their active turn.
   registerMovementRuler();
 
+  // Racial skills can grant Echolocation, which Foundry doesn't have built in.
+  registerVision();
+
   // Define custom Document and DataModel classes.
   // The types themselves are declared under `documentTypes` in system.json.
   CONFIG.Actor.documentClass = NoQuarterActor;
@@ -60,6 +65,8 @@ Hooks.once('init', function () {
     item: models.NoQuarterItem,
     ability: models.NoQuarterAbility,
     spell: models.NoQuarterSpell,
+    racialSkill: models.NoQuarterRacialSkill,
+    skill: models.NoQuarterSkill,
   };
 
   // Active Effects are never copied to the Actor,
@@ -96,6 +103,9 @@ Handlebars.registerHelper('toLowerCase', function (str) {
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {
+  // Convert data from older versions of the system.
+  migrateWorld();
+
   // The GM's client unlocks sides and passes the turn between them.
   registerTurnReferee();
 

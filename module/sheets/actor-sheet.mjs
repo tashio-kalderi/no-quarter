@@ -28,8 +28,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       deleteItem: NoQuarterActorSheet.#onDeleteItem,
       roll: NoQuarterActorSheet.#onRoll,
       resetUses: NoQuarterActorSheet.#onResetUses,
-      createSkill: NoQuarterActorSheet.#onCreateSkill,
-      deleteSkill: NoQuarterActorSheet.#onDeleteSkill,
       breather: NoQuarterActorSheet.#onBreather,
       ...effectActions,
     },
@@ -150,9 +148,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
             }
           );
         break;
-      case 'skills':
-        context.skillColumns = this._prepareSkills();
-        break;
       case 'effects':
         // Effects stored on the actor as well as any on its items
         context.effects = prepareActiveEffectCategories(this.actor.allApplicableEffects());
@@ -163,22 +158,62 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /**
    * Organize and classify Items for Actor sheets.
-   * @returns {{gear: Item[], abilities: object[], spells: Record<number, Item[]>}}
+   * @returns {{gear: Item[], abilities: object[], spells: Record<number, Item[]>, racialSkills: object[], skills: Item[]}}
    * @protected
    */
   _prepareItems() {
     const gear = [];
+    const skills = [];
     const spells = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [] };
 
     const items = this.actor.items.contents.sort((a, b) => a.sort - b.sort);
     for (const i of items) {
       if (i.type === 'item') gear.push(i);
+      else if (i.type === 'skill') skills.push(i);
       else if (i.type === 'spell' && i.system.spellLevel != undefined) {
         spells[i.system.spellLevel].push(i);
       }
     }
 
-    return { gear, abilities: this._prepareAbilities(), spells };
+    // Skills are listed by name.
+    skills.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { gear, skills, abilities: this._prepareAbilities(), spells, racialSkills: this._prepareRacialSkills() };
+  }
+
+  /**
+   * The character's racial skills, each with a one-line summary of the
+   * bonuses it applies, such as "+1 Health · Darkvision 60 ft.".
+   * @returns {object[]}
+   * @protected
+   */
+  _prepareRacialSkills() {
+    const { visionTypes } = CONFIG.NOQUARTER;
+    const signed = (value) => (value > 0 ? `+${value}` : `${value}`);
+    return this.actor.items
+      .filter((i) => i.type === 'racialSkill')
+      .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name))
+      .map((i) => {
+        const { health, stamina, speed, vision } = i.system;
+        const summary = [];
+        if (health) summary.push(game.i18n.format('NOQUARTER.RacialSkill.Health', { value: signed(health) }));
+        if (stamina) summary.push(game.i18n.format('NOQUARTER.RacialSkill.Stamina', { value: signed(stamina) }));
+        if (speed) summary.push(game.i18n.format('NOQUARTER.RacialSkill.Speed', { value: signed(speed) }));
+        if (vision) {
+          summary.push(
+            game.i18n.format('NOQUARTER.RacialSkill.Vision', {
+              vision: game.i18n.localize(visionTypes[vision].label),
+              range: visionTypes[vision].range,
+            })
+          );
+        }
+        // What the player picked for it, such as a Stat Increase's stat.
+        const choice =
+          i.system.choice === 'stat' && i.system.stat
+            ? game.i18n.localize(CONFIG.NOQUARTER.stats[i.system.stat])
+            : '';
+        return { _id: i.id, name: i.name, img: i.img || Item.DEFAULT_ICON, choice, summary: summary.join(' · ') };
+      });
   }
 
   /**
@@ -209,57 +244,13 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       });
   }
 
-  /**
-   * Group the character's skills by stat for the Skills tab: Might and Mind in
-   * the left column, Agility and Personality in the right. Within each stat
-   * the basic skills and the character's own are sorted by name together.
-   *
-   * @returns {{stat: string, label: string, skills: object[]}[][]}
-   * @protected
-   */
-  _prepareSkills() {
-    const system = this.actor.system;
-    const skills = [
-      ...Object.entries(CONFIG.NOQUARTER.basicSkills).map(([key, skill]) => ({
-        key,
-        name: game.i18n.localize(skill.name),
-        stat: skill.stat,
-        trained: system.trainedSkills[key],
-      })),
-      ...system.skills.map((skill, index) => ({
-        index,
-        custom: true,
-        ...skill,
-        // Skills added before they were grouped by stat may not have one.
-        stat: skill.stat in system.stats ? skill.stat : 'might',
-      })),
-    ];
-    // A new skill has no name yet; keep it at the bottom until it gets one.
-    const byName = (a, b) => !a.name - !b.name || a.name.localeCompare(b.name);
-
-    return [
-      ['might', 'mind'],
-      ['agility', 'personality'],
-    ].map((stats) =>
-      stats.map((stat) => ({
-        stat,
-        label: game.i18n.localize(CONFIG.NOQUARTER.stats[stat]),
-        skills: skills
-          .filter((skill) => skill.stat === stat)
-          .sort(byName)
-          // A skill uses its stat's success chances.
-          .map((skill) => ({ ...skill, chances: system.stats[stat].target })),
-      }))
-    );
-  }
-
   /* -------------------------------------------- */
 
   /**
    * Foundry only restores focus after a render to fields with an id or name.
    * Ability and skill fields have neither, so every save (tabbing or clicking
-   * into another box) dropped focus. Find them by their row and field instead,
-   * and keep the cursor where it was.
+   * into another box) dropped focus. Find them by their item's row and field
+   * instead, and keep the cursor where it was.
    * @override
    */
   _preSyncPartState(partId, newElement, priorElement, state) {
@@ -268,12 +259,9 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     if (!focus) return;
 
     const field = focus.dataset.field;
-    const row = focus.closest('[data-item-id], [data-skill-index]');
+    const row = focus.closest('[data-item-id]');
     if (!state.focus && field && row) {
-      const key = row.dataset.itemId
-        ? `[data-item-id="${row.dataset.itemId}"]`
-        : `[data-skill-index="${row.dataset.skillIndex}"]`;
-      state.focus = `${key} [data-field="${field}"]`;
+      state.focus = `[data-item-id="${row.dataset.itemId}"] [data-field="${field}"]`;
     }
     // Only text boxes have a cursor; reading it on other inputs throws.
     try {
@@ -296,6 +284,127 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   /* -------------------------------------------- */
 
   /**
+   * Racial skills dropped onto the sheet go to the Skills tab wherever they
+   * land, like any other item. Only characters can have them, up to
+   * NOQUARTER.maxRacialSkills. A skill can only be taken twice if it's
+   * repeatable, and an exclusive one (Flight) can't be taken with any other.
+   * One that asks for a choice, such as Stat Increase, asks for it first.
+   * @override
+   */
+  async _onDropItem(event, item) {
+    if (item.type === 'skill' && item.parent !== this.actor) return this.#onDropSkill(event, item);
+    if (item.type !== 'racialSkill' || item.parent === this.actor) return super._onDropItem(event, item);
+    if (!this.actor.isOwner) return null;
+    const problem = this.#racialSkillDropProblem(item);
+    if (problem) {
+      ui.notifications.warn(problem);
+      return null;
+    }
+    if (item.system.choice !== 'stat') return super._onDropItem(event, item);
+
+    const stat = await this.#chooseStat(item);
+    if (!stat) return null;
+    const data = item.inCompendium ? game.items.fromCompendium(item, { clearFolder: true }) : item.toObject();
+    data.system.stat = stat;
+    return (await Item.implementation.create(data, { parent: this.actor })) ?? null;
+  }
+
+  /**
+   * Add a dropped skill, unless the character already has one by that name.
+   * Monsters don't have skills.
+   * @param {DragEvent} event
+   * @param {Item} item   The dropped skill
+   * @returns {Promise<Item|null>}
+   */
+  async #onDropSkill(event, item) {
+    if (this.actor.type !== 'character') {
+      ui.notifications.warn('NOQUARTER.Skill.CharactersOnly', { localize: true });
+      return null;
+    }
+    const name = item.name.toLowerCase();
+    if (this.actor.items.some((i) => i.type === 'skill' && i.name.toLowerCase() === name)) {
+      ui.notifications.warn(game.i18n.format('NOQUARTER.Skill.Duplicate', { name: item.name }));
+      return null;
+    }
+    return super._onDropItem(event, item);
+  }
+
+  /**
+   * Ask which stat a racial skill is for, leaving out the stats the character
+   * already picked for other copies of it.
+   * @param {Item} item   The dropped racial skill
+   * @returns {Promise<string|null>}   The stat, or null if none is left or the dialog was closed
+   */
+  async #chooseStat(item) {
+    const taken = new Set(
+      this.actor.items.filter((i) => this.#isSameRacialSkill(i, item)).map((i) => i.system.stat)
+    );
+    const options = Object.entries(CONFIG.NOQUARTER.stats)
+      .filter(([key]) => !taken.has(key))
+      .map(([key, label]) => `<option value="${key}">${game.i18n.localize(label)}</option>`);
+    if (!options.length) {
+      ui.notifications.warn(game.i18n.format('NOQUARTER.RacialSkill.AllStatsChosen', { name: item.name }));
+      return null;
+    }
+    return foundry.applications.api.DialogV2.prompt({
+      window: { title: item.name, icon: 'fa-solid fa-arrow-up' },
+      content: `<p>${game.i18n.format('NOQUARTER.RacialSkill.ChooseStat', { name: item.name })}</p>
+        <select name="stat" autofocus>${options.join('')}</select>`,
+      ok: { label: 'NOQUARTER.RacialSkill.Choose', callback: (event, button) => button.form.elements.stat.value },
+      rejectClose: false,
+    });
+  }
+
+  /**
+   * Whether an owned item is a copy of a racial skill. A skill from the
+   * compendium remembers where it came from, so a renamed copy still counts.
+   * @param {Item} owned   An item the actor has
+   * @param {Item} item    The racial skill to compare it with
+   * @returns {boolean}
+   */
+  #isSameRacialSkill(owned, item) {
+    if (owned.type !== 'racialSkill') return false;
+    const source = item.inCompendium ? item.uuid : item._stats.compendiumSource;
+    return owned.name === item.name || (!!source && owned._stats.compendiumSource === source);
+  }
+
+  /**
+   * Why a racial skill can't be added to this actor, if it can't.
+   * @param {Item} item   The dropped racial skill
+   * @returns {string|undefined}   The warning to show
+   */
+  #racialSkillDropProblem(item) {
+    const i18n = (key, data = {}) => game.i18n.format(key, data);
+    if (this.actor.type !== 'character') return i18n('NOQUARTER.RacialSkill.CharactersOnly');
+    const owned = this.actor.items.filter((i) => i.type === 'racialSkill');
+
+    const exclusive = owned.find((i) => i.system.exclusive);
+    if (exclusive) return i18n('NOQUARTER.RacialSkill.Exclusive', { name: exclusive.name });
+    if (item.system.exclusive && owned.length) return i18n('NOQUARTER.RacialSkill.Exclusive', { name: item.name });
+
+    const duplicate = owned.some((i) => this.#isSameRacialSkill(i, item));
+    if (duplicate && !item.system.repeatable) return i18n('NOQUARTER.RacialSkill.Duplicate');
+    if (owned.length >= CONFIG.NOQUARTER.maxRacialSkills) {
+      return i18n('NOQUARTER.RacialSkill.Limit', { max: CONFIG.NOQUARTER.maxRacialSkills });
+    }
+  }
+
+  /**
+   * The Speed box shows Speed with racial skill bonuses included; take them
+   * back off so the base value is what gets saved.
+   * @override
+   */
+  _processFormData(event, form, formData) {
+    const data = super._processFormData(event, form, formData);
+    const bonus = this.actor.system.bonuses?.speed;
+    const speed = data.system?.speed;
+    if (bonus && speed !== undefined && speed !== null && speed !== '') {
+      data.system.speed = Math.max(0, Number(speed) - bonus);
+    }
+    return data;
+  }
+
+  /**
    * Ability fields edited inline on the sheet belong to the ability item, not
    * the actor, so they are saved separately instead of submitting the form.
    * @override
@@ -305,26 +414,24 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       return this._onAbilityFieldChange(event);
     }
     if (event.target.classList.contains('skill-field')) {
-      return this._onSkillFieldChange(event);
+      return this._onSkillNameChange(event);
     }
     return super._onChangeForm(formConfig, event);
   }
 
   /**
-   * Save a change made to a skill. Skills are an array, which can only be
-   * updated as a whole, so their fields are saved here instead of submitting
-   * the form.
+   * Rename a skill from its box on the Skills tab. A skill can't be left
+   * without a name, so emptying the box puts the old name back.
    * @param {Event} event   The originating change event
    * @protected
    */
-  async _onSkillFieldChange(event) {
+  async _onSkillNameChange(event) {
     const input = event.target;
-    const index = Number(input.closest('[data-skill-index]').dataset.skillIndex);
-    const skills = this.actor.system.toObject().skills;
-    if (!skills[index]) return;
-    const field = input.dataset.field;
-    skills[index][field] = input.type === 'checkbox' ? input.checked : input.value;
-    return this.actor.update({ 'system.skills': skills });
+    const item = this.#getItem(input);
+    if (!item) return;
+    const name = input.value.trim();
+    if (!name) return this.render();
+    return item.update({ name });
   }
 
   /**
@@ -425,19 +532,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /**
-   * Add a skill of the character's own under the button's stat.
-   * @this {NoQuarterActorSheet}
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
-   */
-  static async #onCreateSkill(event, target) {
-    if (!this.isEditable) return;
-    const skills = this.actor.system.toObject().skills;
-    skills.push({ name: '', stat: target.dataset.stat, trained: false });
-    return this.actor.update({ 'system.skills': skills });
-  }
-
-  /**
    * Restore health and stamina and clear conditions, see NoQuarterActor#takeBreather.
    * @this {NoQuarterActorSheet}
    * @param {PointerEvent} event
@@ -446,19 +540,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   static async #onBreather(event, target) {
     if (!this.isEditable) return;
     return this.actor.takeBreather();
-  }
-
-  /**
-   * @this {NoQuarterActorSheet}
-   * @param {PointerEvent} event
-   * @param {HTMLElement} target
-   */
-  static async #onDeleteSkill(event, target) {
-    if (!this.isEditable) return;
-    const index = Number(target.closest('[data-skill-index]').dataset.skillIndex);
-    const skills = this.actor.system.toObject().skills;
-    skills.splice(index, 1);
-    return this.actor.update({ 'system.skills': skills });
   }
 
   /**
@@ -476,15 +557,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
     // Handle stat rolls (d100 against the stat's success chances).
     if (dataset.rollType == 'stat') return this.actor.rollStat(dataset.stat);
-
-    // Handle skill rolls (a stat roll under the skill's name, with advantage
-    // when trained).
-    if (dataset.rollType == 'skill') {
-      return this.actor.rollStat(dataset.stat, {
-        label: dataset.label,
-        skill: dataset.trained === 'true',
-      });
-    }
 
     // Handle rolls that supply the formula directly.
     if (dataset.roll) {

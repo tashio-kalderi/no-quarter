@@ -43,8 +43,29 @@
       "path": "lang/en.json"
     }
   ],
-  "packs": [],
-  "packFolders": [],
+  "packs": [
+    {
+      "name": "srd-characters",
+      "label": "Characters (SRD)",
+      "path": "packs/srd-characters",
+      "type": "Item",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
+      "name": "srd-monsters",
+      "label": "Monsters (SRD)",
+      "path": "packs/srd-monsters",
+      "type": "Actor",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "No Quarter (SRD)",
+      "sorting": "m",
+      "packs": ["srd-characters", "srd-monsters"]
+    }
+  ],
   "socket": false,
   "documentTypes": {
     "Actor": {
@@ -54,7 +75,9 @@
     "Item": {
       "item": {},
       "ability": {},
-      "spell": {}
+      "spell": {},
+      "racialSkill": {},
+      "skill": {}
     }
   },
   "manifest": "https://github.com/tashio-kalderi/no-quarter/releases/latest/download/system.json",

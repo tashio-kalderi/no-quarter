@@ -1,0 +1,34 @@
+{
+  "_id": "oJ1FjotvPvcqlG4S",
+  "name": "Earthsense",
+  "type": "racialSkill",
+  "img": "icons/svg/mole.svg",
+  "system": {
+    "description": "<p>You can feel tremors and vibrations within the ground from up to 60 feet away. This does not provide you with a vision of what is causing the tremors or vibrations, only their intensity and direction.</p>",
+    "health": 0,
+    "stamina": 0,
+    "speed": 0,
+    "vision": "earthsense",
+    "repeatable": false,
+    "exclusive": false
+  },
+  "effects": [],
+  "folder": "bN6av6j1FsHgNyHt",
+  "sort": 200000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!oJ1FjotvPvcqlG4S"
+}

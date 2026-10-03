@@ -1,0 +1,23 @@
+{
+  "_id": "bN6av6j1FsHgNyHt",
+  "name": "Sensory",
+  "type": "Item",
+  "folder": "NqSrdFldRaceSkil",
+  "sorting": "m",
+  "sort": 100000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!bN6av6j1FsHgNyHt"
+}

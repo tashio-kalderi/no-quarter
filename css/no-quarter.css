@@ -651,6 +651,51 @@
   min-width: 2ch;
   text-align: right;
 }
+.no-quarter .racial-skills {
+  margin-bottom: 8px;
+}
+.no-quarter .racial-skills h3 {
+  margin: 4px 0;
+}
+.no-quarter .racial-skills .racial-skills-count {
+  font-size: 0.75em;
+  font-weight: normal;
+  opacity: 0.7;
+}
+.no-quarter .racial-skills .racial-skills-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.no-quarter .racial-skills .racial-skill {
+  display: grid;
+  grid-template-columns: 24px max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  column-gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+.no-quarter .racial-skills .racial-skill img {
+  border: none;
+}
+.no-quarter .racial-skills .racial-skill-name {
+  font-weight: bold;
+}
+.no-quarter .racial-skills .racial-skill-choice {
+  font-weight: normal;
+}
+.no-quarter .racial-skills .racial-skill-summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+.no-quarter .racial-skills .racial-skills-empty {
+  padding: 4px 0;
+  font-style: italic;
+  opacity: 0.7;
+}
 .no-quarter .profession {
   margin-bottom: 8px;
 }
@@ -663,61 +708,43 @@
   column-gap: 8px;
 }
 .no-quarter .skills-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 4px 0;
 }
-.no-quarter .skills-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 16px;
-  align-items: start;
+.no-quarter .skills-title .item-control {
+  font-size: 0.8em;
 }
 .no-quarter .skills-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
 }
 .no-quarter .skills-list .skill-row {
   display: grid;
-  grid-template-columns: 1.4rem minmax(0, 1fr) max-content 1.2rem;
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
   column-gap: 6px;
   padding: 2px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
-.no-quarter .skills-list .skill-header {
-  font-size: 0.85em;
-  font-weight: bold;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-}
-.no-quarter .skills-list .skill-header > :first-child {
-  text-align: center;
-}
-.no-quarter .skills-list .skill-group {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-}
-.no-quarter .skills-list .skill-group h4 {
-  margin: 0;
-  font-weight: bold;
-}
-.no-quarter .skills-list input[type=checkbox] {
-  margin: 0;
-}
-.no-quarter .skills-list .skill-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.no-quarter .skills-list .skill-name input {
+.no-quarter .skills-list .skill-row input {
   width: 100%;
 }
 .no-quarter .skills-list .item-controls {
   display: flex;
+  gap: 4px;
   justify-content: flex-end;
+}
+.no-quarter .skills-list .skills-empty {
+  grid-column: 1/-1;
+  padding: 4px 0;
+  font-style: italic;
+  opacity: 0.7;
 }
 .no-quarter .npc-identity,
 .no-quarter .npc-defenses {

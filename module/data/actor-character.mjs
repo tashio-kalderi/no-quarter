@@ -1,6 +1,7 @@
 import NoQuarterActorBase from './base-actor.mjs';
 import { NOQUARTER } from '../helpers/config.mjs';
 import { successChances } from '../helpers/success.mjs';
+import { LEGACY_SKILLS } from '../helpers/migrations.mjs';
 
 export default class NoQuarterCharacter extends NoQuarterActorBase {
   static defineSchema() {
@@ -38,17 +39,14 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
       description: new fields.StringField({ required: true, blank: true }),
     });
 
-    // Skills are named checks made with one of the stats; their success
-    // chances are the stat's. Every character has the basic skills, so only
-    // whether they are trained in each is stored.
+    // Skills are now items. These are where they used to be stored, kept only
+    // so that older characters can be converted (see helpers/migrations.mjs).
     schema.trainedSkills = new fields.SchemaField(
-      Object.keys(NOQUARTER.basicSkills).reduce((obj, key) => {
+      Object.keys(LEGACY_SKILLS).reduce((obj, key) => {
         obj[key] = new fields.BooleanField();
         return obj;
       }, {})
     );
-
-    // Skills the character has added of their own.
     schema.skills = new fields.ArrayField(
       new fields.SchemaField({
         name: new fields.StringField({ required: true, blank: true }),
@@ -86,11 +84,26 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
   }
 
   /** @override */
+  prepareBonuses() {
+    const bonuses = super.prepareBonuses();
+    for (const item of this.parent.items) {
+      if (item.type !== 'racialSkill') continue;
+      const skill = item.system;
+      bonuses.health += skill.health;
+      bonuses.stamina += skill.stamina;
+      bonuses.speed += skill.speed;
+      if (skill.vision) bonuses.senses.add(skill.vision);
+    }
+    return bonuses;
+  }
+
+  /** @override */
   prepareResourceMaximums() {
-    // Health is 3 + Might + Mind; stamina is 3 + Agility + Personality.
+    // Health is 3 + Might + Mind; stamina is 3 + Agility + Personality. Racial
+    // skills can add to either.
     const { might, mind, agility, personality } = this.stats;
-    this.health.max = Math.max(0, 3 + might.value + mind.value);
-    this.stamina.max = Math.max(0, 3 + agility.value + personality.value);
+    this.health.max = Math.max(0, 3 + might.value + mind.value + this.bonuses.health);
+    this.stamina.max = Math.max(0, 3 + agility.value + personality.value + this.bonuses.stamina);
   }
 
   getRollData() {

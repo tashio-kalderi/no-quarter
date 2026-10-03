@@ -1,0 +1,23 @@
+{
+  "_id": "lhH1IcJfGVlBat0W",
+  "name": "Movement",
+  "type": "Item",
+  "folder": "NqSrdFldRaceSkil",
+  "sorting": "m",
+  "sort": 200000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!lhH1IcJfGVlBat0W"
+}

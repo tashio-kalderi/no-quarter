@@ -1,0 +1,23 @@
+{
+  "_id": "4CPALT2yo4a4jxzx",
+  "name": "Agility Skills",
+  "type": "Item",
+  "folder": "NqSrdFldSkills01",
+  "sorting": "m",
+  "sort": 200000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!4CPALT2yo4a4jxzx"
+}

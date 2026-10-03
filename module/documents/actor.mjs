@@ -1,5 +1,6 @@
 import { askRollMode, rollSuccess } from '../helpers/success.mjs';
 import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
+import { visionTokenChanges } from '../helpers/vision.mjs';
 
 // Actors whose basic abilities are currently being created, so that several
 // sheet renders in a row don't create them twice.
@@ -19,6 +20,22 @@ export class NoQuarterActor extends Actor {
    */
   getRollData() {
     return { ...super.getRollData(), ...(this.system.getRollData?.() ?? null) };
+  }
+
+  /**
+   * Give the actor's tokens the vision its racial skills grant. These are
+   * handed to Foundry alongside any `token.` changes from Active Effects, so
+   * they are applied to the tokens without being saved on them; see
+   * helpers/vision.mjs.
+   * @override
+   */
+  applyActiveEffects(phase) {
+    super.applyActiveEffects(phase);
+    if (phase !== 'final') return;
+    const senses = this.system.bonuses?.senses;
+    const changes = (this.tokenActiveEffectChanges.final ?? []).filter((c) => !c.noQuarterVision);
+    if (senses?.size) changes.push(...visionTokenChanges(senses));
+    this.tokenActiveEffectChanges.final = changes;
   }
 
   /**
@@ -96,6 +113,36 @@ export class NoQuarterActor extends Actor {
     if (userId === game.user.id && relevant.some((k) => k in system)) {
       this.syncDeath();
     }
+  }
+
+  /**
+   * Adding, changing or removing a racial skill can change maximum health, so
+   * re-check death then too.
+   * @override
+   */
+  _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+    super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
+    this.#syncDeathAfterRacialSkills(documents, userId);
+  }
+
+  /** @override */
+  _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
+    super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+    this.#syncDeathAfterRacialSkills(documents, userId);
+  }
+
+  /** @override */
+  _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+    super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
+    this.#syncDeathAfterRacialSkills(documents, userId);
+  }
+
+  /**
+   * @param {Document[]} documents   The descendants that changed
+   * @param {string} userId          The user who changed them
+   */
+  #syncDeathAfterRacialSkills(documents, userId) {
+    if (userId === game.user.id && documents.some((d) => d.type === 'racialSkill')) this.syncDeath();
   }
 
   /**
@@ -212,12 +259,9 @@ export class NoQuarterActor extends Actor {
    * Roll d100 against one of the actor's stats (or a monster's single set of
    * chances) and post the result.
    * @param {string} key   The stat key, such as "might"
-   * @param {object} [options]
-   * @param {string} [options.label]   A label to show instead of the stat's name, such as a skill's
-   * @param {boolean} [options.skill]   Whether this is a trained skill's roll, which has advantage
    * @returns {Promise<Roll|undefined>}
    */
-  async rollStat(key, { label: skillLabel, skill = false } = {}) {
+  async rollStat(key) {
     // A monster has a single set of chances instead of individual stats.
     if (this.type === 'npc') {
       const label = game.i18n.localize('NOQUARTER.Check');
@@ -231,8 +275,8 @@ export class NoQuarterActor extends Actor {
     const stat = this.system.stats?.[key];
     if (!stat) return;
 
-    const label = skillLabel || game.i18n.localize(CONFIG.NOQUARTER.stats[key]);
-    const asked = await askRollMode({ label, chances: stat.target, actor: this, skill });
+    const label = game.i18n.localize(CONFIG.NOQUARTER.stats[key]);
+    const asked = await askRollMode({ label, chances: stat.target, actor: this });
     if (!asked) return;
     await applyRollCosts(this, asked);
     return rollSuccess({

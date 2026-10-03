@@ -1,3 +1,60 @@
+// Racial skills at the top of the tab: one row each, icon | name | summary of
+// the bonuses it applies | edit/delete.
+.racial-skills {
+  margin-bottom: 8px;
+
+  h3 {
+    margin: 4px 0;
+  }
+
+  .racial-skills-count {
+    font-size: 0.75em;
+    font-weight: normal;
+    opacity: 0.7;
+  }
+
+  .racial-skills-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .racial-skill {
+    display: grid;
+    grid-template-columns: 24px max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: 8px;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+
+    img {
+      border: none;
+    }
+  }
+
+  .racial-skill-name {
+    font-weight: bold;
+  }
+
+  .racial-skill-choice {
+    font-weight: normal;
+  }
+
+  .racial-skill-summary {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.8;
+  }
+
+  .racial-skills-empty {
+    padding: 4px 0;
+    font-style: italic;
+    opacity: 0.7;
+  }
+}
+
 // Profession block above the skills: a short name box, then a longer
 // description box filling the rest of the row.
 .profession {
@@ -14,66 +71,33 @@
   }
 }
 
-// Skills tab: two columns of trained | name | success chances rows, grouped
-// by stat.
+// Skills: a plain list of names, in two columns, each with edit/delete.
 .skills-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 4px 0;
-}
 
-.skills-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 16px;
-  align-items: start;
+  .item-control {
+    font-size: 0.8em;
+  }
 }
 
 .skills-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
 
   .skill-row {
     display: grid;
-    grid-template-columns: 1.4rem minmax(0, 1fr) max-content 1.2rem;
+    grid-template-columns: minmax(0, 1fr) max-content;
     align-items: center;
     column-gap: 6px;
     padding: 2px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  }
-
-  .skill-header {
-    font-size: 0.85em;
-    font-weight: bold;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-
-    > :first-child {
-      text-align: center;
-    }
-  }
-
-  // The stat's name above its skills, with the button to add one.
-  .skill-group {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 6px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-
-    h4 {
-      margin: 0;
-      font-weight: bold;
-    }
-  }
-
-  input[type='checkbox'] {
-    margin: 0;
-  }
-
-  .skill-name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 
     input {
       width: 100%;
@@ -82,6 +106,14 @@
 
   .item-controls {
     display: flex;
+    gap: 4px;
     justify-content: flex-end;
+  }
+
+  .skills-empty {
+    grid-column: 1 / -1;
+    padding: 4px 0;
+    font-style: italic;
+    opacity: 0.7;
   }
 }
