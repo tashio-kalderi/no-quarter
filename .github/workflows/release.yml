@@ -16,6 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Build the compendium packs from src/packs
+        run: |
+          npm ci
+          npm run pack
+
       - name: Set the version and download link from the release tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"

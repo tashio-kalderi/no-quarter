@@ -8,10 +8,10 @@ npm-debug.log
 
 # Foundry
 *.lock
-# LevelDB lock and info logs inside compendium packs (the numbered .log files are data)
-packs/*/LOCK
-packs/*/LOG
-packs/*/LOG.old
+# Compendium packs are built from src/packs with `npm run pack` (and by the
+# release workflow). Foundry rewrites their LevelDB files every time it opens
+# them, so the built packs aren't committed.
+packs/
 jsconfig.json
 foundry
 

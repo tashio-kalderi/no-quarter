@@ -7,6 +7,10 @@
  *
  * Foundry keeps a pack locked while a world using it is open, so close the
  * world (or Foundry) before running either command.
+ *
+ * The built packs/ folder isn't committed (Foundry rewrites its files every
+ * time it opens a pack); src/packs is the record of the content, and the
+ * release workflow builds packs/ from it.
  */
 import fs from 'node:fs';
 import { compilePack, extractPack } from '@foundryvtt/foundryvtt-cli';

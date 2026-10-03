@@ -21,6 +21,15 @@ npm install
 npm run build
 ```
 
+### Compendium packs
+
+The compendium content lives as JSON in `src/packs`; the `packs/` folder Foundry reads is built from it and isn't committed. With Foundry closed:
+
+```
+npm run pack     # src/packs -> packs (after cloning or pulling, or after editing the JSON)
+npm run unpack   # packs -> src/packs (after editing a compendium in Foundry; commit the JSON)
+```
+
 ## Releasing
 
-Commit the changes, then publish a GitHub release tagged with the new version (for example `v0.2`). The release workflow in `.github/workflows/release.yml` sets the version and download link in `system.json`, and attaches `system.json` and `no-quarter.zip` to the release.
+Commit the changes, then publish a GitHub release tagged with the new version (for example `v0.2`). The release workflow in `.github/workflows/release.yml` sets the version and download link in `system.json`, and builds the compendium packs from `src/packs`, and attaches `system.json` and `no-quarter.zip` to the release.
