@@ -75,9 +75,12 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
   /** @override */
   static migrateData(source, options) {
     // Before attacks were added, damage was always stored as 1 but only the
-    // basic abilities used it. Clear it on the others so a monster ability
-    // doesn't suddenly deal 1 damage; its damage was written in its effect.
-    if (!options?.partial && source.attacks === undefined && !source.basicKey && 'damage' in source) {
+    // basic abilities used it. Clear that leftover 1 on the others so a monster
+    // ability doesn't suddenly deal 1 damage; its damage was written in its
+    // effect. Any other value was entered since, so it's kept. Foundry only
+    // saves changed fields, so `attacks` can stay missing after an edit until
+    // migrateAbilityAttacks (helpers/migrations.mjs) saves it.
+    if (!options?.partial && source.attacks === undefined && !source.basicKey && source.damage === 1) {
       source.damage = null;
     }
     return super.migrateData(source, options);

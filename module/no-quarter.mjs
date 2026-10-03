@@ -14,7 +14,7 @@ import { registerStackableConditions, registerConditionTurnEffects } from './hel
 import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 import { registerMovementRuler } from './helpers/movement-ruler.mjs';
 import { registerVision } from './helpers/vision.mjs';
-import { migrateWorld } from './helpers/migrations.mjs';
+import { migrateWorld, registerMigrationSettings } from './helpers/migrations.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
 
@@ -33,6 +33,9 @@ Hooks.once('init', function () {
 
   // Add custom constants for configuration.
   CONFIG.NOQUARTER = NOQUARTER;
+
+  // Record which one-off data conversions have run, see helpers/migrations.mjs.
+  registerMigrationSettings();
 
   // Show wounds on tokens.
   registerWoundBadge();

@@ -34,10 +34,57 @@ export const LEGACY_SKILLS = {
   music: 'Music',
 };
 
+/** Register the world settings that record which migrations have run. Called on init. */
+export function registerMigrationSettings() {
+  game.settings.register('no-quarter', 'abilityAttacksMigrated', {
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false,
+  });
+}
+
 /** Run every migration that's needed. Only the active GM does this. */
 export async function migrateWorld() {
   if (!game.users.activeGM?.isSelf) return;
   await migrateSkillsToItems();
+  await migrateAbilityAttacks();
+}
+
+/**
+ * Abilities made before Attacks was added have no `attacks` saved, and their
+ * leftover damage of 1 is cleared when they load (see
+ * NoQuarterAbility.migrateData). Editing one only saves the changed field, so
+ * without `attacks` saved the check would keep running on every load. This
+ * saves `attacks` and `damage` on every ability once, so it stops.
+ */
+async function migrateAbilityAttacks() {
+  if (game.settings.get('no-quarter', 'abilityAttacksMigrated')) return;
+
+  // Send both fields even though they match what's loaded: `diff: false`
+  // stops Foundry from dropping them as unchanged.
+  const updates = (items) =>
+    items
+      .filter((i) => i.type === 'ability')
+      .map((i) => ({ _id: i.id, 'system.attacks': i._source.system.attacks, 'system.damage': i._source.system.damage }));
+  const options = { diff: false, render: false };
+
+  const worldItems = updates(game.items);
+  if (worldItems.length) await Item.updateDocuments(worldItems, options);
+  for (const actor of game.actors) {
+    const data = updates(actor.items);
+    if (data.length) await actor.updateEmbeddedDocuments('Item', data, options);
+  }
+  // Unlinked tokens keep their own changed copies of abilities.
+  for (const scene of game.scenes) {
+    for (const token of scene.tokens) {
+      if (token.actorLink || !token.actor || !token.delta?.items.size) continue;
+      const data = updates(token.delta.items);
+      if (data.length) await token.actor.updateEmbeddedDocuments('Item', data, options);
+    }
+  }
+
+  await game.settings.set('no-quarter', 'abilityAttacksMigrated', true);
 }
 
 /**
