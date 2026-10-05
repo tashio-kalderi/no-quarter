@@ -187,11 +187,114 @@ class NoQuarterTokenHUD extends foundry.applications.hud.TokenHUD {
   }
 }
 
+/* -------------------------------------------- */
+/*  Token status icons                           */
+/* -------------------------------------------- */
+
 /**
- * Swap in the stack-aware TokenHUD subclass and mark which statuses stack.
+ * The font size a token's stack-count badge text is drawn at before being
+ * scaled down to fit the badge. Text is rasterized, so drawing it at its
+ * small on-canvas size would look blurry once the canvas is zoomed in.
+ * @type {number}
+ */
+const STACK_BADGE_FONT_SIZE = 64;
+
+/**
+ * The stack count to show on a status icon: the stack count for a stackable
+ * status (1 included), or 0 for anything else.
+ * @param {ActiveEffect} [effect]
+ * @returns {number}
+ */
+function iconStackCount(effect) {
+  if (effect?.statuses.size !== 1) return 0;
+  const [statusId] = effect.statuses;
+  if (!CONFIG.statusEffects[statusId]?.stackable) return 0;
+  return effect.getFlag(FLAG_SCOPE, STACKS_FLAG) ?? 1;
+}
+
+/**
+ * Wrap the Token placeable class so the status icons drawn on a token show
+ * a stack-count badge for stackable statuses, matching the one in the Token
+ * HUD.
+ * @param {typeof foundry.canvas.placeables.Token} BaseToken
+ * @returns {typeof foundry.canvas.placeables.Token}
+ */
+function stackAwareToken(BaseToken) {
+  return class NoQuarterToken extends BaseToken {
+    /** @inheritDoc */
+    async _drawEffects() {
+      // Core destroys the icon sprites but not their children.
+      for (const icon of this.effects?.children ?? []) icon.nqStackBadge?.destroy({ children: true });
+      await super._drawEffects();
+
+      // Core gives each icon the zIndex of its effect in this same list.
+      const SHOW_ICON = CONST.ACTIVE_EFFECT_SHOW_ICON;
+      const activeEffects =
+        this.actor?.appliedEffects.filter(
+          (e) => e.showIcon === SHOW_ICON.ALWAYS || (e.showIcon === SHOW_ICON.CONDITIONAL && e.isTemporary)
+        ) ?? [];
+      const Text = foundry.canvas?.containers?.PreciseText ?? PIXI.Text;
+      for (const icon of this.effects.children) {
+        if (icon === this.effects.bg || icon === this.effects.overlay) continue;
+        const stacks = iconStackCount(activeEffects[icon.zIndex]);
+        if (!stacks) continue;
+        const badge = new PIXI.Container();
+        badge.background = badge.addChild(new PIXI.Graphics());
+        badge.label = badge.addChild(new Text(String(stacks), CONFIG.canvasTextStyle.clone()));
+        badge.label.anchor.set(0.5);
+        badge.label.style.fill = 0xffffff;
+        badge.label.style.fontWeight = 'bold';
+        badge.label.style.strokeThickness = 0;
+        badge.label.style.dropShadow = false;
+        badge.label.style.fontSize = STACK_BADGE_FONT_SIZE;
+        badge.eventMode = 'none';
+        icon.nqStackBadge = icon.addChild(badge);
+      }
+    }
+
+    /** @inheritDoc */
+    _refreshEffects() {
+      super._refreshEffects();
+      const s = canvas.dimensions.uiScale;
+      const iconSize = 20 * s;
+      const height = iconSize * 0.6;
+      const outline = Math.max(1, s);
+      for (const icon of this.effects.children) {
+        const badge = icon.nqStackBadge;
+        if (!badge || badge.destroyed) continue;
+
+        // The badge is a child of the scaled icon sprite, so undo that scale
+        // to size it in canvas units.
+        badge.scale.set(1 / icon.scale.x, 1 / icon.scale.y);
+        const labelScale = (height * 0.8) / STACK_BADGE_FONT_SIZE;
+        badge.label.scale.set(labelScale);
+
+        // A circle, widening to a pill for two-digit counts.
+        const width = Math.max(height, badge.label.width + height * 0.4);
+        badge.background
+          .clear()
+          .lineStyle(outline, 0xffffff, 1)
+          .beginFill(0x8b0000, 1)
+          .drawRoundedRect(-width / 2, -height / 2, width, height, height / 2)
+          .endFill();
+
+        // Centered just inside the icon's bottom right corner.
+        badge.position.set(
+          icon.texture.width - (width / 2 - s) / icon.scale.x,
+          icon.texture.height - (height / 2 - s) / icon.scale.y
+        );
+      }
+    }
+  };
+}
+
+/**
+ * Swap in the stack-aware TokenHUD and Token subclasses and mark which
+ * statuses stack.
  */
 export function registerStackableConditions() {
   CONFIG.Token.hudClass = NoQuarterTokenHUD;
+  CONFIG.Token.objectClass = stackAwareToken(CONFIG.Token.objectClass);
   for (const id of STACKABLE_STATUS_IDS) {
     const status = CONFIG.statusEffects[id];
     if (status) status.stackable = true;
