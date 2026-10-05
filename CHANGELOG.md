@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- Conditions that stack (Bleeding, Blind, Poisoned, Blessed) now show their stack count on the token itself, not just in the Token HUD: a red circle in the corner of the condition's icon, the same as the one in the HUD. It shows from 1 stack up. Conditions that don't stack have no counter.
+
 ## 0.3.2
 
 - Monster sheet: the Damage/Effect column is split into Attacks, Damage and Effect. Attacks is how many attack rolls one use of the ability makes (default 1); a limited-use ability uses up one use for all of them, not one per roll. Damage is dealt by each attack that hits, plus 1 for a Greater success, 2 for Extreme and 5 for a critical success, like the basic attacks. Leave Damage empty for an ability that only has an effect. All the attacks go in one chat card, numbered, with the effect shown once underneath. The roll mode is asked once, but conditions count each attack as its own roll: each attack uses up a Blessed stack, so with 1 stack only the first attack has advantage (or, against Poisoned or Restrained, only the first is made normally and the rest with disadvantage), and ignoring Burning's penalty costs 1 damage per attack. Monster sheets also open a little wider to fit the new columns.
