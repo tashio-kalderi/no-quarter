@@ -16,6 +16,12 @@ export default class NoQuarterNPC extends NoQuarterActorBase {
     schema.level = new fields.NumberField({ ...requiredInteger, initial: 1, min: 0 });
     schema.alignment = new fields.StringField({ required: true, blank: true });
     schema.creatureType = new fields.StringField({ required: true, blank: true });
+    // Sets the size of the monster's tokens (see NOQUARTER.sizes).
+    schema.size = new fields.StringField({
+      required: true,
+      initial: 'med',
+      choices: () => Object.keys(CONFIG.NOQUARTER.sizes),
+    });
 
     // Physical and magical damage reduction.
     schema.pdr = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
@@ -28,9 +34,8 @@ export default class NoQuarterNPC extends NoQuarterActorBase {
       extreme: chance(0),
     });
 
-    // Bosses can opt in to the wound rules. Other monsters simply die when their
-    // health reaches 0.
-    schema.usesWounds = new fields.BooleanField({ required: true, initial: false });
+    // Bosses get boons: extra features, which are boon items.
+    schema.isBoss = new fields.BooleanField({ required: true, initial: false });
 
     return schema;
   }
@@ -40,6 +45,17 @@ export default class NoQuarterNPC extends NoQuarterActorBase {
     // Level used to be called CR.
     if (source.cr !== undefined && source.level === undefined) source.level = source.cr;
     return super.migrateData(source);
+  }
+
+  /**
+   * How many boons a boss of this level gets: 1 up to level 5, 2 up to level
+   * 10 and 3 from level 11. The sheet shows it but doesn't enforce it.
+   * @type {number}
+   */
+  get boonCount() {
+    if (this.level <= 5) return 1;
+    if (this.level <= 10) return 2;
+    return 3;
   }
 
   getRollData() {

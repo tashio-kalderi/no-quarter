@@ -39,16 +39,69 @@ export class NoQuarterActor extends Actor {
   }
 
   /**
-   * Whether the wound rules apply: always for characters, and only for the
-   * monsters that opt in (bosses).
+   * Whether the wound rules apply: always for characters, and for bosses with
+   * a boon that grants wounds (the Wounds boon). Other monsters die when their
+   * health reaches 0.
    * @type {boolean}
    */
   get usesWounds() {
-    return this.type === 'character' || !!this.system.usesWounds;
+    if (this.type === 'character') return true;
+    return this.#bossBoons('grantsWounds').length > 0;
   }
 
   /**
-   * When health reaches 0 a character (or a boss that uses wounds) gains a
+   * The boons that give this boss advantage on every d100 check (Powerhouse).
+   * Like a condition that forces advantage, but permanent: nothing is used up.
+   * @type {Item[]}
+   */
+  get advantageBoons() {
+    return this.#bossBoons('grantsAdvantage');
+  }
+
+  /**
+   * A boss's boons that have a setting turned on. Only bosses use their boons.
+   * @param {string} setting   A boolean field of the boon, such as grantsWounds
+   * @returns {Item[]}
+   */
+  #bossBoons(setting) {
+    if (this.type !== 'npc' || !this.system.isBoss) return [];
+    return this.items.filter((i) => i.type === 'boon' && i.system[setting]);
+  }
+
+  /**
+   * The wounds that kill an actor that uses them: its maximum health for a
+   * character, and NOQUARTER.monsterMaxWounds for a monster.
+   * @type {number}
+   */
+  get maxWounds() {
+    return this.type === 'character' ? this.system.health.max : CONFIG.NOQUARTER.monsterMaxWounds;
+  }
+
+  /**
+   * The token size, in grid squares, for a monster's size.
+   * @param {string} size   A key of NOQUARTER.sizes
+   * @returns {{width: number, height: number}|undefined}
+   */
+  static tokenSize(size) {
+    const squares = CONFIG.NOQUARTER.sizes[size]?.token;
+    if (squares) return { width: squares, height: squares };
+  }
+
+  /**
+   * A new monster's tokens start at the size for its size, unless it comes
+   * with a token size already (a copy or an import keeps its own).
+   * @override
+   */
+  async _preCreate(data, options, user) {
+    const allowed = await super._preCreate(data, options, user);
+    if (allowed === false) return false;
+    if (this.type !== 'npc' || data.prototypeToken?.width !== undefined) return;
+    const size = NoQuarterActor.tokenSize(this.system.size);
+    if (size) this.updateSource({ prototypeToken: size });
+  }
+
+  /**
+   * When health reaches 0 an actor that uses wounds gains a
    * wound and health resets to its
    * maximum, then any damage beyond 0 is applied to the new health. Handled
    * here so it applies however the health change was made.
@@ -58,17 +111,18 @@ export class NoQuarterActor extends Actor {
     const allowed = await super._preUpdate(changes, options, user);
     if (allowed === false) return false;
 
+    // Changing a monster's size resizes its tokens. A token's own actor
+    // resizes that token instead, in _onUpdate.
+    const size = NoQuarterActor.tokenSize(foundry.utils.getProperty(changes, 'system.size'));
+    if (size && !this.isToken) changes.prototypeToken = { ...changes.prototypeToken, ...size };
+
     let health = foundry.utils.getProperty(changes, 'system.health.value');
     if (health === undefined || health > 0) return;
 
     const max = this.system.health?.max;
-    const usesWounds =
-      this.type === 'character' ||
-      (foundry.utils.getProperty(changes, 'system.usesWounds') ?? this.system.usesWounds);
-
     // Without wounds (or with no maximum health to reset to) health stops at 0
     // and the actor is dead; see syncDeath().
-    if (!usesWounds || !(max > 0)) {
+    if (!this.usesWounds || !(max > 0)) {
       foundry.utils.setProperty(changes, 'system.health.value', 0);
       return;
     }
@@ -106,54 +160,59 @@ export class NoQuarterActor extends Actor {
   /** @override */
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
-    // Death depends on health, wounds and maximum health, so re-check when
-    // any of them could have changed.
+    const size = NoQuarterActor.tokenSize(changed.system?.size);
+    if (size && this.isToken && userId === game.user.id) this.token.update(size);
+    // Death depends on health, wounds and maximum health (and for a monster,
+    // whether it's a boss), so re-check when any of them could have changed.
     const system = changed.system ?? {};
-    const relevant = ['wounds', 'stats', 'health', 'usesWounds'];
+    const relevant = ['wounds', 'stats', 'health', 'isBoss'];
     if (userId === game.user.id && relevant.some((k) => k in system)) {
       this.syncDeath();
     }
   }
 
   /**
-   * Adding, changing or removing a racial skill can change maximum health, so
-   * re-check death then too.
+   * Adding, changing or removing a racial skill can change maximum health, and
+   * a boon can decide whether a monster uses wounds, so re-check death then too.
    * @override
    */
   _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
     super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
-    this.#syncDeathAfterRacialSkills(documents, userId);
+    this.#syncDeathAfterItems(documents, userId);
   }
 
   /** @override */
   _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
     super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-    this.#syncDeathAfterRacialSkills(documents, userId);
+    this.#syncDeathAfterItems(documents, userId);
   }
 
   /** @override */
   _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
     super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
-    this.#syncDeathAfterRacialSkills(documents, userId);
+    this.#syncDeathAfterItems(documents, userId);
   }
 
   /**
    * @param {Document[]} documents   The descendants that changed
    * @param {string} userId          The user who changed them
    */
-  #syncDeathAfterRacialSkills(documents, userId) {
-    if (userId === game.user.id && documents.some((d) => d.type === 'racialSkill')) this.syncDeath();
+  #syncDeathAfterItems(documents, userId) {
+    const relevant = ['racialSkill', 'boon'];
+    if (userId === game.user.id && documents.some((d) => relevant.includes(d.type))) this.syncDeath();
   }
 
   /**
-   * With wounds, an actor is dead once its wounds equal its maximum health.
+   * With wounds, an actor is dead once its wounds reach its maximum (see
+   * maxWounds).
    * Without them, it is dead once its health reaches 0. Applies or removes the
    * Dead status to match.
    * @returns {Promise<void>}
    */
   async syncDeath() {
     const { health, wounds } = this.system;
-    const dead = this.usesWounds ? health.max > 0 && wounds >= health.max : health.value <= 0;
+    const max = this.maxWounds;
+    const dead = this.usesWounds ? max > 0 && wounds >= max : health.value <= 0;
     if (dead === this.statuses.has(CONFIG.specialStatusEffects.DEFEATED)) return;
     await this.toggleStatusEffect(CONFIG.specialStatusEffects.DEFEATED, {
       active: dead,

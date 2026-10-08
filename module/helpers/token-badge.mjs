@@ -63,12 +63,20 @@ export function registerWoundBadge() {
   Hooks.on('drawToken', (token) => refreshWoundBadge(token));
   Hooks.on('refreshToken', (token) => refreshWoundBadge(token));
 
-  // A change to the actor's wounds does not always refresh its tokens.
+  // A change to the actor's wounds does not always refresh its tokens. Nor
+  // does a monster becoming a boss or not, or gaining or losing a boon, which
+  // decide whether it uses wounds.
+  const refreshActor = (actor) => {
+    for (const token of actor?.getActiveTokens() ?? []) refreshWoundBadge(token);
+  };
   Hooks.on('updateActor', (actor, changed) => {
-    if (changed.system && ('wounds' in changed.system || 'usesWounds' in changed.system)) {
-      for (const token of actor.getActiveTokens()) refreshWoundBadge(token);
-    }
+    if (changed.system && ('wounds' in changed.system || 'isBoss' in changed.system)) refreshActor(actor);
   });
+  for (const hook of ['createItem', 'updateItem', 'deleteItem']) {
+    Hooks.on(hook, (item) => {
+      if (item.type === 'boon') refreshActor(item.parent);
+    });
+  }
   // Unlinked tokens keep their actor changes in a delta on the token.
   Hooks.on('updateToken', (tokenDocument, changed) => {
     if (changed.delta) refreshWoundBadge(tokenDocument.object);

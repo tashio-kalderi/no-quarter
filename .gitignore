@@ -10,8 +10,9 @@ npm-debug.log
 *.lock
 # Compendium packs are built from src/packs with `npm run pack` (and by the
 # release workflow). Foundry rewrites their LevelDB files every time it opens
-# them, so the built packs aren't committed.
-packs/
+# them, so the built packs aren't committed. Only the top-level folder: the
+# sources in src/packs are.
+/packs/
 jsconfig.json
 foundry
 

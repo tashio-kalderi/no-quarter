@@ -70,6 +70,7 @@ Hooks.once('init', function () {
     spell: models.NoQuarterSpell,
     racialSkill: models.NoQuarterRacialSkill,
     skill: models.NoQuarterSkill,
+    boon: models.NoQuarterBoon,
   };
 
   // Active Effects are never copied to the Actor,

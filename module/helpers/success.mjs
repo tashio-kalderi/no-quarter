@@ -92,8 +92,10 @@ function bracketText(chances, tag) {
  * being free to decline; that's noted next to the checkbox. When the actor
  * has a condition that forces disadvantage (such as Poisoned or Restrained), Normal and
  * Advantage are disabled instead - there is no opting out of that one. A
- * condition that forces advantage (such as Blessed) likewise leaves only
- * Advantage, and when both are active they cancel out, leaving only Normal.
+ * condition that forces advantage (such as Blessed), or a boss boon that
+ * gives advantage (Powerhouse), likewise leaves only Advantage, and when
+ * advantage and disadvantage are both forced they cancel out, leaving only
+ * Normal.
  * Meant to grow into the place where optional abilities (such as ones that
  * cost stamina) are chosen.
  * @param {object} options
@@ -123,13 +125,15 @@ export async function askRollMode({ label, chances, tag, actor }) {
     })
     .join('');
 
-  // Forced advantage (Blessed) and forced disadvantage (Poisoned) cancel out,
-  // leaving Normal as the only choice.
+  // Forced advantage (Blessed, or a boon such as Powerhouse) and forced
+  // disadvantage (Poisoned) cancel out, leaving Normal as the only choice.
   const forcedDis = activeForcedDisadvantage(actor);
   const forcedAdv = activeForcedAdvantage(actor);
   const labels = (conditions) => Object.values(conditions).map((c) => game.i18n.localize(c.label));
   const disLabels = labels(forcedDis);
-  const advLabels = labels(forcedAdv);
+  const stackLabels = labels(forcedAdv);
+  const boonLabels = (actor?.advantageBoons ?? []).map((boon) => boon.name);
+  const advLabels = [...stackLabels, ...boonLabels];
   let forcedMode = null;
   let forcedRows = [];
   // The modes that can't be picked, and the one picked by default.
@@ -144,12 +148,18 @@ export async function askRollMode({ label, chances, tag, actor }) {
       advantage: advLabels.join(', '),
       disadvantage: disLabels.join(', '),
     })];
+    if (stackLabels.length) {
+      forcedRows.push(game.i18n.format('NOQUARTER.RollMode.CancelledStack', { condition: stackLabels.join(', ') }));
+    }
   } else if (disLabels.length) {
     forcedMode = 'disadvantage';
     forcedRows = disLabels.map((condition) => game.i18n.format('NOQUARTER.RollMode.Forced', { condition }));
   } else if (advLabels.length) {
     forcedMode = 'advantage';
-    forcedRows = advLabels.map((condition) => game.i18n.format('NOQUARTER.RollMode.ForcedAdvantage', { condition }));
+    forcedRows = [
+      ...stackLabels.map((condition) => game.i18n.format('NOQUARTER.RollMode.ForcedAdvantage', { condition })),
+      ...boonLabels.map((boon) => game.i18n.format('NOQUARTER.RollMode.BoonAdvantage', { boon })),
+    ];
   }
   if (forcedMode) {
     disabledModes = ['normal', 'advantage', 'disadvantage'].filter((mode) => mode !== forcedMode);
@@ -191,7 +201,8 @@ export async function askRollMode({ label, chances, tag, actor }) {
  * forced-advantage condition (Blessed) is used up by each attack, so with one
  * stack only the first attack has advantage and the rest are made normally,
  * or with disadvantage when a forced disadvantage (Poisoned) is no longer
- * cancelled out. Self-damage for ignoring a roll penalty (Burning) is paid
+ * cancelled out. A boon that gives advantage (Powerhouse) applies to every
+ * attack. Self-damage for ignoring a roll penalty (Burning) is paid
  * for every attack. A mode the user picked freely is kept for all of them.
  * @param {Actor} actor
  * @param {object} asked   The result of askRollMode
@@ -205,13 +216,14 @@ export function attackRolls(actor, asked, attacks) {
 
   const disadvantage = Object.keys(activeForcedDisadvantage(actor)).length > 0;
   const stacks = Object.keys(activeForcedAdvantage(actor)).map((id) => ({ id, count: stackCount(actor, id) }));
+  const boonAdvantage = (actor?.advantageBoons ?? []).length > 0;
   const modes = [];
   const consumed = [];
   for (let i = 0; i < attacks; i++) {
     // The conditions with a stack left for this attack, each losing one.
     const blessed = stacks.filter((s) => s.count > i);
     consumed.push(...blessed.map((s) => s.id));
-    const advantage = blessed.length > 0;
+    const advantage = blessed.length > 0 || boonAdvantage;
     if (advantage && disadvantage) modes.push('normal');
     else if (advantage) modes.push('advantage');
     else if (disadvantage) modes.push('disadvantage');

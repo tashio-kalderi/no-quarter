@@ -1,0 +1,31 @@
+{
+  "_id": "RI9a78Pn9K4HNYLv",
+  "name": "Precision Strikes",
+  "type": "boon",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "<p>The boss ignores all damage reduction. On creatures that don’t have damage reduction, the boss’s attack deal +2 damage.</p>",
+    "minLevel": null,
+    "grantsWounds": false,
+    "grantsAdvantage": false
+  },
+  "effects": [],
+  "folder": "NqSrdFldBossBoon",
+  "sort": 500000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.3",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!RI9a78Pn9K4HNYLv"
+}

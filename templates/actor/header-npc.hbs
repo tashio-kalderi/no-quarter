@@ -2,7 +2,7 @@
   <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="editImage" title="{{actor.name}}" height="100" width="100"/>
   <div class="header-fields">
     <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
-    <div class="resources npc-identity grid grid-4col">
+    <div class="resources npc-identity grid grid-5col">
       <div class="resource flex-group-center">
         <label for="system.level" class="resource-label">Level</label>
         <div class="resource-content flexrow flex-center">
@@ -20,14 +20,19 @@
         <input type="text" name="system.creatureType" value="{{system.creatureType}}" placeholder="Humanoid"/>
       </div>
 
-      {{!-- Monsters die at 0 health. Bosses can opt in to wounds. --}}
+      {{!-- Sets the size of the monster's tokens. --}}
       <div class="resource flex-group-center">
-        <label for="system.usesWounds" class="resource-label">Wounds</label>
-        <div class="resource-content npc-wounds flexrow flex-center">
-          <input type="checkbox" name="system.usesWounds" title="Uses wounds (bosses)" {{#if system.usesWounds}}checked{{/if}}/>
-          {{#if system.usesWounds}}
-            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
-          {{/if}}
+        <label for="system.size" class="resource-label">{{localize 'NOQUARTER.Size.Label'}}</label>
+        <select name="system.size">
+          {{selectOptions config.sizes selected=system.size labelAttr="label" localize=true}}
+        </select>
+      </div>
+
+      {{!-- Bosses get boons, listed under their abilities. --}}
+      <div class="resource flex-group-center">
+        <label for="system.isBoss" class="resource-label">Boss</label>
+        <div class="resource-content npc-boss flexrow flex-center">
+          <input type="checkbox" name="system.isBoss" title="Boss (gets boons)" {{#if system.isBoss}}checked{{/if}}/>
         </div>
       </div>
     </div>

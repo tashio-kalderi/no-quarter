@@ -9,26 +9,51 @@
   }
 }
 
-// The wounds checkbox (and the count beside it, for bosses) sit in the middle.
-.npc-wounds {
+// Level and the Boss checkbox are narrow; alignment and creature type get the room.
+.npc-identity {
+  grid-template-columns: 0.6fr 1.2fr 1.2fr 1fr 0.6fr;
+
+  select {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+// The Boss checkbox sits in the middle.
+.npc-boss {
   justify-content: center;
   align-items: center;
-  gap: 6px;
 
   input[type='checkbox'] {
     margin: 0;
   }
+}
+
+// A boss with the Wounds boon shows the wounds it dies at after its count.
+.npc-max-wounds {
+  flex: none;
+  margin-left: 4px;
+}
+
+// Health, Wounds, PDR, MDR and Speed share the room; the Stats line only takes
+// what its three fixed-width boxes need.
+.npc-defenses {
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 0.6fr auto;
+}
+
+.npc-chances {
+  justify-content: center;
+  gap: 4px;
 
   input[type='text'] {
     flex: none;
-    width: 3rem;
+    width: 2.6rem;
     text-align: center;
   }
-}
 
-// Health, PDR, MDR and Speed are narrow; the Stats line needs room for three numbers.
-.npc-defenses {
-  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 1.7fr;
+  span {
+    flex: none;
+  }
 }
 
 .monster-abilities {
@@ -58,5 +83,73 @@
     > :nth-child(6) {
       text-align: center;
     }
+  }
+}
+
+// A boss's boons: each an icon, name and controls, with its description below.
+.boons-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+
+  .boon-count {
+    font-size: 0.8em;
+    font-weight: normal;
+    opacity: 0.75;
+  }
+
+  .boon-add {
+    margin-left: auto;
+    font-size: 0.75em;
+    font-weight: normal;
+  }
+}
+
+.boons-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .boon {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  }
+
+  .boon-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    img {
+      display: block;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      font-weight: bold;
+    }
+  }
+
+  .boon-level {
+    font-size: 0.85em;
+    font-weight: bold;
+    white-space: nowrap;
+    color: #a00;
+  }
+
+  .boon-description {
+    margin-top: 2px;
+    padding-left: 30px;
+
+    p {
+      margin: 0.25em 0;
+    }
+  }
+
+  .boons-empty {
+    padding: 4px 0;
+    font-style: italic;
+    opacity: 0.75;
   }
 }

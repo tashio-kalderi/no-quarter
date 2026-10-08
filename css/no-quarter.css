@@ -754,21 +754,38 @@
 .no-quarter .npc-defenses input[type=text] {
   min-width: 0;
 }
-.no-quarter .npc-wounds {
+.no-quarter .npc-identity {
+  grid-template-columns: 0.6fr 1.2fr 1.2fr 1fr 0.6fr;
+}
+.no-quarter .npc-identity select {
+  min-width: 0;
+  width: 100%;
+}
+.no-quarter .npc-boss {
   justify-content: center;
   align-items: center;
-  gap: 6px;
 }
-.no-quarter .npc-wounds input[type=checkbox] {
+.no-quarter .npc-boss input[type=checkbox] {
   margin: 0;
 }
-.no-quarter .npc-wounds input[type=text] {
+.no-quarter .npc-max-wounds {
   flex: none;
-  width: 3rem;
-  text-align: center;
+  margin-left: 4px;
 }
 .no-quarter .npc-defenses {
-  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 1.7fr;
+  grid-template-columns: 1.3fr 0.6fr 0.6fr 0.6fr 0.6fr auto;
+}
+.no-quarter .npc-chances {
+  justify-content: center;
+  gap: 4px;
+}
+.no-quarter .npc-chances input[type=text] {
+  flex: none;
+  width: 2.6rem;
+  text-align: center;
+}
+.no-quarter .npc-chances span {
+  flex: none;
 }
 .no-quarter .monster-abilities .ability-uses {
   display: flex;
@@ -789,6 +806,61 @@
 .no-quarter .monster-abilities .ability-header > :nth-child(5),
 .no-quarter .monster-abilities .ability-header > :nth-child(6) {
   text-align: center;
+}
+.no-quarter .boons-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.no-quarter .boons-title .boon-count {
+  font-size: 0.8em;
+  font-weight: normal;
+  opacity: 0.75;
+}
+.no-quarter .boons-title .boon-add {
+  margin-left: auto;
+  font-size: 0.75em;
+  font-weight: normal;
+}
+.no-quarter .boons-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.no-quarter .boons-list .boon {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+.no-quarter .boons-list .boon-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.no-quarter .boons-list .boon-header img {
+  display: block;
+}
+.no-quarter .boons-list .boon-header input {
+  flex: 1;
+  min-width: 0;
+  font-weight: bold;
+}
+.no-quarter .boons-list .boon-level {
+  font-size: 0.85em;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #a00;
+}
+.no-quarter .boons-list .boon-description {
+  margin-top: 2px;
+  padding-left: 30px;
+}
+.no-quarter .boons-list .boon-description p {
+  margin: 0.25em 0;
+}
+.no-quarter .boons-list .boons-empty {
+  padding: 4px 0;
+  font-style: italic;
+  opacity: 0.75;
 }
 .no-quarter .resource-label {
   font-weight: bold;

@@ -99,6 +99,27 @@ NOQUARTER.damageTypes = {
 };
 
 /**
+ * A boss with the Wounds boon dies when it has this many wounds. (A character
+ * dies when its wounds reach its maximum health.)
+ * @type {number}
+ */
+NOQUARTER.monsterMaxWounds = 3;
+
+/**
+ * Monster sizes and the token size (in grid squares) each one sets, as in
+ * D&D and Pathfinder 2e.
+ * @type {Object}
+ */
+NOQUARTER.sizes = {
+  tiny: { label: 'NOQUARTER.Size.Tiny', token: 0.5 },
+  sm: { label: 'NOQUARTER.Size.Small', token: 1 },
+  med: { label: 'NOQUARTER.Size.Medium', token: 1 },
+  lg: { label: 'NOQUARTER.Size.Large', token: 2 },
+  huge: { label: 'NOQUARTER.Size.Huge', token: 3 },
+  grg: { label: 'NOQUARTER.Size.Gargantuan', token: 4 },
+};
+
+/**
  * How a roll can be made. Advantage rolls twice and keeps the lower result
  * (lower is better); disadvantage rolls twice and keeps the higher.
  * @type {Object}

@@ -1,0 +1,31 @@
+{
+  "_id": "Q2M1T3jDx0EWDGqz",
+  "name": "Knockback",
+  "type": "boon",
+  "img": "icons/svg/thrust.svg",
+  "system": {
+    "description": "<p>When the boss is damaged by an attack, the attacker is instantly knocked back 15 feet.</p>",
+    "minLevel": null,
+    "grantsWounds": false,
+    "grantsAdvantage": false
+  },
+  "effects": [],
+  "folder": "NqSrdFldBossBoon",
+  "sort": 300000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.3",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!Q2M1T3jDx0EWDGqz"
+}

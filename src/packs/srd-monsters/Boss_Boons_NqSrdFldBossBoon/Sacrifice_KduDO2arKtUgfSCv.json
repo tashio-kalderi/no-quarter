@@ -1,0 +1,31 @@
+{
+  "_id": "KduDO2arKtUgfSCv",
+  "name": "Sacrifice",
+  "type": "boon",
+  "img": "icons/svg/cowled.svg",
+  "system": {
+    "description": "<p>Whenever the boss would take damage, an ally of its choice within range of the damaging attack takes the damage (and any relevant conditions) instead.</p>",
+    "minLevel": null,
+    "grantsWounds": false,
+    "grantsAdvantage": false
+  },
+  "effects": [],
+  "folder": "NqSrdFldBossBoon",
+  "sort": 700000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.3",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!KduDO2arKtUgfSCv"
+}

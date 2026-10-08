@@ -10,3 +10,4 @@ export { default as NoQuarterAbility } from './item-ability.mjs';
 export { default as NoQuarterSpell } from './item-spell.mjs';
 export { default as NoQuarterRacialSkill } from './item-racial-skill.mjs';
 export { default as NoQuarterSkill } from './item-skill.mjs';
+export { default as NoQuarterBoon } from './item-boon.mjs';

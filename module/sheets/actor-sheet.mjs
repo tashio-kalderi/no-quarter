@@ -123,6 +123,8 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       config: CONFIG.NOQUARTER,
       // A breather can't be taken mid-fight.
       inCombat: actor.inStartedCombat,
+      usesWounds: actor.usesWounds,
+      maxWounds: actor.maxWounds,
       ...this._prepareItems(),
     });
   }
@@ -133,6 +135,9 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     context.tab = context.tabs[partId];
 
     switch (partId) {
+      case 'abilities':
+        if (this.actor.type === 'npc') context.boons = await this._prepareBoons();
+        break;
       case 'description':
         // Enrichment turns text like `[[/r 1d20]]` into buttons
         context.enrichedBiography =
@@ -217,6 +222,32 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   }
 
   /**
+   * A boss's boons, each with its description ready to show on the sheet.
+   * @returns {Promise<object[]>}
+   * @protected
+   */
+  async _prepareBoons() {
+    const { TextEditor } = foundry.applications.ux;
+    const boons = this.actor.items
+      .filter((i) => i.type === 'boon')
+      .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
+    return Promise.all(
+      boons.map(async (i) => ({
+        _id: i.id,
+        name: i.name,
+        img: i.img || Item.DEFAULT_ICON,
+        minLevel: i.system.minLevel,
+        tooLow: i.system.minLevel > this.actor.system.level,
+        description: await TextEditor.implementation.enrichHTML(i.system.description, {
+          secrets: this.document.isOwner,
+          rollData: i.getRollData(),
+          relativeTo: i,
+        }),
+      }))
+    );
+  }
+
+  /**
    * Build the list of abilities to display: the basic abilities first, in the
    * order they are configured, followed by the rest.
    *
@@ -293,6 +324,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
    */
   async _onDropItem(event, item) {
     if (item.type === 'skill' && item.parent !== this.actor) return this.#onDropSkill(event, item);
+    if (item.type === 'boon' && item.parent !== this.actor) return this.#onDropBoon(event, item);
     if (item.type !== 'racialSkill' || item.parent === this.actor) return super._onDropItem(event, item);
     if (!this.actor.isOwner) return null;
     const problem = this.#racialSkillDropProblem(item);
@@ -325,6 +357,29 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     if (this.actor.items.some((i) => i.type === 'skill' && i.name.toLowerCase() === name)) {
       ui.notifications.warn(game.i18n.format('NOQUARTER.Skill.Duplicate', { name: item.name }));
       return null;
+    }
+    return super._onDropItem(event, item);
+  }
+
+  /**
+   * Add a dropped boon. Only bosses have boons, but how many they get isn't
+   * enforced, and one designed for higher level monsters only warns.
+   * @param {DragEvent} event
+   * @param {Item} item   The dropped boon
+   * @returns {Promise<Item|null>}
+   */
+  async #onDropBoon(event, item) {
+    if (this.actor.type !== 'npc') {
+      ui.notifications.warn('NOQUARTER.Boon.MonstersOnly', { localize: true });
+      return null;
+    }
+    if (!this.actor.system.isBoss) {
+      ui.notifications.warn('NOQUARTER.Boon.BossesOnly', { localize: true });
+      return null;
+    }
+    const { minLevel } = item.system;
+    if (minLevel > this.actor.system.level) {
+      ui.notifications.warn(game.i18n.format('NOQUARTER.Boon.TooLow', { level: minLevel }));
     }
     return super._onDropItem(event, item);
   }
@@ -407,21 +462,23 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   /**
    * Ability fields edited inline on the sheet belong to the ability item, not
    * the actor, so they are saved separately instead of submitting the form.
+   * Skill and boon names are saved to their items the same way.
    * @override
    */
   _onChangeForm(formConfig, event) {
     if (event.target.classList.contains('ability-field')) {
       return this._onAbilityFieldChange(event);
     }
-    if (event.target.classList.contains('skill-field')) {
+    if (event.target.classList.contains('skill-field') || event.target.classList.contains('boon-field')) {
       return this._onSkillNameChange(event);
     }
     return super._onChangeForm(formConfig, event);
   }
 
   /**
-   * Rename a skill from its box on the Skills tab. A skill can't be left
-   * without a name, so emptying the box puts the old name back.
+   * Rename a skill from its box on the Skills tab, or a boon from its box on
+   * a boss's sheet. An item can't be left without a name, so emptying the box
+   * puts the old name back.
    * @param {Event} event   The originating change event
    * @protected
    */

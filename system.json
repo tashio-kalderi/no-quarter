@@ -20,11 +20,11 @@
   "media": [
     {
       "type": "setup",
-      "url": "systems/no-quarter/assets/anvil-impact.png",
-      "thumbnail": "systems/no-quarter/assets/anvil-impact.png"
+      "url": "systems/no-quarter/assets/No-Quarter-Foundry-VTT-Splash-Screen.jpg",
+      "thumbnail": "systems/no-quarter/assets/No-Quarter-Foundry-VTT-Splash-Screen.jpg"
     }
   ],
-  "version": "0.3.2",
+  "version": "0.3.3",
   "compatibility": {
     "minimum": 14,
     "verified": "14.368",
@@ -52,10 +52,17 @@
       "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
     },
     {
+      "name": "srd-bestiary",
+      "label": "Bestiary (SRD)",
+      "path": "packs/srd-bestiary",
+      "type": "Actor",
+      "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
+    },
+    {
       "name": "srd-monsters",
       "label": "Monsters (SRD)",
       "path": "packs/srd-monsters",
-      "type": "Actor",
+      "type": "Item",
       "ownership": { "PLAYER": "OBSERVER", "ASSISTANT": "OWNER" }
     }
   ],
@@ -63,7 +70,7 @@
     {
       "name": "No Quarter (SRD)",
       "sorting": "m",
-      "packs": ["srd-characters", "srd-monsters"]
+      "packs": ["srd-characters", "srd-bestiary", "srd-monsters"]
     }
   ],
   "socket": false,
@@ -77,12 +84,13 @@
       "ability": {},
       "spell": {},
       "racialSkill": {},
-      "skill": {}
+      "skill": {},
+      "boon": {}
     }
   },
   "manifest": "https://github.com/tashio-kalderi/no-quarter/releases/latest/download/system.json",
-  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.3.2/no-quarter.zip",
-  "background": "systems/no-quarter/assets/anvil-impact.png",
+  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.3.3/no-quarter.zip",
+  "background": "systems/no-quarter/assets/No-Quarter-Foundry-VTT-Splash-Screen.jpg",
   "grid": {
     "distance": 5,
     "units": "ft"

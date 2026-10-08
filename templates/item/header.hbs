@@ -14,5 +14,21 @@
         </div>
       </div>
     {{/if}}
+    {{#if (eq item.type "boon")}}
+      <div class="grid grid-2col">
+        <div class="resource">
+          <label class="resource-label" title="{{localize 'NOQUARTER.Boon.MinLevelHint'}}">{{localize 'NOQUARTER.Boon.MinLevel'}}</label>
+          <input type="number" name="system.minLevel" value="{{system.minLevel}}" min="1" step="1"/>
+        </div>
+        <div class="resource">
+          <label class="resource-label" title="{{localize 'NOQUARTER.Boon.GrantsWoundsHint'}}">{{localize 'NOQUARTER.Boon.GrantsWounds'}}</label>
+          <input type="checkbox" name="system.grantsWounds" {{checked system.grantsWounds}}/>
+        </div>
+        <div class="resource">
+          <label class="resource-label" title="{{localize 'NOQUARTER.Boon.GrantsAdvantageHint'}}">{{localize 'NOQUARTER.Boon.GrantsAdvantage'}}</label>
+          <input type="checkbox" name="system.grantsAdvantage" {{checked system.grantsAdvantage}}/>
+        </div>
+      </div>
+    {{/if}}
   </div>
 </header>

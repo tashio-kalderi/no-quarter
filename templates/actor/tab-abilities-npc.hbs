@@ -1,12 +1,23 @@
 <section class="tab abilities-tab {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
   {{!-- The stat block: health, damage reduction and the success chances used by every ability. --}}
-  <div class="resources npc-defenses grid grid-5col">
+  <div class="resources npc-defenses grid grid-6col">
     <div class="resource flex-group-center">
       <label for="system.health.value" class="resource-label">Health</label>
       <div class="resource-content flexrow flex-center flex-between">
         <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
         <span> / </span>
         <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+      </div>
+    </div>
+
+    {{!-- Monsters die at 0 health. Only bosses with the Wounds boon use wounds: they die at
+    NOQUARTER.monsterMaxWounds wounds instead. --}}
+    <div class="resource flex-group-center">
+      <label for="system.wounds" class="resource-label"
+             title="{{#if usesWounds}}Dies at {{maxWounds}} wounds{{else}}Only used by bosses with the Wounds boon{{/if}}">Wounds</label>
+      <div class="resource-content flexrow flex-center">
+        <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
+        {{#if usesWounds}}<span class="npc-max-wounds">/ {{maxWounds}}</span>{{/if}}
       </div>
     </div>
 
@@ -40,7 +51,7 @@
     {{!-- The single set of success chances used by all of the monster's abilities. --}}
     <div class="resource flex-group-center">
       <label class="resource-label rollable" title="Roll a check" data-action="roll" data-roll-type="stat">Stats</label>
-      <div class="resource-content flexrow flex-center flex-between">
+      <div class="resource-content npc-chances flexrow flex-center">
         <input type="text" name="system.chances.regular" value="{{system.chances.regular}}" data-dtype="Number" title="Regular"/>
         <span> / </span>
         <input type="text" name="system.chances.greater" value="{{system.chances.greater}}" data-dtype="Number" title="Greater"/>
@@ -123,4 +134,57 @@
       </li>
     {{/each}}
   </ol>
+
+  {{!-- A boss's boons: items dragged in from the compendium, or added with + and named here. The
+  number a boss of its level gets is shown in the title but not enforced. The name box has no name
+  attribute; the sheet saves it to the boon item (_onSkillNameChange). --}}
+  {{#if system.isBoss}}
+    <h3 class="abilities-title boons-title">
+      {{localize 'NOQUARTER.Boon.Title'}}
+      <span class="boon-count" title="{{localize 'NOQUARTER.Boon.CountHint'}}">
+        {{localize 'NOQUARTER.Boon.Count' count=system.boonCount level=system.level}}
+      </span>
+      {{#if @root.editable}}
+      <a class="item-control boon-add" data-action="createItem" data-type="boon" title="{{localize 'NOQUARTER.Boon.Create'}}">
+        <i class="fas fa-plus"></i> {{localize 'NOQUARTER.Boon.Create'}}
+      </a>
+      {{/if}}
+    </h3>
+    <ol class="boons-list">
+      {{#each boons as |boon|}}
+        <li class="item boon draggable" data-item-id="{{boon._id}}">
+          <div class="boon-header">
+            <a class="rollable" data-action="roll" data-roll-type="item" title="Post to chat">
+              <img src="{{boon.img}}" title="{{boon.name}}" width="24" height="24"/>
+            </a>
+            <input type="text" class="boon-field" data-field="name" value="{{boon.name}}"
+                   {{#unless @root.editable}}disabled{{/unless}}/>
+            {{#if boon.tooLow}}
+              {{!-- A warning while the boss is below the level the boon is designed for. The level
+              is in the boon's name, such as "Ablative Armor (level 6+)". --}}
+              <span class="boon-level" title="{{localize 'NOQUARTER.Boon.TooLow' level=boon.minLevel}}">
+                <i class="fas fa-triangle-exclamation"></i>
+                {{localize 'NOQUARTER.Boon.LevelTag' level=boon.minLevel}}
+              </span>
+            {{/if}}
+            <div class="item-controls">
+              <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Update' type='Item'}}">
+                <i class="fas fa-edit"></i>
+              </a>
+              {{#if @root.editable}}
+              <a class="item-control" data-action="deleteItem" title="{{localize 'NOQUARTER.Boon.Delete'}}">
+                <i class="fas fa-trash"></i>
+              </a>
+              {{/if}}
+            </div>
+          </div>
+          {{#if boon.description}}
+            <div class="boon-description">{{{boon.description}}}</div>
+          {{/if}}
+        </li>
+      {{else}}
+        <li class="boons-empty">{{localize 'NOQUARTER.Boon.Empty'}}</li>
+      {{/each}}
+    </ol>
+  {{/if}}
 </section>

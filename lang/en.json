@@ -74,6 +74,33 @@
       "CharactersOnly": "Only characters have skills.",
       "Migrated": "Skills are now items: converted the skills of {count} character(s)."
     },
+    "Boon": {
+      "Title": "Boons",
+      "Count": "({count} at level {level})",
+      "CountHint": "A boss gets 1 boon at levels 1-5, 2 at levels 6-10 and 3 from level 11",
+      "Create": "Add Boon",
+      "Delete": "Delete Boon",
+      "Empty": "Drag boons here from the compendium, or add your own with +.",
+      "MonstersOnly": "Only monsters have boons.",
+      "BossesOnly": "Only bosses have boons. Tick Boss on the monster's sheet first.",
+      "MinLevel": "Minimum level",
+      "MinLevelHint": "The lowest level of monster this boon is designed for (empty for any)",
+      "LevelTag": "level {level}+",
+      "TooLow": "This boon is designed for monsters level {level} or higher.",
+      "GrantsWounds": "Gives wounds",
+      "GrantsWoundsHint": "The boss uses the wound rules: health resets when it reaches 0, wounds make its rolls worse, and it dies at 3 wounds",
+      "GrantsAdvantage": "Gives advantage",
+      "GrantsAdvantageHint": "The boss makes every d100 check with advantage. Disadvantage (such as Poisoned) cancels it out as usual"
+    },
+    "Size": {
+      "Label": "Size",
+      "Tiny": "Tiny",
+      "Small": "Small",
+      "Medium": "Medium",
+      "Large": "Large",
+      "Huge": "Huge",
+      "Gargantuan": "Gargantuan"
+    },
     "DamageType": {
       "Physical": "Physical",
       "Magic": "Magic"
@@ -86,7 +113,9 @@
       "Disadvantage": "Disadvantage",
       "Forced": "{condition} forces this roll to be made with disadvantage.",
       "ForcedAdvantage": "{condition} grants this roll advantage (uses 1 stack).",
-      "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally ({advantage} still uses 1 stack).",
+      "BoonAdvantage": "{boon} grants this roll advantage.",
+      "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally.",
+      "CancelledStack": "{condition} still uses 1 stack.",
       "IgnoreCost": "(unchecking deals {cost} damage)"
     },
     "NoUsesLeft": "{name} has no uses left this combat.",
@@ -167,7 +196,8 @@
       "ability": "Ability",
       "spell": "Spell",
       "racialSkill": "Racial Skill",
-      "skill": "Skill"
+      "skill": "Skill",
+      "boon": "Boon"
     }
   }
 }

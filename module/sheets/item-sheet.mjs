@@ -8,8 +8,11 @@ const { ItemSheetV2 } = foundry.applications.sheets;
 
 const TEMPLATES = 'systems/no-quarter/templates/item';
 
+/** Item types whose sheet has only a description. */
+const DESCRIPTION_ONLY = ['skill', 'boon'];
+
 /**
- * The item sheet for gear, abilities, spells, racial skills and skills.
+ * The item sheet for gear, abilities, spells, racial skills, skills and boons.
  * @extends {ItemSheetV2}
  */
 export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
@@ -50,8 +53,8 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
   /** @override */
   _configureRenderParts(options) {
     const parts = super._configureRenderParts(options);
-    // Skills are just a description.
-    if (this.item.type === 'skill') delete parts.attributes;
+    // Skills and boons are just a description.
+    if (DESCRIPTION_ONLY.includes(this.item.type)) delete parts.attributes;
     else parts.attributes.template = `${TEMPLATES}/tab-attributes-${this.item.type}.hbs`;
     // Only abilities have an effects tab.
     if (this.item.type !== 'ability') delete parts.effects;
@@ -63,8 +66,8 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
     const config = super._getTabsConfig(group);
     if (group !== 'primary' || this.item.type === 'ability') return config;
     // Gear, spells and racial skills lead with their description, and skills
-    // have nothing else.
-    const order = this.item.type === 'skill' ? ['description'] : ['description', 'attributes'];
+    // and boons have nothing else.
+    const order = DESCRIPTION_ONLY.includes(this.item.type) ? ['description'] : ['description', 'attributes'];
     return { ...config, tabs: order.map((id) => config.tabs.find((t) => t.id === id)) };
   }
 

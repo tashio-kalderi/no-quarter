@@ -1,0 +1,31 @@
+{
+  "_id": "jP4RHTk1oLXASPBl",
+  "name": "Wounds",
+  "type": "boon",
+  "img": "icons/svg/blood.svg",
+  "system": {
+    "description": "<p>The boss takes three wounds—using the same wound mechanics as characters use—before it is defeated.</p>",
+    "minLevel": null,
+    "grantsWounds": true,
+    "grantsAdvantage": false
+  },
+  "effects": [],
+  "folder": "NqSrdFldBossBoon",
+  "sort": 800000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.3",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!jP4RHTk1oLXASPBl"
+}

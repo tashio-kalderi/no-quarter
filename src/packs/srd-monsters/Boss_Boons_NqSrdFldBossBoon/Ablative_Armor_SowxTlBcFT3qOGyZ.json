@@ -1,0 +1,31 @@
+{
+  "_id": "SowxTlBcFT3qOGyZ",
+  "name": "Ablative Armor (level 6+)",
+  "type": "boon",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "<p>The boss is only harmed by attacks that score a greater or extreme success. Once the boss has been harmed five times, this boon ceases to function.</p>",
+    "minLevel": 6,
+    "grantsWounds": false,
+    "grantsAdvantage": false
+  },
+  "effects": [],
+  "folder": "NqSrdFldBossBoon",
+  "sort": 100000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.3",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!SowxTlBcFT3qOGyZ"
+}
