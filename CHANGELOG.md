@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+- Token HUD: fixed conditions with stacks losing their name label and orange highlight when Monk's Little Details is used. The labels now stay while a condition has stacks, and the red stack count sits on the corner of the condition's icon.
+
 ## 0.3.3
 
 - New No Quarter splash screen, used as the system's picture in the Foundry setup screen and as the background of the world join page.

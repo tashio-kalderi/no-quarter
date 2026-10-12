@@ -383,6 +383,14 @@
   z-index: 1;
 }
 
+/* Monk's Little Details turns each icon into a full-width row (icon + name);
+   keep the badge on the icon's corner rather than the row's. */
+#token-hud.monks-little-details .status-effects .effect-container > .nq-stack-badge {
+  right: auto;
+  left: 14px;
+  bottom: -1px;
+}
+
 /* Styles limited to No Quarter sheets */
 .no-quarter input[type=text],
 .no-quarter input[type=number] {

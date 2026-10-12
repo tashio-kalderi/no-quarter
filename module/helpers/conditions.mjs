@@ -145,9 +145,14 @@ class NoQuarterTokenHUD extends foundry.applications.hud.TokenHUD {
     }
   }
 
-  /** @inheritDoc */
-  async _onRender(context, options) {
-    await super._onRender(context, options);
+  /**
+   * Draw the stack-count badges on the status palette. Called from a
+   * renderTokenHUD hook registered at `ready` rather than from `_onRender`,
+   * so it runs after modules that restructure the palette (e.g. Monk's
+   * Little Details, which only finds icons that are direct children of
+   * `.status-effects`) have done so.
+   */
+  renderStackBadges() {
     for (const img of this.element.querySelectorAll('.status-effects .effect-control[data-status-id]')) {
       this.#renderStackBadge(img);
     }
@@ -160,13 +165,16 @@ class NoQuarterTokenHUD extends foundry.applications.hud.TokenHUD {
    */
   #renderStackBadge(img) {
     const statusId = img.dataset.statusId;
-    const wrapper = img.closest('.nq-effect-wrapper');
+    const parent = img.parentElement;
+    // If a module has already wrapped the icon, hang the badge off its
+    // wrapper; only add our own when the icon sits directly in the palette.
+    const wrapper = parent.classList.contains('status-effects') ? null : parent;
 
     const stacks =
       CONFIG.statusEffects[statusId]?.stackable && this.actor ? stackCount(this.actor, statusId) : 0;
 
     if (!stacks) {
-      wrapper?.querySelector('.nq-stack-badge')?.remove();
+      wrapper?.querySelector(':scope > .nq-stack-badge')?.remove();
       return;
     }
 
@@ -176,6 +184,8 @@ class NoQuarterTokenHUD extends foundry.applications.hud.TokenHUD {
       host.className = 'nq-effect-wrapper';
       img.replaceWith(host);
       host.append(img);
+    } else if (getComputedStyle(host).position === 'static') {
+      host.style.position = 'relative';
     }
     let badge = host.querySelector('.nq-stack-badge');
     if (!badge) {
@@ -299,6 +309,13 @@ export function registerStackableConditions() {
     const status = CONFIG.statusEffects[id];
     if (status) status.stackable = true;
   }
+  // Registered at `ready` so it runs after every module's renderTokenHUD
+  // hook (those are registered during init).
+  Hooks.once('ready', () => {
+    Hooks.on('renderTokenHUD', (hud) => {
+      if (hud instanceof NoQuarterTokenHUD) hud.renderStackBadges();
+    });
+  });
 }
 
 /* -------------------------------------------- */
