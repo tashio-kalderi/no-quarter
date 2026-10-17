@@ -277,14 +277,28 @@ export function registerTurnReferee() {
   });
 
   // Being defeated through the actor's status does not touch the combatant.
+  const isDefeatedStatus = (effect) => effect.statuses?.has(CONFIG.specialStatusEffects.DEFEATED);
   const onDefeatedStatus = (effect) => {
-    if (!isReferee() || !effect.statuses?.has(CONFIG.specialStatusEffects.DEFEATED)) return;
+    if (!isReferee() || !isDefeatedStatus(effect)) return;
     const actor = effect.parent;
     for (const combat of game.combats) {
       if (combat.combatants.some((c) => c.actorId === actor?.id)) refereeSides(combat);
     }
   };
-  Hooks.on('createActiveEffect', onDefeatedStatus);
+  // A combatant who dies during their own turn (e.g. from Bleeding at its
+  // start) finishes it, so the turn passes on as if they had clicked Finish.
+  // Marking them done goes through `updateCombatant` above, which hands the
+  // turn to the other side.
+  Hooks.on('createActiveEffect', (effect) => {
+    if (!isReferee() || !isDefeatedStatus(effect)) return;
+    const actor = effect.parent;
+    const active = game.combats
+      .filter((combat) => combat.started)
+      .flatMap((combat) => combat.combatants.filter((c) => c.actor === actor))
+      .filter((c) => getTurnState(c) === TURN_STATES.ACTIVE);
+    if (active.length) active.forEach((c) => setTurnState(c, TURN_STATES.DONE));
+    else onDefeatedStatus(effect);
+  });
   Hooks.on('deleteActiveEffect', onDefeatedStatus);
 
   // Beginning the combat means everyone is ready and the GM declares the attacking side.

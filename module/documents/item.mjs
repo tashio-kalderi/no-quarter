@@ -1,5 +1,6 @@
 import { askRollMode, attackRolls, rollSuccess } from '../helpers/success.mjs';
 import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
+import { basicDamageType, parseConditions } from '../helpers/damage.mjs';
 import { formatRange } from '../helpers/range.mjs';
 
 /**
@@ -102,6 +103,7 @@ export class NoQuarterItem extends Item {
         chances: item.system.chances,
         tag,
         actor: item.actor,
+        ability: true,
       });
       if (!asked) return;
       if (limited) await item.update({ 'system.used': used + 1 });
@@ -118,6 +120,9 @@ export class NoQuarterItem extends Item {
         chances: applyRollPenalty(item.system.chances, asked.penalty),
         // A character's own abilities have no damage value, only the basic ones.
         damage: isMonster || item.system.basicKey ? item.system.damage : undefined,
+        damageType: isMonster ? item.system.damageType : basicDamageType(item.system.basicKey),
+        // Conditions are read from a monster ability's effect text, such as "Poisoned for 1d4 turns".
+        conditions: isMonster ? parseConditions(item.system.effect) : [],
       });
     }
 

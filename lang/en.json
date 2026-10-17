@@ -152,6 +152,16 @@
       "Damage": "Damage",
       "Attack": "Attack {number}"
     },
+    "Hit": {
+      "Inflicts": "Inflicts",
+      "DragHint": "Drag onto a token or an actor sheet to apply",
+      "NoToken": "Drop the hit onto a token to apply it.",
+      "NoGM": "A GM must be connected to apply a hit to {name}.",
+      "AskType": "Damage type",
+      "AskTypePrompt": "This damage has no type. Is it physical or magical?",
+      "Damage": "Takes {damage} damage ({type})",
+      "Gains": "Gains {condition}"
+    },
     "BasicAbility": {
       "Melee": "Basic Melee Attack",
       "Ranged": "Basic Ranged Attack",

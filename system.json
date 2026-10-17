@@ -73,7 +73,7 @@
       "packs": ["srd-characters", "srd-bestiary", "srd-monsters"]
     }
   ],
-  "socket": false,
+  "socket": true,
   "documentTypes": {
     "Actor": {
       "character": {},

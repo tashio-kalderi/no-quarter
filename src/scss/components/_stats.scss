@@ -1,4 +1,5 @@
-// Stats and the vitals list (Speed/Wounds/Health/Stamina) sit side by side.
+// Stats and the vitals list (Speed and Wounds, PDR and MDR, Health, Stamina)
+// sit side by side.
 .stats-and-vitals {
   align-items: flex-start;
   gap: 16px;
@@ -25,6 +26,14 @@
   // lines up in a column instead of following the length of its label.
   .resource-label {
     flex: 0 0 4.5rem;
+  }
+
+  // The second label/input pair on a row (Wounds after Speed, MDR after
+  // PDR). Its label has a fixed width too, narrower than the first, so the
+  // second inputs line up with each other whatever the font.
+  .resource-label.vital-second {
+    flex: 0 0 4rem;
+    margin-left: 8px;
   }
 
   input {

@@ -63,6 +63,26 @@
     }
   }
 
+  // A hit's damage and conditions, dragged onto a target to apply them (see
+  // helpers/damage.mjs).
+  .roll-hit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 2px 6px;
+    border: 1px dashed rgba(0, 0, 0, 0.35);
+    border-radius: 3px;
+
+    &[draggable='true'] {
+      cursor: grab;
+    }
+
+    .roll-hit-grip {
+      opacity: 0.6;
+    }
+  }
+
   // Each attack of an ability that makes several, numbered and separated.
   .roll-attack {
     margin-bottom: 6px;

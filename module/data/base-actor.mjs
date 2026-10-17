@@ -17,6 +17,11 @@ export default class NoQuarterActorBase extends foundry.abstract.TypeDataModel {
 
     schema.speed = new fields.NumberField({ ...requiredInteger, initial: 30, min: 0 });
 
+    // Physical and magical damage reduction, taken off each hit of that type
+    // (see helpers/damage.mjs).
+    schema.pdr = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
+    schema.mdr = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
+
     schema.biography = new fields.StringField({ required: true, blank: true });
 
     return schema;

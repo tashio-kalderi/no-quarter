@@ -14,6 +14,7 @@ import { registerStackableConditions, registerConditionTurnEffects } from './hel
 import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 import { registerMovementRuler } from './helpers/movement-ruler.mjs';
 import { registerVision } from './helpers/vision.mjs';
+import { registerHits } from './helpers/damage.mjs';
 import { migrateWorld, registerMigrationSettings } from './helpers/migrations.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
@@ -55,6 +56,10 @@ Hooks.once('init', function () {
 
   // Racial skills can grant Echolocation, which Foundry doesn't have built in.
   registerVision();
+
+  // A hit in a roll's chat card can be dragged onto a token or actor sheet to
+  // apply its damage and conditions, see helpers/damage.mjs.
+  registerHits();
 
   // Define custom Document and DataModel classes.
   // The types themselves are declared under `documentTypes` in system.json.

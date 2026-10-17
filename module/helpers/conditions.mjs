@@ -425,27 +425,32 @@ export async function applyRollCosts(actor, { cost, consumed }) {
 }
 
 /**
- * Conditions that force every roll to be made with disadvantage while
- * active, with no opt-out - e.g. Poisoned, or Restrained (an on/off status,
- * which counts as a single stack). Add an entry here for future conditions
- * with the same kind of effect.
- * @type {Object<string, {label: string}>}
+ * Conditions that force rolls to be made with disadvantage while active,
+ * with no opt-out - e.g. Poisoned on every roll, or Restrained (an on/off
+ * status, which counts as a single stack) on ability checks only, marked
+ * `abilityOnly`. Add an entry here for future conditions with the same kind
+ * of effect.
+ * @type {Object<string, {label: string, abilityOnly?: boolean}>}
  */
 const CONDITION_FORCED_DISADVANTAGE = {
   poison: { label: 'NOQUARTER.Condition.Poisoned' },
-  restrain: { label: 'EFFECT.StatusRestrained' },
+  restrain: { label: 'EFFECT.StatusRestrained', abilityOnly: true },
 };
 
 /**
  * The conditions currently forcing disadvantage on an actor's rolls, keyed
  * by status id.
  * @param {Actor} [actor]
+ * @param {object} [options]
+ * @param {boolean} [options.ability]  Whether the roll is an ability check rather than a stat check
  * @returns {Object<string, {label: string}>}
  */
-export function activeForcedDisadvantage(actor) {
+export function activeForcedDisadvantage(actor, { ability = false } = {}) {
   if (!actor) return {};
   return Object.fromEntries(
-    Object.entries(CONDITION_FORCED_DISADVANTAGE).filter(([id]) => stackCount(actor, id) > 0)
+    Object.entries(CONDITION_FORCED_DISADVANTAGE).filter(
+      ([id, condition]) => (ability || !condition.abilityOnly) && stackCount(actor, id) > 0
+    )
   );
 }
 

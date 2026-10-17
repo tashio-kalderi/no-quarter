@@ -3,6 +3,13 @@
 ## Unreleased
 
 - Token HUD: fixed conditions with stacks losing their name label and orange highlight when Monk's Little Details is used. The labels now stay while a condition has stacks, and the red stack count sits on the corner of the condition's icon.
+- Cornered Rats Initiative System: a combatant who dies during their own turn, such as from Bleeding at its start, now finishes that turn, and the turn passes to the other side as if they had clicked Finish turn. Before, the turn stayed stuck on their side.
+- Combat tracker: the Cancel turn button is now a red "no" symbol (a circle with a line through it) instead of an X.
+- Restrained: now forces disadvantage only on ability checks (abilities and basic attacks), not on stat checks. A monster's Check counts as a stat check. Poisoned still affects both.
+- Applying hits from chat: every attack that hits shows its damage, damage type and the conditions it inflicts in a dashed box that can be dragged onto a token or an actor sheet. Dropping it takes the target's PDR (physical) or MDR (magical) off the damage, applies the rest, and posts what the target took to chat. Damage with no type asks whether it's physical or magical. Basic Melee and Ranged attacks are physical, and basic Magic is magical. Each attack of a multi-attack ability has its own box, so hits can go to different targets.
+- Conditions on a hit are read from a monster ability's Effect text, such as "Poisoned for 1d4 turns", "2 stacks of Bleeding" or "the target is Restrained". A stacking condition takes the number or dice written just after it (1 if there's none), rolled again for each target it's dropped on; other conditions are just turned on. The box lists what it found, so check it before dragging.
+- Characters have PDR and MDR boxes, like monsters. The Vitals column is now four rows, lining up with the four stats: Speed and Wounds, PDR and MDR, Health, then Stamina.
+- Players can drop hits onto tokens they don't own (such as monsters); the GM's client applies the change, so a GM must be connected. The system now uses a socket for this, so restart the world (return to setup and launch it again) after updating.
 
 ## 0.3.3
 

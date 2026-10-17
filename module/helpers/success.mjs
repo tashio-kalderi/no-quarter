@@ -1,5 +1,6 @@
 import { NOQUARTER } from './config.mjs';
 import { activeRollPenalties, activeForcedAdvantage, activeForcedDisadvantage, stackCount } from './conditions.mjs';
+import { conditionsHtml } from './damage.mjs';
 
 /**
  * Build the Regular/Greater/Extreme chances from a Regular chance. Greater and
@@ -90,7 +91,8 @@ function bracketText(chances, tag) {
  * most rolls are affected, but a roll that doesn't rely on sight can opt out.
  * Some penalties (such as Burning) cost self-damage to opt out of instead of
  * being free to decline; that's noted next to the checkbox. When the actor
- * has a condition that forces disadvantage (such as Poisoned or Restrained), Normal and
+ * has a condition that forces disadvantage (such as Poisoned, or Restrained on
+ * an ability check), Normal and
  * Advantage are disabled instead - there is no opting out of that one. A
  * condition that forces advantage (such as Blessed), or a boss boon that
  * gives advantage (Powerhouse), likewise leaves only Advantage, and when
@@ -103,11 +105,12 @@ function bracketText(chances, tag) {
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {string} [options.tag]    Shown instead of the chances, see rollSuccess
  * @param {Actor} [options.actor]   The actor the roll is made for, to check for penalizing conditions
+ * @param {boolean} [options.ability]  Whether this is an ability check rather than a stat check
  * @returns {Promise<{mode: 'normal'|'advantage'|'disadvantage', forced: boolean, penalty: number, cost: number, consumed: string[]}|null>}
  *   Null if the dialog is closed. `forced` is whether conditions picked the mode. Pass the result to
  *   `applyRollCosts` once the roll goes ahead, or to `attackRolls` first for an ability that makes several attacks.
  */
-export async function askRollMode({ label, chances, tag, actor }) {
+export async function askRollMode({ label, chances, tag, actor, ability = false }) {
   const esc = foundry.utils.escapeHTML;
   const bracket = bracketText(chances, tag);
   const penalties = activeRollPenalties(actor);
@@ -127,7 +130,7 @@ export async function askRollMode({ label, chances, tag, actor }) {
 
   // Forced advantage (Blessed, or a boon such as Powerhouse) and forced
   // disadvantage (Poisoned) cancel out, leaving Normal as the only choice.
-  const forcedDis = activeForcedDisadvantage(actor);
+  const forcedDis = activeForcedDisadvantage(actor, { ability });
   const forcedAdv = activeForcedAdvantage(actor);
   const labels = (conditions) => Object.values(conditions).map((c) => game.i18n.localize(c.label));
   const disLabels = labels(forcedDis);
@@ -214,7 +217,8 @@ export function attackRolls(actor, asked, attacks) {
   const cost = asked.cost * attacks;
   if (!asked.forced) return { modes: Array(attacks).fill(asked.mode), cost, consumed: asked.consumed };
 
-  const disadvantage = Object.keys(activeForcedDisadvantage(actor)).length > 0;
+  // Only abilities make several attacks.
+  const disadvantage = Object.keys(activeForcedDisadvantage(actor, { ability: true })).length > 0;
   const stacks = Object.keys(activeForcedAdvantage(actor)).map((id) => ({ id, count: stackCount(actor, id) }));
   const boonAdvantage = (actor?.advantageBoons ?? []).length > 0;
   const modes = [];
@@ -240,10 +244,13 @@ export function attackRolls(actor, asked, attacks) {
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {number} options.wounds
  * @param {number|null} [options.damage]
+ * @param {string} [options.damageType]
+ * @param {{id: string, formula: string|null}[]} [options.conditions]   Inflicted on a hit
  * @param {'normal'|'advantage'|'disadvantage'} options.mode
- * @returns {Promise<{roll: Roll, html: string}>}
+ * @param {number} options.index   Which attack this is, for the hit's `data-hit`
+ * @returns {Promise<{roll: Roll, html: string, hit: object|null}>}  `hit` is what a hit applies, see helpers/damage.mjs
  */
-async function rollOnce({ chances, wounds, damage, mode }) {
+async function rollOnce({ chances, wounds, damage, damageType, conditions = [], mode, index }) {
   const roll = await new Roll(mode === 'normal' ? '1d100' : '2d100').evaluate();
 
   // Both natural results, in the order they were rolled.
@@ -260,11 +267,25 @@ async function rollOnce({ chances, wounds, damage, mode }) {
   const degree = successDegree(natural, chances, wounds);
   const result = game.i18n.localize(NOQUARTER.successDegrees[degree]);
 
+  // Only a success has a damage bonus. A hit's damage and conditions sit in a
+  // block that can be dragged onto the target.
   const bonus = NOQUARTER.damageBonus[degree];
-  let damageHtml = '';
-  if (damage != null && bonus !== undefined) {
-    const breakdown = bonus ? ` (${damage} + ${bonus})` : '';
-    damageHtml = `<div class="roll-damage">${game.i18n.localize('NOQUARTER.Chat.Damage')}: <strong>${damage + bonus}</strong>${breakdown}</div>`;
+  const hits = bonus !== undefined && (damage != null || conditions.length > 0);
+  let hit = null;
+  let hitHtml = '';
+  if (hits) {
+    hit = { damage: damage != null ? damage + bonus : null, damageType: damageType ?? '', conditions };
+    let damageHtml = '';
+    if (damage != null) {
+      const breakdown = bonus ? ` (${damage} + ${bonus})` : '';
+      const typeKey = NOQUARTER.damageTypes[damageType];
+      const type = typeKey ? ` ${game.i18n.localize(typeKey)}` : '';
+      damageHtml = `<div class="roll-damage">${game.i18n.localize('NOQUARTER.Chat.Damage')}: <strong>${hit.damage}</strong>${breakdown}${type}</div>`;
+    }
+    hitHtml = `<div class="roll-hit" data-hit="${index}">
+      <i class="fa-solid fa-grip-vertical roll-hit-grip" inert></i>
+      <div class="roll-hit-body">${damageHtml}${conditionsHtml(conditions)}</div>
+    </div>`;
   }
 
   const woundNote = wounds
@@ -282,8 +303,8 @@ async function rollOnce({ chances, wounds, damage, mode }) {
   const html = `<div class="roll-result degree-${degree}">${result}</div>
     <div class="roll-total">${game.i18n.localize('NOQUARTER.Chat.Roll')}: <strong>${total}</strong>${woundNote}</div>
     ${modeHtml}
-    ${damageHtml}`;
-  return { roll, html };
+    ${hitHtml}`;
+  return { roll, html, hit };
 }
 
 /**
@@ -302,18 +323,35 @@ async function rollOnce({ chances, wounds, damage, mode }) {
  * @param {string} options.label    The name of the stat or ability rolled
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {number|null} [options.damage]   Base damage; the degree of success adds to it
+ * @param {string} [options.damageType]   A key of NOQUARTER.damageTypes, or '' when it isn't known
+ * @param {{id: string, formula: string|null}[]} [options.conditions]   Conditions each hit inflicts, see parseConditions
  * @param {string} [options.note]   Plain text shown under the roll, such as a monster ability's effect
  * @param {string} [options.tag]   Text shown in brackets after the name instead of the success chances, such as a monster ability's damage type and range
  * @param {'normal'|'advantage'|'disadvantage'} [options.mode='normal']
  * @param {string[]} [options.modes]   The mode of each attack, from attackRolls; rolls that many times instead of once
  * @returns {Promise<Roll[]>}
  */
-export async function rollSuccess({ actor, label, chances, damage, note, tag, mode = 'normal', modes = [mode] }) {
+export async function rollSuccess({
+  actor,
+  label,
+  chances,
+  damage,
+  damageType,
+  conditions,
+  note,
+  tag,
+  mode = 'normal',
+  modes = [mode],
+}) {
   const wounds = actor?.usesWounds ? actor.system.wounds : 0;
   const count = modes.length;
 
   const results = [];
-  for (const attackMode of modes) results.push(await rollOnce({ chances, wounds, damage, mode: attackMode }));
+  for (const [index, attackMode] of modes.entries()) {
+    results.push(await rollOnce({ chances, wounds, damage, damageType, conditions, mode: attackMode, index }));
+  }
+  // What each attack that hit applies, by attack, for dragging onto a target.
+  const hits = results.map(({ hit }) => (hit ? { ...hit, label } : null));
 
   // A single roll is shown on its own; several are numbered.
   const rollsHtml =
@@ -346,6 +384,7 @@ export async function rollSuccess({ actor, label, chances, damage, note, tag, mo
       content,
       rolls,
       sound: CONFIG.sounds.dice,
+      flags: hits.some(Boolean) ? { 'no-quarter': { hits } } : {},
     },
     { messageMode: game.settings.get('core', 'messageMode') }
   );

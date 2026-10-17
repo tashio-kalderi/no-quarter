@@ -23,10 +23,6 @@ export default class NoQuarterNPC extends NoQuarterActorBase {
       choices: () => Object.keys(CONFIG.NOQUARTER.sizes),
     });
 
-    // Physical and magical damage reduction.
-    schema.pdr = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
-    schema.mdr = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
-
     // The success chances used by every ability, e.g. 70/35/0.
     schema.chances = new fields.SchemaField({
       regular: chance(50),

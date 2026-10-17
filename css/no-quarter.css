@@ -248,6 +248,21 @@
 .no-quarter-roll .roll-result.degree-criticalFailure {
   background: rgba(170, 50, 50, 0.45);
 }
+.no-quarter-roll .roll-hit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border: 1px dashed rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
+}
+.no-quarter-roll .roll-hit[draggable=true] {
+  cursor: grab;
+}
+.no-quarter-roll .roll-hit .roll-hit-grip {
+  opacity: 0.6;
+}
 .no-quarter-roll .roll-attack {
   margin-bottom: 6px;
   padding-bottom: 4px;
@@ -383,14 +398,6 @@
   z-index: 1;
 }
 
-/* Monk's Little Details turns each icon into a full-width row (icon + name);
-   keep the badge on the icon's corner rather than the row's. */
-#token-hud.monks-little-details .status-effects .effect-container > .nq-stack-badge {
-  right: auto;
-  left: 14px;
-  bottom: -1px;
-}
-
 /* Styles limited to No Quarter sheets */
 .no-quarter input[type=text],
 .no-quarter input[type=number] {
@@ -520,6 +527,10 @@
 }
 .no-quarter .vital .resource-label {
   flex: 0 0 4.5rem;
+}
+.no-quarter .vital .resource-label.vital-second {
+  flex: 0 0 4rem;
+  margin-left: 8px;
 }
 .no-quarter .vital input {
   flex: 0 0 3rem;

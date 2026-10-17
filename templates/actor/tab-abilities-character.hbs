@@ -51,11 +51,15 @@
             <input type="text" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
                    {{#if system.bonuses.speed}}data-tooltip="{{localize 'NOQUARTER.RacialSkill.SpeedTooltip' base=system.speed bonus=system.bonuses.speed}}"{{/if}}/>
             {{/if}}
+            <label for="system.wounds" class="resource-label align-left vital-second">Wounds:</label>
+            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
           </div>
 
           <div class="vital flexrow flex-group-left">
-            <label for="system.wounds" class="resource-label align-left">Wounds:</label>
-            <input type="text" name="system.wounds" value="{{system.wounds}}" data-dtype="Number"/>
+            <label for="system.pdr" class="resource-label align-left" title="Physical damage reduction">PDR:</label>
+            <input type="text" name="system.pdr" value="{{system.pdr}}" data-dtype="Number"/>
+            <label for="system.mdr" class="resource-label align-left vital-second" title="Magical damage reduction">MDR:</label>
+            <input type="text" name="system.mdr" value="{{system.mdr}}" data-dtype="Number"/>
           </div>
 
           <div class="vital flexrow flex-group-left">
