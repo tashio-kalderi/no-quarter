@@ -21,6 +21,7 @@
     },
     "Passive": "Passive",
     "ActionType": {
+      "basic": { "label": "Basic" },
       "full": { "label": "Full Action", "section": "Full Actions" },
       "supplemental": { "label": "Supplemental", "section": "Supplemental" },
       "passive": { "label": "Passive", "section": "Passive" },
@@ -61,6 +62,8 @@
       "LockSettingHint": "Players can't enter build mode or change their character's level; the GM does it for them. Raising a character's level still puts it in build mode.",
       "Locked": "Character building is locked by the GM.",
       "LevelLocked": "Only the GM can change a character's level while building is locked.",
+      "DrGmOnly": "Only the GM can change a character's PDR and MDR.",
+      "DamageGmOnly": "Only the GM can change a basic attack's damage.",
       "NotBuilding": "Enter build mode to change stats, ability ranks and skills.",
       "StatCap": "{stat} can't go above {cap} at level {level}.",
       "StatLockedIn": "{stat} can't go below {value}: points spent at earlier levels are locked in.",
@@ -264,6 +267,39 @@
       "Gains": "Gains {condition}",
       "Raised": "Gains {condition}, up from {current}",
       "Stays": "Gains {condition}, but already has {current}, so it stays at {current}"
+    },
+    "Scaling": {
+      "base": "Value at Min Rank",
+      "baseHint": "The number in the effect at the ability's minimum rank, which grows with rank. Leave empty if the effect has none.",
+      "step": "Increase",
+      "mode": "Increases",
+      "perRank": "Every rank",
+      "everyOtherRank": "Every other rank (3, 5)",
+      "fixed": "Fixed",
+      "currentLabel": "Current Value",
+      "current": "Currently {value}"
+    },
+    "ImposeCondition": {
+      "ChoiceLabel": "Choose a condition when taken",
+      "ChoiceHint": "Asks which condition this imposes when a character takes it. It can be taken once for each condition.",
+      "Condition": "Condition",
+      "Choose": "Choose the condition {name} imposes.",
+      "AllChosen": "{name} has already been taken for every condition."
+    },
+    "Automation": {
+      "label": "Applies Automatically",
+      "none": "No (effect text only)",
+      "damage": "Adds to basic attack damage",
+      "pdr": "Adds to PDR",
+      "mdr": "Adds to MDR",
+      "DrTooltip": "Base {base}, +{bonus} from abilities",
+      "DamageBase": "Base {base}"
+    },
+    "BasicAttack": {
+      "label": "Basic Attacks",
+      "Melee": "Melee",
+      "Ranged": "Ranged",
+      "Magic": "Magic"
     },
     "BasicAbility": {
       "Melee": "Basic Melee Attack",

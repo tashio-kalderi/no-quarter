@@ -1,6 +1,7 @@
 import NoQuarterItemBase from './base-item.mjs';
 import { NOQUARTER } from '../helpers/config.mjs';
 import { abilityChances } from '../helpers/success.mjs';
+import { statusList } from '../helpers/damage.mjs';
 
 export default class NoQuarterAbility extends NoQuarterItemBase {
   static defineSchema() {
@@ -21,6 +22,31 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     schema.stats = new fields.SetField(
       new fields.StringField({ required: true, blank: false, choices: Object.keys(NOQUARTER.stats) })
     );
+    // The basic attacks the ability works with, such as a supplemental
+    // ability that can only be added onto a melee attack. Empty for none.
+    schema.basicAttacks = new fields.SetField(
+      new fields.StringField({ required: true, blank: false, choices: Object.keys(NOQUARTER.basicAttacks) })
+    );
+    // The number in the effect that grows with rank: `base` at the ability's
+    // minimum rank, plus `step` every rank or every other rank (ranks 3 and 5
+    // when it starts at 1), or always `base` when fixed. An empty base means
+    // the effect has no such number.
+    schema.scaling = new fields.SchemaField({
+      base: new fields.NumberField({ required: true, nullable: true, integer: true, initial: null }),
+      step: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      mode: new fields.StringField({ required: true, choices: Object.keys(NOQUARTER.scalingModes), initial: 'perRank' }),
+    });
+    // An ability such as Impose Condition asks which condition it imposes when
+    // a character takes it, and can be taken once for each condition.
+    schema.conditionChoice = new fields.BooleanField();
+    schema.condition = new fields.StringField({ required: true, blank: true, initial: '' });
+    // What's done with the scaling value automatically; see NOQUARTER.abilityAutomations.
+    schema.automation = new fields.StringField({
+      required: true,
+      blank: true,
+      choices: ['', ...Object.keys(NOQUARTER.abilityAutomations)],
+      initial: '',
+    });
     // Rank and stamina cost can be left empty; empty counts as 0.
     schema.rank = new fields.NumberField({
       required: true,
@@ -146,17 +172,109 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     return cap === undefined ? rank : Math.min(rank, cap);
   }
 
+  /**
+   * The ability's scaling value at its effective rank, or null when it has
+   * none or hasn't been taken (rank 0).
+   * @type {number|null}
+   */
+  get scaledValue() {
+    const { base, step, mode } = this.scaling;
+    const rank = this.effectiveRank;
+    if (base === null || rank < 1) return null;
+    if (mode === 'fixed') return base;
+    const above = Math.max(0, rank - this.minRank);
+    const steps = mode === 'everyOtherRank' ? Math.floor(above / 2) : above;
+    return base + step * steps;
+  }
+
+  /**
+   * The scaling value as shown, such as "+3" for a damage bonus.
+   * @type {string}
+   */
+  get scaledLabel() {
+    const value = this.scaledValue;
+    if (value === null) return '';
+    return this.automation && value >= 0 ? `+${value}` : String(value);
+  }
+
+  /**
+   * The effect as posted to chat, with the scaling value for the current rank,
+   * such as "... per rank. (Currently +3)".
+   * @type {string}
+   */
+  get effectNote() {
+    const scaled = this.scaledLabel;
+    const current = scaled && `(${game.i18n.format('NOQUARTER.Scaling.current', { value: scaled })})`;
+    return [this.effect, current].filter(Boolean).join(' ');
+  }
+
+  /**
+   * A basic attack's damage bonuses from the character's abilities that add
+   * to its damage, such as Increase Damage (Melee).
+   * @type {{name: string, value: number}[]}
+   */
+  get damageBonuses() {
+    const actor = this.parent?.actor;
+    if (!this.basicKey || !actor) return [];
+    return actor.items
+      .filter((i) => i.type === 'ability' && i.system.automation === 'damage' && i.system.basicAttacks.has(this.basicKey))
+      .map((i) => ({ name: i.name, value: i.system.scaledValue ?? 0 }))
+      .filter((b) => b.value);
+  }
+
+  /**
+   * The sum of a basic attack's damage bonuses.
+   * @type {number}
+   */
+  get damageBonus() {
+    return this.damageBonuses.reduce((sum, b) => sum + b.value, 0);
+  }
+
+  /**
+   * A basic attack's damage with its bonuses added.
+   * @type {number|null}
+   */
+  get totalDamage() {
+    const bonus = this.damageBonus;
+    if (this.damage === null && !bonus) return null;
+    return (this.damage ?? 0) + bonus;
+  }
+
+  /**
+   * The tooltip on a basic attack's damage box when abilities add to it, such
+   * as "Base 1, Increase Damage (Melee) +2".
+   * @type {string}
+   */
+  get damageTooltip() {
+    const bonuses = this.damageBonuses;
+    if (!bonuses.length) return '';
+    const esc = foundry.utils.escapeHTML;
+    const lines = bonuses.map((b) => `${esc(b.name)} +${b.value}`);
+    return [game.i18n.format('NOQUARTER.Automation.DamageBase', { base: this.damage ?? 0 }), ...lines].join('<br>');
+  }
+
+  /**
+   * The chosen condition's name, or '' when there is none.
+   * @type {string}
+   */
+  get conditionLabel() {
+    if (!this.condition) return '';
+    const status = statusList().find((s) => s.id === this.condition);
+    return status ? game.i18n.localize(status.name) : this.condition;
+  }
+
   /** Whether this is a Special supplemental ability (see `special`). */
   get isSpecial() {
     return this.actionType === 'supplemental' && this.special;
   }
 
   /**
-   * The ability's type as shown: its action type, or "Special" for a Special
-   * supplemental ability.
+   * The ability's type as shown: "Basic" for the basic attacks, "Special" for
+   * a Special supplemental ability, otherwise its action type.
    * @type {string}
    */
   get typeLabel() {
+    if (this.basicKey) return game.i18n.localize('NOQUARTER.ActionType.basic.label');
     if (this.isSpecial) return game.i18n.localize('NOQUARTER.ActionType.special.label');
     return game.i18n.localize(NOQUARTER.actionTypes[this.actionType]?.label ?? 'NOQUARTER.Passive');
   }

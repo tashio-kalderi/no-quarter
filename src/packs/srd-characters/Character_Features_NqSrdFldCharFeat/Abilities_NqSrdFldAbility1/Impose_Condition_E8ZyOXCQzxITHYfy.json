@@ -1,0 +1,60 @@
+{
+  "_id": "E8ZyOXCQzxITHYfy",
+  "name": "Impose Condition",
+  "type": "ability",
+  "img": "icons/svg/hazard.svg",
+  "system": {
+    "description": "<p>When you hit an enemy with an attack, you may impose a condition on the enemy. This ability starts at Rank 3 when it imposes 1 value of a given condition (if the condition has values). At Rank 4 it imposes 2 values of a condition; at Rank 5 it imposes 3 values. This ability may be taken multiple times; each time you take it, you must choose the condition it imposes.</p>",
+    "actionType": "supplemental",
+    "stats": [
+      "might",
+      "agility",
+      "mind"
+    ],
+    "basicAttacks": [
+      "melee",
+      "ranged",
+      "magic"
+    ],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "perRank"
+    },
+    "automation": "",
+    "conditionChoice": true,
+    "condition": "",
+    "rank": null,
+    "special": false,
+    "minRank": 3,
+    "maxRank": 5,
+    "staminaCost": 2,
+    "effect": "When you hit an enemy with an attack, you may impose a condition on the enemy. This ability starts at Rank 3 when it imposes 1 value of a given condition (if the condition has values). At Rank 4 it imposes 2 values of a condition; at Rank 5 it imposes 3 values. This ability may be taken multiple times; each time you take it, you must choose the condition it imposes.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1800000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!E8ZyOXCQzxITHYfy"
+}

@@ -1,0 +1,56 @@
+{
+  "_id": "uahHcA5MxWcnPZf9",
+  "name": "Counterattack",
+  "type": "ability",
+  "img": "icons/svg/sword.svg",
+  "system": {
+    "description": "<p>When damaged by an attack, you can immediately make an attack against the attacker. This ability starts at Rank 3 and has no progression beyond Rank 3.</p>",
+    "actionType": "supplemental",
+    "stats": [
+      "agility"
+    ],
+    "basicAttacks": [
+      "melee",
+      "ranged",
+      "magic"
+    ],
+    "scaling": {
+      "base": null,
+      "step": 0,
+      "mode": "fixed"
+    },
+    "automation": "",
+    "rank": null,
+    "special": true,
+    "minRank": 3,
+    "maxRank": 3,
+    "staminaCost": null,
+    "effect": "When damaged by an attack, you can immediately make an attack against the attacker. This ability starts at Rank 3 and has no progression beyond Rank 3.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1500000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!uahHcA5MxWcnPZf9"
+}

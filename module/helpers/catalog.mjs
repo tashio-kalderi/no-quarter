@@ -56,6 +56,10 @@ export const ABILITY_FIELDS = [
   'system.staminaCost',
   'system.effect',
   'system.special',
+  'system.basicAttacks',
+  'system.scaling',
+  'system.automation',
+  'system.conditionChoice',
 ];
 
 /** The fields needed from a racial skill's compendium entry. */

@@ -1,0 +1,52 @@
+{
+  "_id": "eHyylraE69HjJqCf",
+  "name": "Physical Defense",
+  "type": "ability",
+  "img": "icons/svg/shield.svg",
+  "system": {
+    "description": "<p>Each rank grants +1 physical damage reduction.</p>",
+    "actionType": "passive",
+    "stats": [
+      "might"
+    ],
+    "basicAttacks": [],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "perRank"
+    },
+    "automation": "pdr",
+    "rank": null,
+    "special": false,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": null,
+    "effect": "Each rank grants +1 physical damage reduction.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1300000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!eHyylraE69HjJqCf"
+}

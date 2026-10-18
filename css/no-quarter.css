@@ -863,7 +863,8 @@
   gap: 4px;
   margin-top: 4px;
 }
-.no-quarter .ability-stats multi-checkbox {
+.no-quarter .ability-stats multi-checkbox,
+.no-quarter .ability-basic-attacks multi-checkbox {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
@@ -884,6 +885,11 @@
   display: inline-block;
   min-width: 2ch;
   text-align: right;
+}
+.no-quarter .ability-scaled {
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 0 4px;
 }
 .no-quarter .build-enter {
   flex: none;

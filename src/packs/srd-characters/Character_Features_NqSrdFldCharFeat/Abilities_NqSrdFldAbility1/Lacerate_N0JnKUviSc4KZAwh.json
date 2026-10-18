@@ -1,0 +1,54 @@
+{
+  "_id": "N0JnKUviSc4KZAwh",
+  "name": "Lacerate",
+  "type": "ability",
+  "img": "icons/svg/blood.svg",
+  "system": {
+    "description": "<p>Causes 1 Bleeding per rank on a hit.</p>",
+    "actionType": "supplemental",
+    "stats": [
+      "agility"
+    ],
+    "basicAttacks": [
+      "melee"
+    ],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "perRank"
+    },
+    "automation": "",
+    "rank": null,
+    "special": true,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": 3,
+    "effect": "Causes 1 Bleeding per rank on a hit.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1200000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!N0JnKUviSc4KZAwh"
+}

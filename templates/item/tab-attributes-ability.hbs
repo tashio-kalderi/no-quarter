@@ -86,10 +86,66 @@
       </span>
     </div>
   </div>
+  {{#unless system.basicKey}}
+    <div class="resource ability-basic-attacks">
+      {{!-- The basic attacks this ability works with. --}}
+      <label class="resource-label">{{localize 'NOQUARTER.BasicAttack.label'}}</label>
+      {{formInput basicAttacksField value=basicAttacksValue type="checkboxes" choices=config.basicAttacks localize=true disabled=buildLocked}}
+    </div>
+    {{!-- The number in the effect that grows with rank; see NoQuarterAbility#scaledValue. --}}
+    <div class="grid grid-3col">
+      <div class="grid-span-1">
+        <label class="resource-label" data-tooltip="{{localize 'NOQUARTER.Scaling.baseHint'}}">{{localize 'NOQUARTER.Scaling.base'}}</label>
+        <input type="text" name="system.scaling.base" value="{{system.scaling.base}}" data-dtype="Number"/>
+      </div>
+      <div class="grid-span-1">
+        <label class="resource-label">{{localize 'NOQUARTER.Scaling.step'}}</label>
+        <input type="text" name="system.scaling.step" value="{{system.scaling.step}}" data-dtype="Number"/>
+      </div>
+      <div class="grid-span-1">
+        <label class="resource-label">{{localize 'NOQUARTER.Scaling.mode'}}</label>
+        <select name="system.scaling.mode">
+          {{selectOptions config.scalingModes selected=system.scaling.mode localize=true}}
+        </select>
+      </div>
+    </div>
+    {{!-- An ability such as Impose Condition asks for its condition when a character takes it. --}}
+    <div class="grid grid-2col">
+      <div class="grid-span-1">
+        <label class="checkbox" data-tooltip="{{localize 'NOQUARTER.ImposeCondition.ChoiceHint'}}">
+          <input type="checkbox" name="system.conditionChoice" {{checked system.conditionChoice}} {{#if buildLocked}}disabled{{/if}}/>
+          {{localize 'NOQUARTER.ImposeCondition.ChoiceLabel'}}
+        </label>
+      </div>
+      {{#if system.conditionChoice}}
+      <div class="grid-span-1">
+        <label class="resource-label">{{localize 'NOQUARTER.ImposeCondition.Condition'}}</label>
+        <select name="system.condition" {{#if buildLocked}}disabled{{/if}}>
+          {{selectOptions conditionChoices selected=system.condition blank="-"}}
+        </select>
+      </div>
+      {{/if}}
+    </div>
+    <div class="grid grid-2col">
+      <div class="grid-span-1">
+        <label class="resource-label">{{localize 'NOQUARTER.Automation.label'}}</label>
+        <select name="system.automation">
+          {{selectOptions automationChoices selected=system.automation localize=true}}
+        </select>
+      </div>
+      <div class="grid-span-1">
+        <label class="resource-label">{{localize 'NOQUARTER.Scaling.currentLabel'}}</label>
+        <span class="ability-scaled">{{#if system.scaledLabel}}{{system.scaledLabel}}{{else}}-{{/if}}</span>
+      </div>
+    </div>
+  {{/unless}}
   {{#if system.basicKey}}
     <div class="resource">
       <label class="resource-label">Damage (base 1)</label>
-      <input type="text" name="system.damage" value="{{system.damage}}" data-dtype="Number"/>
+      {{!-- Shown with bonuses from abilities such as Increase Damage; saved without them. --}}
+      <input type="text" name="system.damage" value="{{system.totalDamage}}" data-dtype="Number"
+             {{#unless isGM}}disabled{{/unless}}
+             {{#if system.damageTooltip}}data-tooltip="{{system.damageTooltip}}"{{/if}}/>
     </div>
   {{else}}
     <div class="resource">

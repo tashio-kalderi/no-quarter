@@ -131,7 +131,8 @@
 }
 
 // The ability sheet's stat checkboxes sit in a row.
-.ability-stats multi-checkbox {
+.ability-stats multi-checkbox,
+.ability-basic-attacks multi-checkbox {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
@@ -159,4 +160,11 @@
   display: inline-block;
   min-width: 2ch;
   text-align: right;
+}
+
+// A scaling value worked out for the ability's rank.
+.ability-scaled {
+  font-weight: bold;
+  white-space: nowrap;
+  padding: 0 4px;
 }

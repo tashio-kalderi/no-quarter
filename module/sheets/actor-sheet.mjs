@@ -156,6 +156,8 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       // the form would write the effect into the stat.
       sourceStats: Object.fromEntries(Object.entries(actor._source.system.stats).map(([k, v]) => [k, v.value])),
       levelLocked: !isGM && buildingLocked(),
+      // PDR, MDR and basic attack damage include ability bonuses; only the GM adjusts them by hand.
+      gmLocked: !isGM,
       progression,
     };
   }
@@ -463,10 +465,13 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
    */
   _processFormData(event, form, formData) {
     const data = super._processFormData(event, form, formData);
-    const bonus = this.actor.system.bonuses?.speed;
-    const speed = data.system?.speed;
-    if (bonus && speed !== undefined && speed !== null && speed !== '') {
-      data.system.speed = Math.max(0, Number(speed) - bonus);
+    // Speed and damage reduction are shown with their bonuses; save the base.
+    for (const field of ['speed', 'pdr', 'mdr']) {
+      const bonus = this.actor.system.bonuses?.[field];
+      const value = data.system?.[field];
+      if (bonus && value !== undefined && value !== null && value !== '') {
+        data.system[field] = Math.max(0, Number(value) - bonus);
+      }
     }
     return data;
   }
@@ -529,6 +534,11 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
     // A bare number is a distance in feet; show that right away.
     if (field === 'range') input.value = value = formatRange(value);
+
+    // A basic attack's damage box shows its bonuses; save the base.
+    if (field === 'damage' && item.system.basicKey && value !== null) {
+      value = Math.max(0, value - item.system.damageBonus);
+    }
 
     // The name is on the item itself and can't be empty.
     if (field === 'name') {

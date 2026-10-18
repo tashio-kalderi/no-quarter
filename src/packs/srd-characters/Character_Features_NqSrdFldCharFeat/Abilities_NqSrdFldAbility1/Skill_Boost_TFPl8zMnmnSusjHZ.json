@@ -1,0 +1,52 @@
+{
+  "_id": "TFPl8zMnmnSusjHZ",
+  "name": "Skill Boost",
+  "type": "ability",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "<p>Range 30 feet. Rank 1: Grants one target advantage on their next check. Rank 3: Grants two targets advantage on their next check. Rank 5: Grants three targets advantage on their next check. Only one casting can be in effect at the same time. A greater success grants advantage on the next two checks; an extreme success grants advantage on the next three checks.</p>",
+    "actionType": "full",
+    "stats": [
+      "personality"
+    ],
+    "basicAttacks": [],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "everyOtherRank"
+    },
+    "automation": "",
+    "rank": null,
+    "special": false,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": 2,
+    "effect": "Range 30 feet. Rank 1: Grants one target advantage on their next check. Rank 3: Grants two targets advantage on their next check. Rank 5: Grants three targets advantage on their next check. Only one casting can be in effect at the same time. A greater success grants advantage on the next two checks; an extreme success grants advantage on the next three checks.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "30 ft.",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1600000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!TFPl8zMnmnSusjHZ"
+}

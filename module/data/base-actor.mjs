@@ -39,16 +39,20 @@ export default class NoQuarterActorBase extends foundry.abstract.TypeDataModel {
     // comes back once the condition is toggled off.
     this.restrained = this.parent.statuses.has('restrain');
     this.effectiveSpeed = this.restrained ? 0 : this.speed + this.bonuses.speed;
+
+    // Damage reduction bonuses are added the same way, on top of the stored base.
+    this.effectivePdr = this.pdr + this.bonuses.pdr;
+    this.effectiveMdr = this.mdr + this.bonuses.mdr;
   }
 
   /**
-   * Bonuses to maximum Health and Stamina and to Speed from the actor's items,
-   * and the forms of vision they grant. None by default; characters get them
-   * from their racial skills.
-   * @returns {{health: number, stamina: number, speed: number, senses: Set<string>}}
+   * Bonuses to maximum Health and Stamina, Speed and damage reduction from the
+   * actor's items, and the forms of vision they grant. None by default;
+   * characters get them from their racial skills and abilities.
+   * @returns {{health: number, stamina: number, speed: number, pdr: number, mdr: number, senses: Set<string>}}
    */
   prepareBonuses() {
-    return { health: 0, stamina: 0, speed: 0, senses: new Set() };
+    return { health: 0, stamina: 0, speed: 0, pdr: 0, mdr: 0, senses: new Set() };
   }
 
   /**

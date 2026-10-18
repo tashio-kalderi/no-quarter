@@ -1,0 +1,54 @@
+{
+  "_id": "7WHZq9GXM1sUMFfF",
+  "name": "Ranged Caster",
+  "type": "ability",
+  "img": "icons/svg/eye.svg",
+  "system": {
+    "description": "<p>Increase the range you can cast spells from by 15 ft. per rank</p>",
+    "actionType": "supplemental",
+    "stats": [
+      "agility"
+    ],
+    "basicAttacks": [
+      "magic"
+    ],
+    "scaling": {
+      "base": 15,
+      "step": 15,
+      "mode": "perRank"
+    },
+    "automation": "",
+    "rank": null,
+    "special": false,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": null,
+    "effect": "Increase the range you can cast spells from by 15 ft. per rank",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 1000000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!7WHZq9GXM1sUMFfF"
+}

@@ -4,6 +4,7 @@ import {
 } from '../helpers/effects.mjs';
 import { rankableAbilities } from '../helpers/racial-skills.mjs';
 import { racialSkillChoice } from '../helpers/progression.mjs';
+import { statusList } from '../helpers/damage.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -75,10 +76,26 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
 
   /* -------------------------------------------- */
 
+  /**
+   * A basic attack's damage box shows its bonuses from abilities such as
+   * Increase Damage; take them back off so the base is what gets saved.
+   * @override
+   */
+  _processFormData(event, form, formData) {
+    const data = super._processFormData(event, form, formData);
+    const bonus = this.item.system.basicKey ? this.item.system.damageBonus : 0;
+    const damage = data.system?.damage;
+    if (bonus && damage !== undefined && damage !== null && damage !== '') {
+      data.system.damage = Math.max(0, Number(damage) - bonus);
+    }
+    return data;
+  }
+
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     const item = this.item;
+    context.isGM = game.user.isGM;
 
     Object.assign(context, {
       item,
@@ -116,6 +133,15 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       context.buildLocked = item.actor?.type === 'character' && !game.user.isGM && !item.actor.system.building;
       context.statsField = item.system.schema.fields.stats;
       context.statsValue = [...item.system.stats];
+      context.basicAttacksField = item.system.schema.fields.basicAttacks;
+      context.basicAttacksValue = [...item.system.basicAttacks];
+      context.conditionChoices = Object.fromEntries(
+        statusList()
+          .filter((s) => s.id && s.id !== 'dead')
+          .map((s) => [s.id, game.i18n.localize(s.name)])
+          .sort((a, b) => a[1].localeCompare(b[1]))
+      );
+      context.automationChoices = { '': 'NOQUARTER.Automation.none', ...CONFIG.NOQUARTER.abilityAutomations };
       context.actionTypeChoices = Object.fromEntries(
         Object.entries(CONFIG.NOQUARTER.actionTypes).map(([key, { label }]) => [key, label])
       );

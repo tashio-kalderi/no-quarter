@@ -18,8 +18,8 @@ const DRAG_TYPE = 'NoQuarterHit';
 
 /** The damage reduction field for each damage type. */
 const REDUCTIONS = {
-  physical: { field: 'pdr', label: 'PDR' },
-  magic: { field: 'mdr', label: 'MDR' },
+  physical: { field: 'effectivePdr', label: 'PDR' },
+  magic: { field: 'effectiveMdr', label: 'MDR' },
 };
 
 /**
@@ -43,7 +43,7 @@ const FORMULA_REACH = 3;
 /* -------------------------------------------- */
 
 /** @returns {object[]} Every status effect. */
-function statusList() {
+export function statusList() {
   return Array.isArray(CONFIG.statusEffects) ? CONFIG.statusEffects : Object.values(CONFIG.statusEffects);
 }
 

@@ -78,6 +78,40 @@ NOQUARTER.basicAbilities = {
 };
 
 /**
+ * Short names for the basic attacks, used when an ability says which of them
+ * it works with (`system.basicAttacks`).
+ * @type {Object}
+ */
+/**
+ * How often an ability's scaling value goes up by its step (see
+ * NoQuarterAbility#scaledValue).
+ * @type {Object}
+ */
+NOQUARTER.scalingModes = {
+  perRank: 'NOQUARTER.Scaling.perRank',
+  everyOtherRank: 'NOQUARTER.Scaling.everyOtherRank',
+  fixed: 'NOQUARTER.Scaling.fixed',
+};
+
+/**
+ * What the system does with an ability's scaling value by itself. "damage"
+ * adds it to the damage of the basic attacks the ability is tied to; "pdr"
+ * and "mdr" add it to the character's damage reduction.
+ * @type {Object}
+ */
+NOQUARTER.abilityAutomations = {
+  damage: 'NOQUARTER.Automation.damage',
+  pdr: 'NOQUARTER.Automation.pdr',
+  mdr: 'NOQUARTER.Automation.mdr',
+};
+
+NOQUARTER.basicAttacks = {
+  melee: 'NOQUARTER.BasicAttack.Melee',
+  ranged: 'NOQUARTER.BasicAttack.Ranged',
+  magic: 'NOQUARTER.BasicAttack.Magic',
+};
+
+/**
  * Forms of vision a racial skill can grant, and how far each reaches in feet.
  * See helpers/vision.mjs for how they are applied to tokens.
  * @type {Object}

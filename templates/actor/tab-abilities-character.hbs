@@ -59,9 +59,12 @@
 
           <div class="vital flexrow flex-group-left">
             <label for="system.pdr" class="resource-label align-left" title="Physical damage reduction">PDR:</label>
-            <input type="text" name="system.pdr" value="{{system.pdr}}" data-dtype="Number"/>
+            {{!-- Shown with bonuses from abilities such as Physical Defense; the sheet takes them off again when saving. --}}
+            <input type="text" name="system.pdr" value="{{system.effectivePdr}}" data-dtype="Number" {{#if @root.build.gmLocked}}disabled{{/if}}
+                   {{#if system.bonuses.pdr}}data-tooltip="{{localize 'NOQUARTER.Automation.DrTooltip' base=system.pdr bonus=system.bonuses.pdr}}"{{/if}}/>
             <label for="system.mdr" class="resource-label align-left vital-second" title="Magical damage reduction">MDR:</label>
-            <input type="text" name="system.mdr" value="{{system.mdr}}" data-dtype="Number"/>
+            <input type="text" name="system.mdr" value="{{system.effectiveMdr}}" data-dtype="Number" {{#if @root.build.gmLocked}}disabled{{/if}}
+                   {{#if system.bonuses.mdr}}data-tooltip="{{localize 'NOQUARTER.Automation.DrTooltip' base=system.mdr bonus=system.bonuses.mdr}}"{{/if}}/>
           </div>
 
           <div class="vital flexrow flex-group-left">
@@ -173,10 +176,17 @@
           <div class="ability-effect">
             {{#if item.basic}}
               <span class="ability-damage-label">Damage (base 1)</span>
+              {{!-- Shown with bonuses from abilities such as Increase Damage; the sheet takes them off
+              again when saving. Only the GM changes it. --}}
               <input type="text" class="ability-field ability-damage" data-field="damage" data-dtype="Number"
-                     data-min="0" title="Damage" value="{{item.system.damage}}"/>
+                     data-min="0" title="Damage" value="{{item.system.totalDamage}}"
+                     {{#if @root.build.gmLocked}}disabled{{/if}}
+                     {{#if item.system.damageTooltip}}data-tooltip="{{item.system.damageTooltip}}"{{/if}}/>
             {{else}}
               <input type="text" class="ability-field" data-field="effect" value="{{item.system.effect}}"/>
+              {{#if item.system.scaledLabel}}
+                <span class="ability-scaled" data-tooltip="{{localize 'NOQUARTER.Scaling.current' value=item.system.scaledLabel}}">{{item.system.scaledLabel}}</span>
+              {{/if}}
             {{/if}}
           </div>
           <div class="item-controls">

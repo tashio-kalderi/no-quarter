@@ -32,6 +32,47 @@ export class NoQuarterItem extends Item {
     if (!checkItemCreate(this, options, user)) return false;
     if (!this.#allowedRank(this.system.rank, this.system.stats, user)) return false;
     if (!this.#rankInRange(this.system.rank, this.system.minRank, this.system.maxRank, user)) return false;
+    if (!(await this.#chooseCondition(user))) return false;
+  }
+
+  /**
+   * An ability such as Impose Condition asks which condition it imposes when a
+   * character takes it, and is renamed after it, as in "Impose Condition
+   * (Bleeding)". Each copy must be for a different condition.
+   * @param {User} user
+   * @returns {Promise<boolean>}   False if no condition was chosen
+   */
+  async #chooseCondition(user) {
+    const system = this.system;
+    if (this.type !== 'ability' || !system.conditionChoice || system.condition) return true;
+    if (this.actor?.type !== 'character' || user.id !== game.user.id) return true;
+    const prefix = `${this.name} (`;
+    const taken = new Set(
+      this.actor.items
+        .filter((i) => i.type === 'ability' && i.system.conditionChoice && i.name.startsWith(prefix))
+        .map((i) => i.system.condition)
+    );
+    const esc = foundry.utils.escapeHTML;
+    const options = statusList()
+      .filter((s) => s.id && s.id !== 'dead' && !taken.has(s.id))
+      .map((s) => ({ id: s.id, name: game.i18n.localize(s.name) }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`);
+    if (!options.length) {
+      ui.notifications.warn(game.i18n.format('NOQUARTER.ImposeCondition.AllChosen', { name: this.name }));
+      return false;
+    }
+    const condition = await foundry.applications.api.DialogV2.prompt({
+      window: { title: this.name, icon: 'fa-solid fa-person-falling-burst' },
+      content: `<p>${game.i18n.format('NOQUARTER.ImposeCondition.Choose', { name: esc(this.name) })}</p>
+        <select name="condition" autofocus>${options.join('')}</select>`,
+      ok: { label: 'NOQUARTER.RacialSkill.Choose', callback: (event, button) => button.form.elements.condition.value },
+      rejectClose: false,
+    });
+    if (!condition) return false;
+    const label = game.i18n.localize(statusList().find((s) => s.id === condition)?.name ?? condition);
+    this.updateSource({ name: `${this.name} (${label})`, 'system.condition': condition });
+    return true;
   }
 
   /**
@@ -269,9 +310,8 @@ export class NoQuarterItem extends Item {
       if (!item.system.chances) {
         const esc = foundry.utils.escapeHTML;
         const typeLabel = item.system.typeLabel;
-        const effect = item.system.effect
-          ? `<div class="roll-effect">${esc(item.system.effect)}</div>`
-          : '';
+        const effectText = item.system.effectNote;
+        const effect = effectText ? `<div class="roll-effect">${esc(effectText)}</div>` : '';
         return ChatMessage.create(
           {
             speaker: ChatMessage.getSpeaker({ actor: item.actor }),
@@ -296,12 +336,12 @@ export class NoQuarterItem extends Item {
       }
 
       // A monster ability shows its damage type and range after the name (the
-      // stat block has the chances), and its effect under the roll.
+      // stat block has the chances). Every ability shows its effect under the roll.
       const typeKey = CONFIG.NOQUARTER.damageTypes[item.system.damageType];
       const tag = isMonster
         ? [typeKey ? game.i18n.localize(typeKey) : '', item.system.range].filter(Boolean).join(', ')
         : undefined;
-      const note = isMonster ? item.system.effect : undefined;
+      const note = item.system.effectNote || undefined;
 
       // Ask how the roll is made; closing the dialog cancels it without using up a use.
       const asked = await askRollMode({
@@ -324,8 +364,9 @@ export class NoQuarterItem extends Item {
         modes: attacks.modes,
         label: item.name,
         chances: applyRollPenalty(item.system.chances, asked.penalty),
-        // A character's own abilities have no damage value, only the basic ones.
-        damage: isMonster || item.system.basicKey ? item.system.damage : undefined,
+        // A character's own abilities have no damage value, only the basic
+        // ones, which add the bonuses from abilities such as Increase Damage.
+        damage: isMonster ? item.system.damage : item.system.basicKey ? item.system.totalDamage : undefined,
         damageType: isMonster ? item.system.damageType : basicDamageType(item.system.basicKey),
         // Conditions are read from a monster ability's effect text, such as "Poisoned for 1d4 turns".
         conditions: isMonster ? parseConditions(item.system.effect) : [],

@@ -273,7 +273,7 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
         };
       });
     const available = this.#catalog.abilities
-      .filter((e) => !ownedNames.has(e.name.toLowerCase()))
+      .filter((e) => e.system.conditionChoice || !ownedNames.has(e.name.toLowerCase()))
       .map((e) => {
         const minRank = e.system.minRank ?? 1;
         const highest = this.#highestStat(e.system.stats);

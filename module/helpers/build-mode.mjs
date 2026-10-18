@@ -120,6 +120,12 @@ export function checkActorUpdate(actor, changes, user, options = {}) {
   }
   if (user.isGM) return true;
 
+  // Only the GM adjusts damage reduction; abilities add to it by themselves.
+  for (const field of ['pdr', 'mdr']) {
+    const value = get(`system.${field}`);
+    if (value !== undefined && value !== actor._source.system[field]) return refuse('DrGmOnly');
+  }
+
   const locked = buildingLocked();
   if (levelChanged && locked) return refuse('LevelLocked');
   const building = get('system.building');
@@ -223,6 +229,8 @@ export function checkItemUpdate(item, changes, user) {
     if (field === 'stats') return [...(after ?? [])].sort().join() === [...(before ?? [])].sort().join();
     return (after ?? null) === (before ?? null);
   };
+  // Only the GM changes a basic attack's damage; abilities add to it by themselves.
+  if (item.system.basicKey && 'damage' in system && !same('damage')) return refuse('DamageGmOnly');
   const touched = ABILITY_BUILD_FIELDS.filter((f) => f in system && !same(f));
   if (!touched.length) return true;
   if (!actor.system.building) return refuse('NotBuilding');

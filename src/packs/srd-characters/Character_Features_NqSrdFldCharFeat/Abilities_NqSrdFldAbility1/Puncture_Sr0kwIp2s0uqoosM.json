@@ -1,0 +1,54 @@
+{
+  "_id": "Sr0kwIp2s0uqoosM",
+  "name": "Puncture",
+  "type": "ability",
+  "img": "icons/svg/target.svg",
+  "system": {
+    "description": "<p>Ignore 1 point of damage reduction per rank when you hit with a ranged attack</p>",
+    "actionType": "supplemental",
+    "stats": [
+      "agility"
+    ],
+    "basicAttacks": [
+      "ranged"
+    ],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "perRank"
+    },
+    "automation": "",
+    "rank": null,
+    "special": false,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": null,
+    "effect": "Ignore 1 point of damage reduction per rank when you hit with a ranged attack",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 900000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!Sr0kwIp2s0uqoosM"
+}

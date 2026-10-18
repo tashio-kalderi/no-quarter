@@ -1,0 +1,54 @@
+{
+  "_id": "lDbtOVjYr5wDbKlB",
+  "name": "Increase Damage (Ranged)",
+  "type": "ability",
+  "img": "icons/svg/upgrade.svg",
+  "system": {
+    "description": "<p>Increase the damage of your basic ranged attack by +1 per rank.</p>",
+    "actionType": "passive",
+    "stats": [
+      "agility"
+    ],
+    "basicAttacks": [
+      "ranged"
+    ],
+    "scaling": {
+      "base": 1,
+      "step": 1,
+      "mode": "perRank"
+    },
+    "automation": "damage",
+    "rank": null,
+    "special": false,
+    "minRank": 1,
+    "maxRank": 5,
+    "staminaCost": null,
+    "effect": "Increase the damage of your basic ranged attack by +1 per rank.",
+    "damage": null,
+    "attacks": 1,
+    "damageType": "",
+    "range": "",
+    "uses": null,
+    "used": 0,
+    "basicKey": ""
+  },
+  "effects": [],
+  "folder": "NqSrdFldAbility1",
+  "sort": 200000,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!items!lDbtOVjYr5wDbKlB"
+}

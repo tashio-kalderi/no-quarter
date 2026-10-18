@@ -96,6 +96,11 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
   prepareBonuses() {
     const bonuses = super.prepareBonuses();
     for (const item of this.parent.items) {
+      // Abilities such as Physical Defense add their value to PDR or MDR.
+      if (item.type === 'ability' && ['pdr', 'mdr'].includes(item.system.automation)) {
+        bonuses[item.system.automation] += item.system.scaledValue ?? 0;
+        continue;
+      }
       if (item.type !== 'racialSkill') continue;
       const skill = item.system;
       bonuses.health += skill.health;
