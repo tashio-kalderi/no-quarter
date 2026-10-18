@@ -1,6 +1,7 @@
 import { askRollMode, rollSuccess } from '../helpers/success.mjs';
 import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
 import { visionTokenChanges } from '../helpers/vision.mjs';
+import { checkActorUpdate } from '../helpers/build-mode.mjs';
 
 // Actors whose basic abilities are currently being created, so that several
 // sheet renders in a row don't create them twice.
@@ -111,6 +112,13 @@ export class NoQuarterActor extends Actor {
     const allowed = await super._preUpdate(changes, options, user);
     if (allowed === false) return false;
 
+    // A character's stats and level are only changed in build mode, within
+    // its points; raising the level enters build mode (see helpers/build-mode.mjs).
+    if (!checkActorUpdate(this, changes, user, options)) return false;
+    // Raising the level opens the character builder for its players.
+    const level = foundry.utils.getProperty(changes, 'system.attributes.level.value');
+    if (this.type === 'character' && level > this.system.attributes.level.value) options.noQuarterLevelUp = true;
+
     // Changing a monster's size resizes its tokens. A token's own actor
     // resizes that token instead, in _onUpdate.
     const size = NoQuarterActor.tokenSize(foundry.utils.getProperty(changes, 'system.size'));
@@ -192,6 +200,8 @@ export class NoQuarterActor extends Actor {
     super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
     this.#syncDeathAfterItems(documents, userId);
     this.#deleteLinkedSkills(documents, ids, userId);
+    this.#removeGrantedRanks(documents, ids, userId);
+    this.#removeRacialStats(documents, userId);
   }
 
   /**
@@ -208,6 +218,43 @@ export class NoQuarterActor extends Actor {
       .map((d) => d.system.skillId)
       .filter((id) => !ids.includes(id) && this.items.get(id)?.type === 'skill');
     if (skillIds.length) this.deleteEmbeddedDocuments('Item', skillIds);
+  }
+
+  /**
+   * Removing a Stat Increase takes back the rank it gave its stat.
+   * @param {Document[]} documents   The deleted descendants
+   * @param {string} userId          The user who deleted them
+   */
+  #removeRacialStats(documents, userId) {
+    if (userId !== game.user.id || this.type !== 'character') return;
+    const changes = {};
+    for (const d of documents) {
+      if (d.type !== 'racialSkill' || d.system.choice !== 'stat' || !d.system.stat) continue;
+      const path = `system.stats.${d.system.stat}.value`;
+      const value = changes[path] ?? this._source.system.stats[d.system.stat]?.value ?? 0;
+      changes[path] = Math.max(0, value - 1);
+    }
+    if (Object.keys(changes).length) this.update(changes, { noQuarterRacialStat: true });
+  }
+
+  /**
+   * Removing an Ability racial skill takes back the rank it gave. An ability
+   * left below its minimum rank goes back to 0 (not taken).
+   * @param {Document[]} documents   The deleted descendants
+   * @param {string[]} ids           Their ids
+   * @param {string} userId          The user who deleted them
+   */
+  #removeGrantedRanks(documents, ids, userId) {
+    if (userId !== game.user.id) return;
+    const updates = [];
+    for (const d of documents) {
+      if (d.type !== 'racialSkill' || !d.system.abilityId || ids.includes(d.system.abilityId)) continue;
+      const ability = this.items.get(d.system.abilityId);
+      if (ability?.type !== 'ability') continue;
+      const rank = Math.max(0, (ability.system.rank ?? 0) - 1);
+      updates.push({ _id: ability.id, 'system.rank': rank < ability.system.minRank ? 0 : rank });
+    }
+    if (updates.length) this.updateEmbeddedDocuments('Item', updates);
   }
 
   /**
@@ -278,7 +325,8 @@ export class NoQuarterActor extends Actor {
           sort: index * 10,
           system: {
             basicKey: key,
-            stat: basic.stat,
+            actionType: 'full',
+            stats: basic.stats,
             rank: 0,
             staminaCost: 0,
             damage: 1,

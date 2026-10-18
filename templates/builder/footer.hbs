@@ -1,0 +1,14 @@
+<footer class="builder-footer">
+  <button type="button" data-action="step" data-to="prev" {{#if isFirst}}disabled{{/if}}>
+    <i class="fa-solid fa-arrow-left"></i> {{localize 'NOQUARTER.Builder.Back'}}
+  </button>
+  {{#if isLast}}
+  <button type="button" class="builder-finish" data-action="finish" {{#unless building}}disabled{{/unless}}>
+    <i class="fa-solid fa-check"></i> {{localize 'NOQUARTER.Build.Finish'}}
+  </button>
+  {{else}}
+  <button type="button" data-action="step" data-to="next">
+    {{localize 'NOQUARTER.Builder.Next'}} <i class="fa-solid fa-arrow-right"></i>
+  </button>
+  {{/if}}
+</footer>

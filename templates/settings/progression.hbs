@@ -1,0 +1,32 @@
+<section class="progression-form">
+  <p class="hint">{{localize "NOQUARTER.Progression.TableHint"}}</p>
+  <table class="progression-table">
+    <thead>
+      <tr>
+        <th>{{localize "NOQUARTER.Progression.Level"}}</th>
+        <th>{{localize "NOQUARTER.Progression.StatPoints"}}</th>
+        <th>{{localize "NOQUARTER.Progression.AbilityPoints"}}</th>
+        <th>{{localize "NOQUARTER.Progression.Skills"}}</th>
+        <th>{{localize "NOQUARTER.Progression.StatCap"}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each rows as |row i|}}
+      <tr>
+        <td class="level">{{row.level}}</td>
+        <td><input type="number" name="rows.{{i}}.statPoints" value="{{row.statPoints}}" min="0" step="1"/></td>
+        <td><input type="number" name="rows.{{i}}.abilityPoints" value="{{row.abilityPoints}}" min="0" step="1"/></td>
+        <td><input type="number" name="rows.{{i}}.skills" value="{{row.skills}}" min="0" step="1"/></td>
+        <td><input type="number" name="rows.{{i}}.statCap" value="{{row.statCap}}" min="0" max="{{@root.maxRank}}" step="1"/></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div class="form-group">
+    <label for="no-quarter-free-respec">{{localize "NOQUARTER.Progression.FreeRespec"}}</label>
+    <div class="form-fields">
+      <input type="checkbox" id="no-quarter-free-respec" name="freeRespec" {{checked freeRespec}}/>
+    </div>
+    <p class="hint">{{localize "NOQUARTER.Progression.FreeRespecHint"}}</p>
+  </div>
+</section>

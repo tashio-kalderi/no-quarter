@@ -2,6 +2,7 @@ import { askRollMode, attackRolls, rollSuccess } from '../helpers/success.mjs';
 import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
 import { basicDamageType, parseConditions } from '../helpers/damage.mjs';
 import { formatRange } from '../helpers/range.mjs';
+import { checkItemCreate, checkItemDelete, checkItemUpdate } from '../helpers/build-mode.mjs';
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -18,12 +19,80 @@ export class NoQuarterItem extends Item {
   }
 
   /**
-   * A range typed as a bare number, such as "60", becomes "60 ft.".
+   * A player can only add abilities, skills and racial skills to a character
+   * in build mode, with the points to spare, and can't give an ability a rank
+   * above its highest stat (see helpers/build-mode.mjs).
+   * @override
+   */
+  async _preCreate(data, options, user) {
+    const allowed = await super._preCreate(data, options, user);
+    if (allowed === false) return false;
+    if (!checkItemCreate(this, options, user)) return false;
+    if (!this.#allowedRank(this.system.rank, this.system.stats, user)) return false;
+    if (!this.#rankInRange(this.system.rank, this.system.minRank, this.system.maxRank, user)) return false;
+  }
+
+  /**
+   * A range typed as a bare number, such as "60", becomes "60 ft.". A player
+   * can't raise a character's ability above its highest stat, nor untie it
+   * from the stat that allows its rank.
    * @override
    */
   async _preUpdate(changes, options, user) {
     const allowed = await super._preUpdate(changes, options, user);
     if (allowed === false) return false;
+    if (!checkItemUpdate(this, changes, user)) return false;
+
+    // A Stat Increase moved to another stat takes its rank with it (see _onUpdate).
+    const stat = foundry.utils.getProperty(changes, 'system.stat');
+    if (
+      this.type === 'racialSkill' &&
+      this.system.choice === 'stat' &&
+      this.actor?.type === 'character' &&
+      stat !== undefined &&
+      stat !== this.system.stat
+    ) {
+      // A player can only move it while building, and not onto a stat already at the cap.
+      if (!user.isGM) {
+        const actor = this.actor;
+        if (!actor.system.building) {
+          ui.notifications.warn('NOQUARTER.Build.NotBuilding', { localize: true });
+          return false;
+        }
+        const { statCap, level } = actor.system.progression;
+        if (stat && (actor._source.system.stats[stat]?.value ?? 0) >= statCap) {
+          ui.notifications.warn(
+            game.i18n.format('NOQUARTER.Build.StatCap', {
+              stat: game.i18n.localize(CONFIG.NOQUARTER.stats[stat]),
+              cap: statCap,
+              level,
+            })
+          );
+          return false;
+        }
+      }
+      options.noQuarterStatMoved = { from: this.system.stat, to: stat };
+    }
+
+    const rank = foundry.utils.getProperty(changes, 'system.rank');
+    const stats = foundry.utils.getProperty(changes, 'system.stats');
+    if (rank !== undefined || stats !== undefined) {
+      const newRank = rank !== undefined ? rank : this.system.rank;
+      const previous = { rank: this.system.rank, stats: this.system.stats };
+      if (!this.#allowedRank(newRank, stats ?? this.system.stats, user, previous)) return false;
+    }
+    const minRank = foundry.utils.getProperty(changes, 'system.minRank');
+    const maxRank = foundry.utils.getProperty(changes, 'system.maxRank');
+    const rangeChanged =
+      (rank !== undefined && rank !== this.system.rank) ||
+      (minRank !== undefined && minRank !== this.system.minRank) ||
+      (maxRank !== undefined && maxRank !== this.system.maxRank);
+    if (rangeChanged) {
+      const newRank = rank !== undefined ? rank : this.system.rank;
+      if (!this.#rankInRange(newRank, minRank ?? this.system.minRank, maxRank ?? this.system.maxRank, user)) {
+        return false;
+      }
+    }
 
     const range = foundry.utils.getProperty(changes, 'system.range');
     if (typeof range === 'string') foundry.utils.setProperty(changes, 'system.range', formatRange(range));
@@ -31,6 +100,98 @@ export class NoQuarterItem extends Item {
     // An emptied attacks box goes back to a single attack.
     const attacks = foundry.utils.getProperty(changes, 'system.attacks');
     if (attacks !== undefined && !(attacks >= 1)) foundry.utils.setProperty(changes, 'system.attacks', 1);
+  }
+
+  /**
+   * Move a Stat Increase's rank when its stat changes.
+   * @override
+   */
+  _onUpdate(changed, options, userId) {
+    super._onUpdate(changed, options, userId);
+    const moved = options.noQuarterStatMoved;
+    if (!moved || userId !== game.user.id || !this.actor) return;
+    const stats = this.actor._source.system.stats;
+    const changes = {};
+    if (moved.from) changes[`system.stats.${moved.from}.value`] = Math.max(0, (stats[moved.from]?.value ?? 0) - 1);
+    if (moved.to) changes[`system.stats.${moved.to}.value`] = (stats[moved.to]?.value ?? 0) + 1;
+    this.actor.update(changes, { noQuarterRacialStat: true });
+  }
+
+  /**
+   * A player can only remove a character's abilities, skills and racial
+   * skills in build mode (see helpers/build-mode.mjs).
+   * @override
+   */
+  async _preDelete(options, user) {
+    const allowed = await super._preDelete(options, user);
+    if (allowed === false) return false;
+    if (!checkItemDelete(this, user)) return false;
+  }
+
+  /**
+   * Whether a rank is allowed for this item when it's a character's ability.
+   * The cap is the highest of its stats as the player allocated them, so a
+   * temporary bonus from an effect doesn't count. GMs can set any rank. When
+   * a GM has already set it higher, a player's other edits still save as long
+   * as they don't raise the rank or lower the cap further. Warns the player
+   * when it isn't allowed.
+   * @param {number|null} rank
+   * @param {Iterable<string>} stats
+   * @param {User} user
+   * @param {{rank: number|null, stats: Iterable<string>}} [previous]   The values before an update
+   * @returns {boolean}
+   */
+  #allowedRank(rank, stats, user, previous) {
+    if (this.type !== 'ability' || this.actor?.type !== 'character' || user.isGM) return true;
+    const best = this.#highestBaseStat(stats);
+    // Without a stat there's nothing to cap it by yet; tying it to one is checked.
+    if (!best || (rank ?? 0) <= best.value) return true;
+    if (previous) {
+      const before = this.#highestBaseStat(previous.stats);
+      if ((rank ?? 0) <= (previous.rank ?? 0) && before && best.value >= before.value) return true;
+    }
+    ui.notifications.warn(
+      game.i18n.format('NOQUARTER.AbilityRank.TooHigh', {
+        name: this.name,
+        rank,
+        stat: game.i18n.localize(CONFIG.NOQUARTER.stats[best.key]),
+        value: best.value,
+      })
+    );
+    return false;
+  }
+
+  /**
+   * Whether a rank is within a character's ability's range: 0 (not taken) or
+   * from its minimum to its maximum rank. GMs can set any rank. Warns the
+   * player when it isn't allowed.
+   * @param {number|null} rank
+   * @param {number} min
+   * @param {number} max
+   * @param {User} user
+   * @returns {boolean}
+   */
+  #rankInRange(rank, min, max, user) {
+    if (this.type !== 'ability' || this.actor?.type !== 'character' || user.isGM) return true;
+    rank = rank ?? 0;
+    if (rank === 0 || (rank >= min && rank <= max)) return true;
+    ui.notifications.warn(game.i18n.format('NOQUARTER.AbilityRank.OutOfRange', { name: this.name, min, max }));
+    return false;
+  }
+
+  /**
+   * The highest of some stats as the owning character allocated them.
+   * @param {Iterable<string>} stats
+   * @returns {{key: string, value: number}|null}
+   */
+  #highestBaseStat(stats) {
+    const base = this.actor._source.system.stats;
+    let best = null;
+    for (const key of stats ?? []) {
+      const value = base[key]?.value ?? 0;
+      if (!best || value > best.value) best = { key, value };
+    }
+    return best;
   }
 
   /**
@@ -60,9 +221,12 @@ export class NoQuarterItem extends Item {
 
     // Abilities roll d100 against their success chances.
     if (item.type === 'ability') {
-      // Passive abilities have nothing to roll; post them to chat instead.
+      // Only full actions are rolled; post the others to chat instead.
       if (!item.system.chances) {
         const esc = foundry.utils.escapeHTML;
+        const typeLabel = game.i18n.localize(
+          CONFIG.NOQUARTER.actionTypes[item.system.actionType]?.label ?? 'NOQUARTER.Passive'
+        );
         const effect = item.system.effect
           ? `<div class="roll-effect">${esc(item.system.effect)}</div>`
           : '';
@@ -70,7 +234,7 @@ export class NoQuarterItem extends Item {
           {
             speaker: ChatMessage.getSpeaker({ actor: item.actor }),
             content: `<div class="no-quarter-roll">
-              <div class="roll-title"><strong>${esc(item.name)}</strong> <span class="roll-chances">(${game.i18n.localize('NOQUARTER.Passive')})</span></div>
+              <div class="roll-title"><strong>${esc(item.name)}</strong> <span class="roll-chances">(${esc(typeLabel)})</span></div>
               ${effect}
             </div>`,
           },

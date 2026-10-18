@@ -42,6 +42,18 @@ export function registerMigrationSettings() {
     type: Boolean,
     default: false,
   });
+  game.settings.register('no-quarter', 'buildModeMigrated', {
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false,
+  });
+  game.settings.register('no-quarter', 'abilityActionTypesMigrated', {
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false,
+  });
 }
 
 /** Run every migration that's needed. Only the active GM does this. */
@@ -49,6 +61,59 @@ export async function migrateWorld() {
   if (!game.users.activeGM?.isSelf) return;
   await migrateSkillsToItems();
   await migrateAbilityAttacks();
+  await migrateAbilityActionTypes();
+  await migrateBuildMode();
+}
+
+/**
+ * New characters start in build mode, but characters made before build mode
+ * existed are already built, so they're taken out of it once.
+ */
+async function migrateBuildMode() {
+  if (game.settings.get('no-quarter', 'buildModeMigrated')) return;
+  const updates = game.actors
+    .filter((a) => a.type === 'character')
+    .map((a) => ({ _id: a.id, 'system.building': false }));
+  if (updates.length) await Actor.updateDocuments(updates, { diff: false, render: false });
+  await game.settings.set('no-quarter', 'buildModeMigrated', true);
+}
+
+/**
+ * Abilities used to have a single `stat`, and no stat meant a passive one.
+ * NoQuarterAbility.migrateData turns that into `stats` and an `actionType`
+ * when they load; this saves the result once and removes the old field.
+ * Monster abilities don't use either, so they're simply full actions.
+ */
+async function migrateAbilityActionTypes() {
+  if (game.settings.get('no-quarter', 'abilityActionTypesMigrated')) return;
+
+  const updates = (items, isMonster) =>
+    items
+      .filter((i) => i.type === 'ability')
+      .map((i) => ({
+        _id: i.id,
+        'system.stats': isMonster ? [] : [...i._source.system.stats],
+        'system.actionType': isMonster ? 'full' : i._source.system.actionType,
+        'system.-=stat': null,
+      }));
+  const options = { diff: false, render: false };
+
+  const worldItems = updates(game.items, false);
+  if (worldItems.length) await Item.updateDocuments(worldItems, options);
+  for (const actor of game.actors) {
+    const data = updates(actor.items, actor.type === 'npc');
+    if (data.length) await actor.updateEmbeddedDocuments('Item', data, options);
+  }
+  // Unlinked tokens keep their own changed copies of abilities.
+  for (const scene of game.scenes) {
+    for (const token of scene.tokens) {
+      if (token.actorLink || !token.actor || !token.delta?.items.size) continue;
+      const data = updates(token.delta.items, token.actor.type === 'npc');
+      if (data.length) await token.actor.updateEmbeddedDocuments('Item', data, options);
+    }
+  }
+
+  await game.settings.set('no-quarter', 'abilityActionTypesMigrated', true);
 }
 
 /**

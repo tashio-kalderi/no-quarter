@@ -37,10 +37,42 @@
       <div class="resource flex-group-center">
         <label for="system.attributes.level.value" class="resource-label">Level</label>
         <div class="resource-content flexrow flex-center flex-between">
-        <input type="text" name="system.attributes.level.value" value="{{system.attributes.level.value}}" data-dtype="Number"/>
+        {{!-- Raising the level enters build mode. Players can't change it while the GM has locked building. --}}
+        <input type="text" name="system.attributes.level.value" value="{{system.attributes.level.value}}" data-dtype="Number"
+               {{#if build.levelLocked}}disabled data-tooltip="{{localize 'NOQUARTER.Build.LevelLocked'}}"{{/if}}/>
+        {{#if build.canEnter}}
+        <a class="build-enter" data-action="enterBuild" data-tooltip="{{localize 'NOQUARTER.Build.EnterHint'}}"
+           aria-label="{{localize 'NOQUARTER.Build.Enter'}}"><i class="fa-solid fa-hammer"></i></a>
+        {{/if}}
         </div>
       </div>
 
     </div>
   </div>
+  {{!-- Points left to spend, shown only while the character is being built or levelled up. --}}
+  {{#if build.building}}
+  {{#with build.progression as |p|}}
+  <div class="build-tracker">
+    <span class="build-title"><i class="fa-solid fa-hammer"></i> {{localize 'NOQUARTER.Build.Building'}}</span>
+    <span class="build-pool {{#if (lt p.stats.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.StatsLeft'}}: <strong>{{p.stats.remaining}}</strong> / {{p.stats.earned}}
+    </span>
+    <span class="build-pool {{#if (lt p.abilities.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.AbilitiesLeft'}}: <strong>{{p.abilities.remaining}}</strong> / {{p.abilities.earned}}
+    </span>
+    <span class="build-pool {{#if (lt p.skills.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.SkillsLeft'}}: <strong>{{p.skills.remaining}}</strong> / {{p.skills.earned}}
+    </span>
+    <span class="build-pool">{{localize 'NOQUARTER.Build.StatCapLabel'}}: <strong>{{p.statCap}}</strong></span>
+    {{#if @root.editable}}
+    <button type="button" class="build-open" data-action="openBuilder">
+      <i class="fa-solid fa-list-check"></i> {{localize 'NOQUARTER.Builder.Open'}}
+    </button>
+    <button type="button" class="build-finish" data-action="finishBuild">
+      <i class="fa-solid fa-check"></i> {{localize 'NOQUARTER.Build.Finish'}}
+    </button>
+    {{/if}}
+  </div>
+  {{/with}}
+  {{/if}}
 </header>

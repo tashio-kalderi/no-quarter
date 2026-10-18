@@ -1,0 +1,21 @@
+// The Character Progression settings window: a compact table, one row per level.
+.progression-config {
+  .progression-table {
+    width: 100%;
+    margin: 0 0 8px;
+    text-align: center;
+
+    th {
+      font-size: 0.85em;
+    }
+
+    td.level {
+      font-weight: bold;
+    }
+
+    input[type='number'] {
+      width: 4rem;
+      text-align: center;
+    }
+  }
+}

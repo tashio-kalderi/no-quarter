@@ -38,16 +38,35 @@
     <input type="text" name="system.effect" value="{{system.effect}}"/>
   </div>
   {{else}}
-  <div class="grid grid-4col">
+  <div class="grid grid-2col">
     <div class="grid-span-1">
-      <label class="resource-label">Stat</label>
-      <select name="system.stat" {{#if system.basicKey}}disabled{{/if}}>
-        {{selectOptions config.stats selected=system.stat localize=true blank="-"}}
+      <label class="resource-label">Action Type</label>
+      <select name="system.actionType" {{#if (or system.basicKey buildLocked)}}disabled{{/if}}>
+        {{selectOptions actionTypeChoices selected=system.actionType localize=true}}
       </select>
     </div>
+    <div class="grid-span-1 ability-stats">
+      {{!-- Rank can't go above the highest of these; a full action rolls with the highest. --}}
+      <label class="resource-label">Stats</label>
+      {{formInput statsField value=statsValue type="checkboxes" choices=config.stats localize=true disabled=(or system.basicKey buildLocked)}}
+    </div>
+  </div>
+  <div class="grid grid-3col">
+    <div class="grid-span-1">
+      <label class="resource-label">Min Rank</label>
+      <input type="text" name="system.minRank" value="{{system.minRank}}" data-dtype="Number" {{#if buildLocked}}disabled{{/if}}
+             data-tooltip="Taking the ability costs this many ability points."/>
+    </div>
+    <div class="grid-span-1">
+      <label class="resource-label">Max Rank</label>
+      <input type="text" name="system.maxRank" value="{{system.maxRank}}" data-dtype="Number" {{#if buildLocked}}disabled{{/if}}/>
+    </div>
+    <div class="grid-span-1"></div>
+  </div>
+  <div class="grid grid-3col">
     <div class="grid-span-1">
       <label class="resource-label">Rank</label>
-      <input type="text" name="system.rank" value="{{system.rank}}" data-dtype="Number"/>
+      <input type="text" name="system.rank" value="{{system.rank}}" data-dtype="Number" {{#if buildLocked}}disabled{{/if}}/>
     </div>
     <div class="grid-span-1">
       <label class="resource-label">Stamina Cost</label>
@@ -56,7 +75,7 @@
     <div class="grid-span-1">
       <label class="resource-label">Reg/Great/Ext</label>
       <span class="ability-chances">
-        {{#if chances}}<span class="chance">{{chances.regular}}</span>/<span class="chance">{{chances.greater}}</span>/<span class="chance">{{chances.extreme}}</span>{{else}}{{localize 'NOQUARTER.Passive'}}{{/if}}
+        {{#if chances}}<span class="chance">{{chances.regular}}</span>/<span class="chance">{{chances.greater}}</span>/<span class="chance">{{chances.extreme}}</span>{{else}}{{localize (lookup (lookup config.actionTypes system.actionType) "label")}}{{/if}}
       </span>
     </div>
   </div>

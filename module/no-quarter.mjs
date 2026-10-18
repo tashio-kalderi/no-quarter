@@ -6,6 +6,8 @@ import { NoQuarterActorSheet } from './sheets/actor-sheet.mjs';
 import { NoQuarterItemSheet } from './sheets/item-sheet.mjs';
 // Import application classes.
 import { NoQuarterCombatTracker } from './applications/combat-tracker.mjs';
+import { ProgressionConfig } from './applications/progression-config.mjs';
+import { CharacterBuilder, registerCharacterBuilder } from './applications/character-builder.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { NOQUARTER } from './helpers/config.mjs';
@@ -16,6 +18,8 @@ import { registerMovementRuler } from './helpers/movement-ruler.mjs';
 import { registerVision } from './helpers/vision.mjs';
 import { registerHits } from './helpers/damage.mjs';
 import { migrateWorld, registerMigrationSettings } from './helpers/migrations.mjs';
+import { registerProgressionSettings } from './helpers/progression.mjs';
+import { registerBuildModeSettings } from './helpers/build-mode.mjs';
 // Import DataModel classes.
 import * as models from './data/_module.mjs';
 
@@ -29,6 +33,7 @@ Hooks.once('init', function () {
   game.noquarter = {
     NoQuarterActor,
     NoQuarterItem,
+    CharacterBuilder,
     rollItemMacro,
   };
 
@@ -37,6 +42,13 @@ Hooks.once('init', function () {
 
   // Record which one-off data conversions have run, see helpers/migrations.mjs.
   registerMigrationSettings();
+
+  // What each character level gives, editable by the GM, see helpers/progression.mjs.
+  registerProgressionSettings(ProgressionConfig);
+  registerBuildModeSettings();
+
+  // The step-by-step character builder opens for new characters and on level-up.
+  registerCharacterBuilder();
 
   // Show wounds on tokens.
   registerWoundBadge();

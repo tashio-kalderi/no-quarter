@@ -3,6 +3,9 @@ import {
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
 import { formatRange } from '../helpers/range.mjs';
+import { buildingLocked, finishBuilding } from '../helpers/build-mode.mjs';
+import { addRacialSkill, addSkill } from '../helpers/racial-skills.mjs';
+import { CharacterBuilder } from '../applications/character-builder.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -29,6 +32,9 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       roll: NoQuarterActorSheet.#onRoll,
       resetUses: NoQuarterActorSheet.#onResetUses,
       breather: NoQuarterActorSheet.#onBreather,
+      enterBuild: NoQuarterActorSheet.#onEnterBuild,
+      finishBuild: NoQuarterActorSheet.#onFinishBuild,
+      openBuilder: NoQuarterActorSheet.#onOpenBuilder,
       ...effectActions,
     },
   };
@@ -125,8 +131,33 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       inCombat: actor.inStartedCombat,
       usesWounds: actor.usesWounds,
       maxWounds: actor.maxWounds,
+      build: this._prepareBuild(),
       ...this._prepareItems(),
     });
+  }
+
+  /**
+   * A character's build mode: whether it's on, whether this user can turn it
+   * on and change what it covers, and the points left to spend. Players can
+   * only change stats, ability ranks and skills while building; GMs always can.
+   * @returns {object|null}   Null for monsters
+   * @protected
+   */
+  _prepareBuild() {
+    const actor = this.actor;
+    if (actor.type !== 'character') return null;
+    const isGM = game.user.isGM;
+    const { building, progression } = actor.system;
+    return {
+      building,
+      canEnter: this.isEditable && !building && (isGM || !buildingLocked()),
+      canEdit: this.isEditable && (isGM || building),
+      // The stat boxes show stats as allocated: with effects included, saving
+      // the form would write the effect into the stat.
+      sourceStats: Object.fromEntries(Object.entries(actor._source.system.stats).map(([k, v]) => [k, v.value])),
+      levelLocked: !isGM && buildingLocked(),
+      progression,
+    };
   }
 
   /** @override */
@@ -163,7 +194,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /**
    * Organize and classify Items for Actor sheets.
-   * @returns {{gear: Item[], abilities: object[], spells: Record<number, Item[]>, racialSkills: object[], skills: Item[]}}
+   * @returns {{gear: Item[], abilities: object[], abilitySections: object[], spells: Record<number, Item[]>, racialSkills: object[], skills: Item[]}}
    * @protected
    */
   _prepareItems() {
@@ -183,7 +214,15 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     // Skills are listed by name.
     skills.sort((a, b) => a.name.localeCompare(b.name));
 
-    return { gear, skills, abilities: this._prepareAbilities(), spells, racialSkills: this._prepareRacialSkills() };
+    const abilities = this._prepareAbilities();
+    return {
+      gear,
+      skills,
+      abilities,
+      abilitySections: this._prepareAbilitySections(abilities),
+      spells,
+      racialSkills: this._prepareRacialSkills(),
+    };
   }
 
   /**
@@ -218,6 +257,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         if (i.system.choice === 'stat' && i.system.stat) {
           choice = game.i18n.localize(CONFIG.NOQUARTER.stats[i.system.stat]);
         } else if (i.system.choice === 'skill') choice = i.system.skillName;
+        else if (i.system.choice === 'ability') choice = i.system.abilityName;
         return { _id: i.id, name: i.name, img: i.img || Item.DEFAULT_ICON, choice, summary: summary.join(' · ') };
       });
   }
@@ -268,12 +308,64 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
         basicIndex: basicOrder.indexOf(i.system.basicKey),
         system: i.system,
         chances: i.system.chances,
+        ...this._abilityStatInfo(i),
       }))
       .sort((a, b) => {
         if (a.basic !== b.basic) return a.basic ? -1 : 1;
         if (a.basic) return a.basicIndex - b.basicIndex;
         return a.sort - b.sort || a.name.localeCompare(b.name);
       });
+  }
+
+  /**
+   * How a character's ability shows its stats: their abbreviations with the
+   * highest one marked, the most a player may type in the rank box, and a
+   * warning when an effect has lowered the stat below the ability's rank.
+   * @param {Item} item
+   * @returns {{statList: object[], rankMax: number, cappedTooltip: string}}
+   * @protected
+   */
+  _abilityStatInfo(item) {
+    const { stats, highestStat, rankCapped, effectiveRank } = item.system;
+    if (!stats) return {};
+    const statList = [...stats]
+      .sort((a, b) => Object.keys(CONFIG.NOQUARTER.stats).indexOf(a) - Object.keys(CONFIG.NOQUARTER.stats).indexOf(b))
+      .map((key) => ({
+        key,
+        abbr: game.i18n.localize(CONFIG.NOQUARTER.statAbbreviations[key]),
+        highest: stats.size > 1 && key === highestStat?.key,
+      }));
+    // Players can't type a rank above the ability's maximum or their highest
+    // stat as allocated; GMs can.
+    const maxRank = game.user.isGM ? CONFIG.NOQUARTER.successRules.maxRank : item.system.maxRank;
+    let rankMax = maxRank;
+    if (!game.user.isGM && stats.size && this.actor.type === 'character') {
+      const base = this.actor._source.system.stats;
+      rankMax = Math.min(maxRank, Math.max(...[...stats].map((key) => base[key]?.value ?? 0)));
+    }
+    const cappedTooltip = rankCapped
+      ? game.i18n.format('NOQUARTER.AbilityRank.Capped', {
+          stat: game.i18n.localize(CONFIG.NOQUARTER.stats[highestStat.key]),
+          value: effectiveRank,
+        })
+      : '';
+    return { statList, rankMax, cappedTooltip };
+  }
+
+  /**
+   * Split a character's abilities into a section per action type, in the
+   * order the types are configured. Every section is shown, even when empty,
+   * so new abilities can be added to it.
+   * @param {object[]} abilities   From _prepareAbilities
+   * @returns {{type: string, label: string, abilities: object[]}[]}
+   * @protected
+   */
+  _prepareAbilitySections(abilities) {
+    return Object.entries(CONFIG.NOQUARTER.actionTypes).map(([type, { section }]) => ({
+      type,
+      label: game.i18n.localize(section),
+      abilities: abilities.filter((a) => a.system.actionType === type),
+    }));
   }
 
   /* -------------------------------------------- */
@@ -317,115 +409,15 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
 
   /**
    * Racial skills dropped onto the sheet go to the Skills tab wherever they
-   * land, like any other item. Only characters can have them, up to
-   * NOQUARTER.maxRacialSkills. A skill can only be taken twice if it's
-   * repeatable, and an exclusive one (Flight) can't be taken with any other.
-   * One that asks for a choice, such as Stat Increase, asks for it first.
+   * land, like any other item. The rules for taking them, and the choice some
+   * ask for, are in helpers/racial-skills.mjs, shared with the character builder.
    * @override
    */
   async _onDropItem(event, item) {
     if (item.type === 'skill' && item.parent !== this.actor) return this.#onDropSkill(event, item);
     if (item.type === 'boon' && item.parent !== this.actor) return this.#onDropBoon(event, item);
     if (item.type !== 'racialSkill' || item.parent === this.actor) return super._onDropItem(event, item);
-    if (!this.actor.isOwner) return null;
-    const problem = this.#racialSkillDropProblem(item);
-    if (problem) {
-      ui.notifications.warn(problem);
-      return null;
-    }
-    const { choice } = item.system;
-    if (choice !== 'stat' && choice !== 'skill') return super._onDropItem(event, item);
-
-    const data = item.inCompendium ? game.items.fromCompendium(item, { clearFolder: true }) : item.toObject();
-    if (choice === 'stat') {
-      const stat = await this.#chooseStat(item);
-      if (!stat) return null;
-      data.system.stat = stat;
-      return (await Item.implementation.create(data, { parent: this.actor })) ?? null;
-    }
-
-    // A Profession also adds the skill it's for to the character's skills,
-    // linked by id so that removing the Profession removes the skill too.
-    const skill = await this.#chooseSkill(item);
-    if (!skill) return null;
-    delete data._id;
-    skill._id = foundry.utils.randomID();
-    data.system.skill = skill.name;
-    data.system.skillId = skill._id;
-    const [created] = await this.actor.createEmbeddedDocuments('Item', [data, skill], { keepId: true });
-    return created ?? null;
-  }
-
-  /**
-   * Ask which skill a racial skill adds: one from the compendiums, or any
-   * skill typed by name. Skills the character already has aren't offered.
-   * @param {Item} item   The dropped racial skill
-   * @returns {Promise<object|null>}   The new skill's data, or null if none was chosen
-   */
-  async #chooseSkill(item) {
-    const owned = new Set(this.actor.items.filter((i) => i.type === 'skill').map((i) => i.name.toLowerCase()));
-    // Compendium skills by lowercase name, and grouped by their folder.
-    const byName = new Map();
-    const groups = new Map();
-    for (const pack of game.packs.filter((p) => p.documentName === 'Item' && p.visible)) {
-      const index = await pack.getIndex({ fields: ['type', 'folder'] });
-      for (const entry of index) {
-        const key = entry.name.toLowerCase();
-        if (entry.type !== 'skill' || owned.has(key) || byName.has(key)) continue;
-        byName.set(key, entry);
-        const group = pack.folders.get(entry.folder)?.name ?? pack.title;
-        if (!groups.has(group)) groups.set(group, []);
-        groups.get(group).push(entry);
-      }
-    }
-
-    const esc = foundry.utils.escapeHTML;
-    const optgroups = [...groups.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([group, entries]) => {
-        const options = entries
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((e) => `<option value="${e.uuid}">${esc(e.name)}</option>`);
-        return `<optgroup label="${esc(group)}">${options.join('')}</optgroup>`;
-      });
-    const i18n = (key) => game.i18n.localize(key);
-    const picked = await foundry.applications.api.DialogV2.prompt({
-      window: { title: item.name, icon: 'fa-solid fa-book' },
-      content: `<p>${game.i18n.format('NOQUARTER.RacialSkill.ChooseSkill', { name: item.name })}</p>
-        <div class="form-group">
-          <label>${i18n('NOQUARTER.RacialSkill.SkillFromCompendium')}</label>
-          <select name="uuid" autofocus><option value=""></option>${optgroups.join('')}</select>
-        </div>
-        <div class="form-group">
-          <label>${i18n('NOQUARTER.RacialSkill.SkillByName')}</label>
-          <input type="text" name="name">
-        </div>`,
-      ok: {
-        label: 'NOQUARTER.RacialSkill.Choose',
-        callback: (event, button) => ({
-          uuid: button.form.elements.uuid.value,
-          name: button.form.elements.name.value.trim(),
-        }),
-      },
-      rejectClose: false,
-    });
-    if (!picked) return null;
-
-    // A typed name wins over the list, and uses the compendium's skill if it has one by that name.
-    let uuid = picked.uuid;
-    if (picked.name) {
-      if (owned.has(picked.name.toLowerCase())) {
-        ui.notifications.warn(game.i18n.format('NOQUARTER.Skill.Duplicate', { name: picked.name }));
-        return null;
-      }
-      uuid = byName.get(picked.name.toLowerCase())?.uuid;
-      if (!uuid) return { name: picked.name, type: 'skill' };
-    }
-    if (!uuid) {
-      ui.notifications.warn('NOQUARTER.RacialSkill.NoSkillChosen', { localize: true });
-      return null;
-    }
-    return game.items.fromCompendium(await fromUuid(uuid), { clearFolder: true });
+    return addRacialSkill(this.actor, item);
   }
 
   /**
@@ -436,16 +428,9 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
    * @returns {Promise<Item|null>}
    */
   async #onDropSkill(event, item) {
-    if (this.actor.type !== 'character') {
-      ui.notifications.warn('NOQUARTER.Skill.CharactersOnly', { localize: true });
-      return null;
-    }
-    const name = item.name.toLowerCase();
-    if (this.actor.items.some((i) => i.type === 'skill' && i.name.toLowerCase() === name)) {
-      ui.notifications.warn(game.i18n.format('NOQUARTER.Skill.Duplicate', { name: item.name }));
-      return null;
-    }
-    return super._onDropItem(event, item);
+    const data = item.inCompendium ? game.items.fromCompendium(item, { clearFolder: true }) : item.toObject();
+    delete data._id;
+    return addSkill(this.actor, data);
   }
 
   /**
@@ -469,66 +454,6 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       ui.notifications.warn(game.i18n.format('NOQUARTER.Boon.TooLow', { level: minLevel }));
     }
     return super._onDropItem(event, item);
-  }
-
-  /**
-   * Ask which stat a racial skill is for, leaving out the stats the character
-   * already picked for other copies of it.
-   * @param {Item} item   The dropped racial skill
-   * @returns {Promise<string|null>}   The stat, or null if none is left or the dialog was closed
-   */
-  async #chooseStat(item) {
-    const taken = new Set(
-      this.actor.items.filter((i) => this.#isSameRacialSkill(i, item)).map((i) => i.system.stat)
-    );
-    const options = Object.entries(CONFIG.NOQUARTER.stats)
-      .filter(([key]) => !taken.has(key))
-      .map(([key, label]) => `<option value="${key}">${game.i18n.localize(label)}</option>`);
-    if (!options.length) {
-      ui.notifications.warn(game.i18n.format('NOQUARTER.RacialSkill.AllStatsChosen', { name: item.name }));
-      return null;
-    }
-    return foundry.applications.api.DialogV2.prompt({
-      window: { title: item.name, icon: 'fa-solid fa-arrow-up' },
-      content: `<p>${game.i18n.format('NOQUARTER.RacialSkill.ChooseStat', { name: item.name })}</p>
-        <select name="stat" autofocus>${options.join('')}</select>`,
-      ok: { label: 'NOQUARTER.RacialSkill.Choose', callback: (event, button) => button.form.elements.stat.value },
-      rejectClose: false,
-    });
-  }
-
-  /**
-   * Whether an owned item is a copy of a racial skill. A skill from the
-   * compendium remembers where it came from, so a renamed copy still counts.
-   * @param {Item} owned   An item the actor has
-   * @param {Item} item    The racial skill to compare it with
-   * @returns {boolean}
-   */
-  #isSameRacialSkill(owned, item) {
-    if (owned.type !== 'racialSkill') return false;
-    const source = item.inCompendium ? item.uuid : item._stats.compendiumSource;
-    return owned.name === item.name || (!!source && owned._stats.compendiumSource === source);
-  }
-
-  /**
-   * Why a racial skill can't be added to this actor, if it can't.
-   * @param {Item} item   The dropped racial skill
-   * @returns {string|undefined}   The warning to show
-   */
-  #racialSkillDropProblem(item) {
-    const i18n = (key, data = {}) => game.i18n.format(key, data);
-    if (this.actor.type !== 'character') return i18n('NOQUARTER.RacialSkill.CharactersOnly');
-    const owned = this.actor.items.filter((i) => i.type === 'racialSkill');
-
-    const exclusive = owned.find((i) => i.system.exclusive);
-    if (exclusive) return i18n('NOQUARTER.RacialSkill.Exclusive', { name: exclusive.name });
-    if (item.system.exclusive && owned.length) return i18n('NOQUARTER.RacialSkill.Exclusive', { name: item.name });
-
-    const duplicate = owned.some((i) => this.#isSameRacialSkill(i, item));
-    if (duplicate && !item.system.repeatable) return i18n('NOQUARTER.RacialSkill.Duplicate');
-    if (owned.length >= CONFIG.NOQUARTER.maxRacialSkills) {
-      return i18n('NOQUARTER.RacialSkill.Limit', { max: CONFIG.NOQUARTER.maxRacialSkills });
-    }
   }
 
   /**
@@ -617,7 +542,10 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
     }
     // Uses are shown as the number left, but stored as the number used.
     if (field === 'remaining') return item.update({ 'system.used': item.system.uses - value });
-    return item.update({ [`system.${field}`]: value });
+    // A refused change (such as a rank the rules don't allow) puts the old value back in the box.
+    const updated = await item.update({ [`system.${field}`]: value });
+    if (!updated) this.render();
+    return updated;
   }
 
   /* -------------------------------------------- */
@@ -684,6 +612,30 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
   static async #onBreather(event, target) {
     if (!this.isEditable) return;
     return this.actor.takeBreather();
+  }
+
+  /**
+   * Enter build mode (see helpers/build-mode.mjs) and open the character builder.
+   * @this {NoQuarterActorSheet}
+   */
+  static async #onEnterBuild() {
+    if (await this.actor.update({ 'system.building': true })) CharacterBuilder.open(this.actor);
+  }
+
+  /**
+   * Open the character builder while building.
+   * @this {NoQuarterActorSheet}
+   */
+  static #onOpenBuilder() {
+    CharacterBuilder.open(this.actor);
+  }
+
+  /**
+   * Finish building, locking in what was spent.
+   * @this {NoQuarterActorSheet}
+   */
+  static #onFinishBuild() {
+    return finishBuilding(this.actor);
   }
 
   /**

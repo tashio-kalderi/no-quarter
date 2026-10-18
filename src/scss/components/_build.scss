@@ -1,0 +1,34 @@
+// Build mode: the hammer next to Level enters it, and the tracker under the
+// header shows the points left while it's on.
+.build-enter {
+  flex: none;
+  margin-left: 4px;
+}
+
+.build-tracker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  background: rgba(255, 200, 0, 0.12);
+
+  .build-title {
+    font-weight: bold;
+  }
+
+  // More spent than earned, such as after the level was lowered.
+  .build-pool.overspent {
+    color: #a01010;
+  }
+
+  .build-finish {
+    flex: none;
+    width: auto;
+    margin-left: auto;
+    line-height: 1.6;
+  }
+}

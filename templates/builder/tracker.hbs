@@ -1,0 +1,27 @@
+<header class="builder-header">
+  {{!-- The steps, any of which can be jumped to. --}}
+  <nav class="builder-steps">
+    {{#each steps as |s|}}
+    <a class="builder-step {{#if s.active}}active{{/if}}" data-action="step" data-to="{{s.index}}">
+      <span class="builder-step-number">{{s.number}}</span> {{s.label}}
+    </a>
+    {{/each}}
+  </nav>
+  {{!-- Points left, as on the sheet's build tracker. --}}
+  <div class="build-tracker">
+    <span class="build-pool">{{localize 'NOQUARTER.Progression.Level'}}: <strong>{{progression.level}}</strong></span>
+    <span class="build-pool {{#if (lt progression.stats.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.StatsLeft'}}: <strong>{{progression.stats.remaining}}</strong> / {{progression.stats.earned}}
+    </span>
+    <span class="build-pool {{#if (lt progression.abilities.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.AbilitiesLeft'}}: <strong>{{progression.abilities.remaining}}</strong> / {{progression.abilities.earned}}
+    </span>
+    <span class="build-pool {{#if (lt progression.skills.remaining 0)}}overspent{{/if}}">
+      {{localize 'NOQUARTER.Build.SkillsLeft'}}: <strong>{{progression.skills.remaining}}</strong> / {{progression.skills.earned}}
+    </span>
+    <span class="build-pool">{{localize 'NOQUARTER.Build.StatCapLabel'}}: <strong>{{progression.statCap}}</strong></span>
+  </div>
+  {{#unless building}}
+  <p class="builder-notice">{{localize 'NOQUARTER.Builder.NotBuilding'}}</p>
+  {{/unless}}
+</header>

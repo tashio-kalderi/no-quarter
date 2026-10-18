@@ -2,6 +2,7 @@ import NoQuarterActorBase from './base-actor.mjs';
 import { NOQUARTER } from '../helpers/config.mjs';
 import { successChances } from '../helpers/success.mjs';
 import { LEGACY_SKILLS } from '../helpers/migrations.mjs';
+import { characterProgression } from '../helpers/progression.mjs';
 
 export default class NoQuarterCharacter extends NoQuarterActorBase {
   static defineSchema() {
@@ -55,6 +56,11 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
       })
     );
 
+    // Whether the character is being built or levelled up, when its player can
+    // change its stats, ability ranks and skills (see helpers/build-mode.mjs).
+    // New characters start in build mode.
+    schema.building = new fields.BooleanField({ initial: true });
+
     schema.attributes = new fields.SchemaField({
       level: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 1 }),
@@ -81,6 +87,9 @@ export default class NoQuarterCharacter extends NoQuarterActorBase {
 
     // Current stamina cannot exceed its maximum.
     this.stamina.value = Math.min(this.stamina.value, this.stamina.max);
+
+    // Stat points, ability points and skills earned by this level, spent and left.
+    this.progression = characterProgression(this.parent);
   }
 
   /** @override */

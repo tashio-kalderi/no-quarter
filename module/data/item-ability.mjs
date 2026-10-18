@@ -8,14 +8,19 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     const requiredInteger = { required: true, nullable: false, integer: true };
     const schema = super.defineSchema();
 
-    // The stat the ability is based on. Blank for passive abilities, which
-    // have no stat and no success chance.
-    schema.stat = new fields.StringField({
+    // How the ability is used: a full action takes the character's turn and is
+    // rolled; a supplemental ability is added onto a full action, and a passive
+    // one is always on. Neither of those is rolled.
+    schema.actionType = new fields.StringField({
       required: true,
-      blank: true,
-      choices: ['', ...Object.keys(NOQUARTER.stats)],
-      initial: '',
+      choices: Object.keys(NOQUARTER.actionTypes),
+      initial: 'full',
     });
+    // The stats the ability is tied to. Its rank can't go above the highest of
+    // them, and a full action rolls with the highest.
+    schema.stats = new fields.SetField(
+      new fields.StringField({ required: true, blank: false, choices: Object.keys(NOQUARTER.stats) })
+    );
     // Rank and stamina cost can be left empty; empty counts as 0.
     schema.rank = new fields.NumberField({
       required: true,
@@ -23,6 +28,20 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
       integer: true,
       initial: null,
       min: 0,
+      max: NOQUARTER.successRules.maxRank,
+    });
+    // The lowest and highest rank a character can have the ability at. Taking
+    // it costs its minimum rank in ability points; rank 0 means not taken yet.
+    schema.minRank = new fields.NumberField({
+      ...requiredInteger,
+      initial: 1,
+      min: 1,
+      max: NOQUARTER.successRules.maxRank,
+    });
+    schema.maxRank = new fields.NumberField({
+      ...requiredInteger,
+      initial: NOQUARTER.successRules.maxRank,
+      min: 1,
       max: NOQUARTER.successRules.maxRank,
     });
     schema.staminaCost = new fields.NumberField({
@@ -80,6 +99,11 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     // effect. Any other value was entered since, so it's kept. Foundry only
     // saves changed fields, so `attacks` can stay missing after an edit until
     // migrateAbilityAttacks (helpers/migrations.mjs) saves it.
+    // Abilities used to have a single stat, and no stat meant a passive one.
+    if (!options?.partial && source.stats === undefined && source.stat !== undefined) {
+      source.stats = source.stat ? [source.stat] : [];
+      source.actionType ??= source.stat ? 'full' : 'passive';
+    }
     if (!options?.partial && source.attacks === undefined && !source.basicKey && source.damage === 1) {
       source.damage = null;
     }
@@ -92,15 +116,48 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
   }
 
   /**
+   * The tied stat with the highest rank on the owning character, counting any
+   * effects on it, or null when the ability has no stats or no character.
+   * @type {{key: string, value: number}|null}
+   */
+  get highestStat() {
+    const stats = this.parent?.actor?.system.stats;
+    if (!stats) return null;
+    let best = null;
+    for (const key of this.stats) {
+      const value = stats[key]?.value ?? 0;
+      if (!best || value > best.value) best = { key, value };
+    }
+    return best;
+  }
+
+  /**
+   * The rank the ability is used at. It can't go above the highest tied stat,
+   * so if an effect lowers that stat the ability keeps its rank but works as
+   * if it were the lower one.
+   * @type {number}
+   */
+  get effectiveRank() {
+    const rank = this.rank ?? 0;
+    const cap = this.highestStat?.value;
+    return cap === undefined ? rank : Math.min(rank, cap);
+  }
+
+  /** Whether the ability's rank is above its highest tied stat. */
+  get rankCapped() {
+    return (this.rank ?? 0) > this.effectiveRank;
+  }
+
+  /**
    * The Regular/Greater/Extreme success chances. A monster's abilities all use
-   * the monster's own chances. A character's are based on their rank in the
-   * ability's stat, and are null for passive abilities (no stat).
+   * the monster's own chances. A character's full actions use the highest tied
+   * stat and the ability's effective rank; other abilities aren't rolled, so
+   * they have none.
    */
   get chances() {
     const actor = this.parent?.actor;
     if (actor?.type === 'npc') return actor.system.chances;
-    if (!this.stat) return null;
-    const statRank = this.parent?.actor?.system.stats?.[this.stat]?.value ?? 0;
-    return abilityChances(statRank, this.rank ?? 0);
+    if (this.actionType !== 'full' || !this.stats.size) return null;
+    return abilityChances(this.highestStat?.value ?? 0, this.effectiveRank);
   }
 }

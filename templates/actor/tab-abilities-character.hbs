@@ -20,7 +20,9 @@
           {{#each system.stats as |stat key|}}
           <div class="stat flexrow flex-group-center">
             <label for="system.stats.{{key}}.value" class="resource-label rollable flexlarge align-left" data-action="roll" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">{{localize (lookup @root.config.stats key)}}</label>
-            <input type="text" name="system.stats.{{key}}.value" value="{{stat.value}}" data-dtype="Number"/>
+            {{!-- Stats are only changed in build mode, and the box shows the value as allocated; the chances include effects. --}}
+            <input type="text" name="system.stats.{{key}}.value" value="{{lookup @root.build.sourceStats key}}" data-dtype="Number"
+                   {{#unless @root.build.canEdit}}disabled{{/unless}}/>
             <div class="stat-chances rollable" data-action="roll" data-roll-type="stat" data-stat="{{key}}" data-label="{{localize (lookup @root.config.stats key)}}">
               <input type="text" class="chance-box" value="{{stat.target.regular}}" readonly tabindex="-1"/>
               <span>/</span>
@@ -87,15 +89,18 @@
     </div>
   </aside>
 
-  {{!-- The abilities list sits below the stats. Its fields have no name: they belong to the
-  ability items and are saved by the sheet's _onAbilityFieldChange. --}}
+  {{!-- The abilities list sits below the stats, split into a section per action type. Its
+  fields have no name: they belong to the ability items and are saved by the sheet's
+  _onAbilityFieldChange. --}}
   <section class="main">
     <h3 class="abilities-title">Abilities</h3>
-    <ol class="abilities-list">
+    {{#each abilitySections as |section|}}
+    <ol class="abilities-list ability-section" data-action-type="{{section.type}}">
       <li class="ability-row ability-header">
-        <div>Name</div>
+        <div class="ability-section-title">{{section.label}}</div>
         <div>Stat</div>
         <div>Rank</div>
+        {{#if (eq section.type "full")}}
         {{!-- Shares .ability-chances' layout with the rows below so the "/"s line up. --}}
         <div class="ability-chances">
           <span class="chance-label">Reg</span>
@@ -104,17 +109,22 @@
           <span>/</span>
           <span class="chance-label">Ext</span>
         </div>
+        {{else}}
+        <div></div>
+        {{/if}}
         <div>Stam</div>
         <div>Effect/Notes</div>
         <div class="item-controls">
-          <a class="item-control" data-action="createItem" data-type="ability"
-             title="{{localize 'DOCUMENT.Create' type='ability'}}">
+          {{#if @root.build.canEdit}}
+          <a class="item-control" data-action="createItem" data-type="ability" data-action-type="{{section.type}}"
+             title="{{localize 'DOCUMENT.Create' type=section.label}}">
             <i class="fas fa-plus"></i>
             {{localize 'DOCUMENT.New' type='ability'}}
           </a>
+          {{/if}}
         </div>
       </li>
-      {{#each abilities as |item|}}
+      {{#each section.abilities as |item|}}
         <li class="item ability-row draggable" data-item-id="{{item._id}}">
           <div class="item-name">
             <a class="rollable" data-action="roll" data-roll-type="item">
@@ -127,18 +137,15 @@
               <input type="text" class="ability-field ability-name" data-field="name" value="{{item.name}}"/>
             {{/if}}
           </div>
-          {{#if item.basic}}
-            <div class="ability-stat">{{localize (lookup @root.config.statAbbreviations item.system.stat)}}</div>
-          {{else}}
-            <div>
-              <select class="ability-field ability-stat" data-field="stat">
-                {{selectOptions @root.config.statAbbreviations selected=item.system.stat localize=true blank="-"}}
-              </select>
-            </div>
-          {{/if}}
+          {{!-- Stats are picked on the ability's own sheet; the highest of several is marked. --}}
+          <div class="ability-stat">
+            {{#each item.statList as |stat|}}{{#unless @first}} / {{/unless}}<span class="{{#if stat.highest}}highest-stat{{/if}}">{{stat.abbr}}</span>{{else}}-{{/each}}
+          </div>
           <div>
-            <input type="text" class="ability-field" data-field="rank" data-dtype="Number" data-nullable="true"
-                   data-min="0" data-max="{{@root.config.successRules.maxRank}}" value="{{item.system.rank}}"/>
+            <input type="text" class="ability-field {{#if item.cappedTooltip}}rank-capped{{/if}}" data-field="rank"
+                   data-dtype="Number" data-nullable="true" data-min="0" data-max="{{item.rankMax}}"
+                   {{#unless @root.build.canEdit}}disabled{{/unless}}
+                   value="{{item.system.rank}}" {{#if item.cappedTooltip}}data-tooltip="{{item.cappedTooltip}}"{{/if}}/>
           </div>
           {{#if item.chances}}
             <div class="ability-chances rollable" data-action="roll" data-roll-type="item">
@@ -151,8 +158,8 @@
               <input type="text" class="chance-box" value="{{item.chances.extreme}}" readonly tabindex="-1"/>
             </div>
           {{else}}
-            {{!-- No stat means a passive ability: no success chance. --}}
-            <div class="ability-passive">{{localize 'NOQUARTER.Passive'}}</div>
+            {{!-- Supplemental and passive abilities aren't rolled; neither is a full action with no stat. --}}
+            <div class="ability-passive">{{localize (lookup (lookup @root.config.actionTypes item.system.actionType) "label")}}</div>
           {{/if}}
           <div>
             <input type="text" class="ability-field" data-field="staminaCost" data-dtype="Number" data-nullable="true"
@@ -171,14 +178,15 @@
             <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Edit' type='ability'}}">
               <i class="fas fa-edit"></i>
             </a>
-            {{#unless item.basic}}
+            {{#if (and (not item.basic) @root.build.canEdit)}}
               <a class="item-control" data-action="deleteItem" title="{{localize 'DOCUMENT.Delete' type='ability'}}">
                 <i class="fas fa-trash"></i>
               </a>
-            {{/unless}}
+            {{/if}}
           </div>
         </li>
       {{/each}}
     </ol>
+    {{/each}}
   </section>
 </section>

@@ -1,0 +1,23 @@
+{
+  "_id": "NqSrdFldAbility1",
+  "name": "Abilities",
+  "type": "Item",
+  "folder": "NqSrdFldCharFeat",
+  "sorting": "a",
+  "sort": 300000,
+  "color": null,
+  "description": "",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "14.368",
+    "systemId": "no-quarter",
+    "systemVersion": "0.3.4",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  },
+  "_key": "!folders!NqSrdFldAbility1"
+}

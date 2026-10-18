@@ -89,6 +89,35 @@
   }
 }
 
+// A character's abilities are split into a list per action type.
+.abilities-list.ability-section + .ability-section {
+  margin-top: 10px;
+}
+
+.abilities-list .ability-section-title {
+  font-size: 1.1em;
+}
+
+// With several stats, the highest (the one the ability uses) is underlined.
+.abilities-list .ability-stat .highest-stat {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+// An effect has lowered the ability's stat below its rank; it's used at the lower rank.
+.abilities-list input.rank-capped {
+  color: #a01010;
+  border-color: #a01010;
+  font-weight: bold;
+}
+
+// The ability sheet's stat checkboxes sit in a row.
+.ability-stats multi-checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
 .ability-passive {
   font-style: italic;
   opacity: 0.7;

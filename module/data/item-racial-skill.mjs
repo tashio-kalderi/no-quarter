@@ -2,9 +2,9 @@ import NoQuarterItemBase from './base-item.mjs';
 import { NOQUARTER } from '../helpers/config.mjs';
 
 /**
- * A racial skill, dragged onto a character from the compendium. Stat increases
- * and other character creation bonuses are written in the description and
- * allocated by hand for now; the bonuses below are applied automatically
+ * A racial skill, dragged onto a character from the compendium or picked in
+ * the character builder (see helpers/racial-skills.mjs). Stat increases are
+ * allocated by hand; the bonuses below are applied automatically
  * while the character has the skill (see NoQuarterCharacter#prepareBonuses).
  */
 export default class NoQuarterRacialSkill extends NoQuarterItemBase {
@@ -48,6 +48,10 @@ export default class NoQuarterRacialSkill extends NoQuarterItemBase {
     // and its id, so it's removed along with this racial skill.
     schema.skill = new fields.StringField({ required: true, blank: true, initial: '' });
     schema.skillId = new fields.StringField({ required: true, blank: true, initial: '' });
+    // The ability it gave a rank in (the Ability racial skill): its name when
+    // picked, and its id, so the rank is taken back along with this racial skill.
+    schema.ability = new fields.StringField({ required: true, blank: true, initial: '' });
+    schema.abilityId = new fields.StringField({ required: true, blank: true, initial: '' });
 
     return schema;
   }
@@ -67,5 +71,22 @@ export default class NoQuarterRacialSkill extends NoQuarterItemBase {
    */
   get skillName() {
     return this.linkedSkill?.name ?? this.skill;
+  }
+
+  /**
+   * The ability this racial skill gave a rank in, if the character still has it.
+   * @type {Item|undefined}
+   */
+  get linkedAbility() {
+    const ability = this.abilityId ? this.parent.actor?.items.get(this.abilityId) : undefined;
+    return ability?.type === 'ability' ? ability : undefined;
+  }
+
+  /**
+   * The name of that ability, as it's called now if it was renamed.
+   * @type {string}
+   */
+  get abilityName() {
+    return this.linkedAbility?.name ?? this.ability;
   }
 }

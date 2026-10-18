@@ -55,14 +55,26 @@ NOQUARTER.damageBonus = {
 };
 
 /**
+ * How a character's ability is used, in the order the sections appear on the
+ * sheet. Full actions take the character's turn and are rolled; supplemental
+ * abilities are added onto a full action; passive abilities are always on.
+ * @type {Object}
+ */
+NOQUARTER.actionTypes = {
+  full: { label: 'NOQUARTER.ActionType.full.label', section: 'NOQUARTER.ActionType.full.section' },
+  supplemental: { label: 'NOQUARTER.ActionType.supplemental.label', section: 'NOQUARTER.ActionType.supplemental.section' },
+  passive: { label: 'NOQUARTER.ActionType.passive.label', section: 'NOQUARTER.ActionType.passive.section' },
+};
+
+/**
  * Abilities every character has. Listed in display order, at the top of the
  * Abilities list.
  * @type {Object}
  */
 NOQUARTER.basicAbilities = {
-  melee: { name: 'NOQUARTER.BasicAbility.Melee', stat: 'might', img: 'systems/no-quarter/assets/icons/basic_melee_attack.png' },
-  ranged: { name: 'NOQUARTER.BasicAbility.Ranged', stat: 'agility', img: 'systems/no-quarter/assets/icons/basic_ranged_attack.png' },
-  magic: { name: 'NOQUARTER.BasicAbility.Magic', stat: 'mind', img: 'systems/no-quarter/assets/icons/basic_magic_attack.png' },
+  melee: { name: 'NOQUARTER.BasicAbility.Melee', stats: ['might'], img: 'systems/no-quarter/assets/icons/basic_melee_attack.png' },
+  ranged: { name: 'NOQUARTER.BasicAbility.Ranged', stats: ['agility'], img: 'systems/no-quarter/assets/icons/basic_ranged_attack.png' },
+  magic: { name: 'NOQUARTER.BasicAbility.Magic', stats: ['mind'], img: 'systems/no-quarter/assets/icons/basic_magic_attack.png' },
 };
 
 /**
@@ -84,7 +96,23 @@ NOQUARTER.visionTypes = {
 NOQUARTER.racialSkillChoices = {
   stat: 'NOQUARTER.RacialSkill.Choice.stat',
   skill: 'NOQUARTER.RacialSkill.Choice.skill',
+  ability: 'NOQUARTER.RacialSkill.Choice.ability',
 };
+
+/**
+ * The id of the Ability racial skill in the compendium, so copies taken
+ * before it had the `ability` choice still count as a free ability rank (see
+ * helpers/progression.mjs).
+ * @type {string}
+ */
+NOQUARTER.racialAbilityId = 'toHT9UiZg7aSIyC4';
+
+/**
+ * The highest level a character can reach. What each level gives is set in
+ * the Character Progression settings (see helpers/progression.mjs).
+ * @type {number}
+ */
+NOQUARTER.maxLevel = 10;
 
 /** How many racial skills a character can have. */
 NOQUARTER.maxRacialSkills = 3;

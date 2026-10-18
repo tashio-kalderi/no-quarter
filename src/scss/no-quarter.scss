@@ -21,11 +21,18 @@
 /* Token HUD condition stacks */
 @import 'components/conditions';
 
+// Character Progression settings window.
+@import 'components/progression';
+
+/* Character builder window */
+@import 'components/builder';
+
 /* Styles limited to No Quarter sheets */
 .no-quarter {
   @import 'components/forms';
   @import 'components/stats';
   @import 'components/abilities';
+  @import 'components/build';
   @import 'components/skills';
   @import 'components/npc';
   @import 'components/resource';

@@ -1,5 +1,6 @@
 <section class="tab skills-tab {{tab.cssClass}}" data-group="{{tab.group}}" data-tab="{{tab.id}}">
-  {{!-- Racial skills are dragged in from the compendium; dropping one anywhere on the sheet puts
+  {{!-- Racial skills and skills are only added or removed in build mode (or by the GM).
+  Racial skills are dragged in from the compendium; dropping one anywhere on the sheet puts
   it here. Their Health, Stamina, Speed and vision bonuses apply automatically. --}}
   <div class="racial-skills">
     <h3>{{localize 'NOQUARTER.RacialSkill.Title'}}
@@ -16,7 +17,7 @@
           <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Update' type='Item'}}">
             <i class="fas fa-edit"></i>
           </a>
-          {{#if @root.editable}}
+          {{#if @root.build.canEdit}}
           <a class="item-control" data-action="deleteItem" title="{{localize 'DOCUMENT.Delete' type='Item'}}">
             <i class="fas fa-trash"></i>
           </a>
@@ -43,7 +44,7 @@
   have no name attribute; the sheet saves the name to the skill item (_onSkillNameChange). --}}
   <div class="skills">
     <h3 class="skills-title">{{localize 'NOQUARTER.Tabs.skills'}}
-      {{#if @root.editable}}
+      {{#if @root.build.canEdit}}
       <a class="item-control" data-action="createItem" data-type="skill" title="{{localize 'NOQUARTER.Skill.Create'}}">
         <i class="fas fa-plus"></i>
       </a>
@@ -58,7 +59,7 @@
           <a class="item-control" data-action="editItem" title="{{localize 'DOCUMENT.Update' type='Item'}}">
             <i class="fas fa-edit"></i>
           </a>
-          {{#if @root.editable}}
+          {{#if @root.build.canEdit}}
           <a class="item-control" data-action="deleteItem" title="{{localize 'NOQUARTER.Skill.Delete'}}">
             <i class="fas fa-trash"></i>
           </a>

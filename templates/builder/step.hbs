@@ -1,0 +1,169 @@
+<section class="builder-body {{#if (or (eq step "race") (eq step "abilities") (eq step "skills"))}}split{{/if}}">
+  {{#if (eq step "race")}}
+  {{!-- Race and racial skills. What's picked stays in view above the list to pick from, which
+  scrolls by itself. A racial skill that asks for a choice asks when it's added. --}}
+  <div class="builder-picked">
+    <div class="form-group">
+      <label>{{localize 'NOQUARTER.Builder.Race'}}</label>
+      <div class="form-fields"><input type="text" name="system.race" value="{{system.race}}"/></div>
+    </div>
+    <h3>{{localize 'NOQUARTER.RacialSkill.Title'}} <span class="builder-count">{{racialSkills.length}}/{{maxRacialSkills}}</span></h3>
+    <ol class="builder-list">
+      {{#each racialSkills as |r|}}
+      <li class="builder-row">
+        <img src="{{r.img}}" width="24" height="24" alt=""/>
+        <span class="builder-name">{{r.name}}{{#if r.choice}} <span class="builder-note">({{r.choice}})</span>{{/if}}</span>
+        <button type="button" class="builder-icon" data-action="removeItem" data-item-id="{{r.id}}"
+                data-tooltip="{{localize 'NOQUARTER.Builder.Remove'}}"><i class="fa-solid fa-trash"></i></button>
+      </li>
+      {{else}}
+      <li class="builder-empty">{{localize 'NOQUARTER.Builder.NoRacialSkills'}}</li>
+      {{/each}}
+    </ol>
+  </div>
+  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available">
+    <ol class="builder-list">
+      {{#each racialSkillCatalog as |r|}}
+      <li class="builder-row {{#if r.problem}}unavailable{{/if}}" {{#if r.problem}}data-tooltip="{{r.problem}}"{{/if}}>
+        <img src="{{r.img}}" width="24" height="24" alt=""/>
+        <span class="builder-name">{{r.name}} <span class="builder-note">{{r.group}}</span></span>
+        <button type="button" class="builder-icon" data-action="addRacialSkill" data-uuid="{{r.uuid}}"
+                {{#if r.problem}}disabled{{/if}} data-tooltip="{{localize 'NOQUARTER.Builder.Add'}}"><i class="fa-solid fa-plus"></i></button>
+      </li>
+      {{/each}}
+    </ol>
+  </div>
+  {{/if}}
+
+  {{#if (eq step "stats")}}
+  {{!-- Stats: a point each rank, up to the cap for the character's level. --}}
+  <p class="hint">{{localize 'NOQUARTER.Builder.StatsHint' cap=progression.statCap}}</p>
+  <ol class="builder-list builder-stats">
+    {{#each stats as |s|}}
+    <li class="builder-row">
+      <span class="builder-name">{{s.label}}{{#if s.racial}} <span class="builder-note">{{localize 'NOQUARTER.Builder.RacialStat' value=s.racial}}</span>{{/if}}</span>
+      <button type="button" class="builder-icon" data-action="statDown" data-stat="{{s.key}}" {{#unless s.canDown}}disabled{{/unless}}><i class="fa-solid fa-minus"></i></button>
+      <span class="builder-rank">{{s.value}}</span>
+      <button type="button" class="builder-icon" data-action="statUp" data-stat="{{s.key}}" {{#unless s.canUp}}disabled{{/unless}}><i class="fa-solid fa-plus"></i></button>
+    </li>
+    {{/each}}
+  </ol>
+  {{/if}}
+
+  {{#if (eq step "abilities")}}
+  {{!-- Abilities: a point each rank; taking one costs its minimum rank. Its rank can't go above
+  the highest of its stats. The character's abilities stay in view above the list to pick from. --}}
+  <div class="builder-picked">
+    <p class="hint">{{localize 'NOQUARTER.Builder.AbilitiesHint'}}</p>
+    {{#each abilitySections as |section|}}
+    {{#if section.owned.length}}
+    <h4>{{section.label}}</h4>
+    <ol class="builder-list">
+      {{#each section.owned as |a|}}
+      <li class="builder-row">
+        <img src="{{a.img}}" width="24" height="24" alt=""/>
+        <span class="builder-name">{{a.name}} <span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}}</span></span>
+        <button type="button" class="builder-icon" data-action="rankDown" data-item-id="{{a.id}}" {{#unless a.canDown}}disabled{{/unless}}><i class="fa-solid fa-minus"></i></button>
+        <span class="builder-rank">{{a.rank}}</span>
+        <button type="button" class="builder-icon" data-action="rankUp" data-item-id="{{a.id}}" {{#unless a.canUp}}disabled{{/unless}}><i class="fa-solid fa-plus"></i></button>
+        {{#if a.basic}}<span class="builder-icon-space"></span>{{else}}
+        <button type="button" class="builder-icon" data-action="removeItem" data-item-id="{{a.id}}"
+                data-tooltip="{{localize 'NOQUARTER.Builder.Remove'}}"><i class="fa-solid fa-trash"></i></button>
+        {{/if}}
+      </li>
+      {{/each}}
+    </ol>
+    {{/if}}
+    {{/each}}
+  </div>
+  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available">
+    {{#each abilitySections as |section|}}
+    <h4>{{section.label}}</h4>
+    <ol class="builder-list">
+      {{#each section.available as |a|}}
+      <li class="builder-row {{#if a.problem}}unavailable{{/if}}"
+          {{#if a.problem}}data-tooltip="{{a.problem}}"{{else if a.effect}}data-tooltip="{{a.effect}}"{{/if}}>
+        <img src="{{a.img}}" width="24" height="24" alt=""/>
+        <span class="builder-name">{{a.name}} <span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}} · {{a.group}}</span></span>
+        <span class="builder-cost">{{localize 'NOQUARTER.Builder.Cost' cost=a.minRank}}</span>
+        <button type="button" class="builder-icon" data-action="addAbility" data-uuid="{{a.uuid}}"
+                {{#if a.problem}}disabled{{/if}} data-tooltip="{{localize 'NOQUARTER.Builder.Add'}}"><i class="fa-solid fa-plus"></i></button>
+      </li>
+      {{else}}
+      <li class="builder-empty">{{localize 'NOQUARTER.Builder.NoAbilities'}}</li>
+      {{/each}}
+    </ol>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if (eq step "skills")}}
+  {{!-- Skills: the character's stay in view above the list to pick from. The ones a Profession
+  added come on top and go with it. --}}
+  <div class="builder-picked">
+    <h3>{{localize 'NOQUARTER.Tabs.skills'}}</h3>
+    <ol class="builder-list">
+      {{#each skills as |s|}}
+      <li class="builder-row">
+        <span class="builder-name">{{s.name}}{{#if s.fromProfession}} <span class="builder-note">({{localize 'NOQUARTER.Builder.FromProfession'}})</span>{{/if}}</span>
+        {{#unless s.fromProfession}}
+        <button type="button" class="builder-icon" data-action="removeItem" data-item-id="{{s.id}}"
+                data-tooltip="{{localize 'NOQUARTER.Builder.Remove'}}"><i class="fa-solid fa-trash"></i></button>
+        {{/unless}}
+      </li>
+      {{else}}
+      <li class="builder-empty">{{localize 'NOQUARTER.Skill.Empty'}}</li>
+      {{/each}}
+    </ol>
+    <div class="builder-custom-skill">
+      <input type="text" name="customSkill" placeholder="{{localize 'NOQUARTER.Builder.CustomSkill'}}"/>
+      <button type="button" data-action="addCustomSkill" {{#unless canAddSkill}}disabled{{/unless}}>
+        <i class="fa-solid fa-plus"></i> {{localize 'NOQUARTER.Builder.Add'}}
+      </button>
+    </div>
+  </div>
+  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available">
+    {{#each skillGroups as |g|}}
+    <h4>{{g.label}}</h4>
+    <ol class="builder-list">
+      {{#each g.skills as |s|}}
+      <li class="builder-row">
+        <span class="builder-name">{{s.name}}</span>
+        <button type="button" class="builder-icon" data-action="addSkill" data-uuid="{{s.uuid}}"
+                {{#unless @root.canAddSkill}}disabled{{/unless}} data-tooltip="{{localize 'NOQUARTER.Builder.Add'}}"><i class="fa-solid fa-plus"></i></button>
+      </li>
+      {{/each}}
+    </ol>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{#if (eq step "details")}}
+  {{!-- The rest of the character. --}}
+  <div class="form-group">
+    <label>{{localize 'NOQUARTER.Builder.Name'}}</label>
+    <div class="form-fields"><input type="text" name="name" value="{{actor.name}}"/></div>
+  </div>
+  <div class="form-group">
+    <label>{{localize 'NOQUARTER.Builder.Gender'}}</label>
+    <div class="form-fields"><input type="text" name="system.gender" value="{{system.gender}}"/></div>
+  </div>
+  <div class="form-group">
+    <label>{{localize 'NOQUARTER.Builder.Alignment'}}</label>
+    <div class="form-fields"><input type="text" name="system.alignment" value="{{system.alignment}}"/></div>
+  </div>
+  <div class="form-group">
+    <label>{{localize 'NOQUARTER.Profession.Name'}}</label>
+    <div class="form-fields"><input type="text" name="system.profession.name" value="{{system.profession.name}}"/></div>
+  </div>
+  {{!-- Label above, and a box a few lines tall across the full width. --}}
+  <div class="builder-textarea">
+    <label>{{localize 'NOQUARTER.Profession.Description'}}</label>
+    <textarea name="system.profession.description" rows="4">{{system.profession.description}}</textarea>
+  </div>
+  <p class="hint">{{localize 'NOQUARTER.Builder.FinishHint'}}</p>
+  {{/if}}
+</section>

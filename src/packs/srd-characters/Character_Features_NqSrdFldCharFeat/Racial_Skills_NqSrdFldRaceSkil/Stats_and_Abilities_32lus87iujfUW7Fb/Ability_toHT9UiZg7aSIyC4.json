@@ -10,7 +10,8 @@
     "speed": 0,
     "vision": "",
     "repeatable": true,
-    "exclusive": false
+    "exclusive": false,
+    "choice": "ability"
   },
   "effects": [],
   "folder": "32lus87iujfUW7Fb",

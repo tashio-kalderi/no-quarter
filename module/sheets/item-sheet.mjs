@@ -97,6 +97,13 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       context.chances = item.system.chances;
       // Monster abilities have a damage type, range and uses instead of a stat and rank.
       context.isMonsterAbility = item.actor?.type === 'npc';
+      // A player only changes a character's ability's rank, stats and type in build mode.
+      context.buildLocked = item.actor?.type === 'character' && !game.user.isGM && !item.actor.system.building;
+      context.statsField = item.system.schema.fields.stats;
+      context.statsValue = [...item.system.stats];
+      context.actionTypeChoices = Object.fromEntries(
+        Object.entries(CONFIG.NOQUARTER.actionTypes).map(([key, { label }]) => [key, label])
+      );
     }
     return context;
   }
