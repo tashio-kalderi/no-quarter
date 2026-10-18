@@ -24,7 +24,7 @@
       "thumbnail": "systems/no-quarter/assets/No-Quarter-Foundry-VTT-Splash-Screen.jpg"
     }
   ],
-  "version": "0.3.3",
+  "version": "0.3.4",
   "compatibility": {
     "minimum": 14,
     "verified": "14.368",
@@ -89,7 +89,7 @@
     }
   },
   "manifest": "https://github.com/tashio-kalderi/no-quarter/releases/latest/download/system.json",
-  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.3.3/no-quarter.zip",
+  "download": "https://github.com/tashio-kalderi/no-quarter/releases/download/v0.3.4/no-quarter.zip",
   "background": "systems/no-quarter/assets/No-Quarter-Foundry-VTT-Splash-Screen.jpg",
   "grid": {
     "distance": 5,

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 0.3.4
 
 - Token HUD: fixed conditions with stacks losing their name label and orange highlight when Monk's Little Details is used. The labels now stay while a condition has stacks, and the red stack count sits on the corner of the condition's icon.
 - Cornered Rats Initiative System: a combatant who dies during their own turn, such as from Bleeding at its start, now finishes that turn, and the turn passes to the other side as if they had clicked Finish turn. Before, the turn stayed stuck on their side.
@@ -12,7 +12,7 @@
 - Characters have PDR and MDR boxes, like monsters. The Vitals column is now four rows, lining up with the four stats: Speed and Wounds, PDR and MDR, Health, then Stamina.
 - Players can drop hits onto tokens they don't own (such as monsters); the GM's client applies the change, so a GM must be connected. The system now uses a socket for this, so restart the world (return to setup and launch it again) after updating.
 - Stat Increase: changing the stat on the skill's sheet no longer offers stats the character already picked for another Stat Increase, so the same stat can't be taken twice.
-- Profession: dropping it onto a character opens a box to pick a skill from the compendium or type the name of any skill. The skill is added to the character's skill list and shown next to the racial skill's name, such as "Profession (Lockpicking)". Skills the character already has aren't offered. A typed name that matches a compendium skill uses that skill and its description. The two are linked: removing the Profession removes its skill, and renaming the skill renames it in the brackets. Any racial skill can work this way by setting its "Choose on drop" option to "A skill". The Profession in the compendium is updated, so rebuild the packs (`npm run pack`, with Foundry closed) after updating.
+- Profession: dropping it onto a character opens a box to pick a skill from the compendium or type the name of any skill. The skill is added to the character's skill list and shown next to the racial skill's name, such as "Profession (Lockpicking)". Skills the character already has aren't offered. A typed name that matches a compendium skill uses that skill and its description. The two are linked: removing the Profession removes its skill, and renaming the skill renames it in the brackets. Any racial skill can work this way by setting its "Choose on drop" option to "A skill". A Profession that was already on a character has no skill: remove it and add it again from the compendium to pick one.
 
 ## 0.3.3
 
