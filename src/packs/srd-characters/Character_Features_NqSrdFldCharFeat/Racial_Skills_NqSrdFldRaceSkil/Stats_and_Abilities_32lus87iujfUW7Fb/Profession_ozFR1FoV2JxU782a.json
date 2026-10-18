@@ -10,7 +10,10 @@
     "speed": 0,
     "vision": "",
     "repeatable": true,
-    "exclusive": false
+    "exclusive": false,
+    "choice": "skill",
+    "stat": "",
+    "skill": ""
   },
   "effects": [],
   "folder": "32lus87iujfUW7Fb",

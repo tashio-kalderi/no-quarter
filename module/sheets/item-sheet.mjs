@@ -91,6 +91,7 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
           `${game.i18n.localize(label)} (${range} ft.)`,
         ])
       );
+      if (item.actor) context.statChoices = this.#statChoices();
     }
     if (item.type === 'ability') {
       context.chances = item.system.chances;
@@ -98,6 +99,29 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
       context.isMonsterAbility = item.actor?.type === 'npc';
     }
     return context;
+  }
+
+  /**
+   * The stats an owned racial skill can be changed to, leaving out the ones
+   * other copies of it on the character already picked, as dropping it does.
+   * A copy from the compendium remembers where it came from, so a renamed copy
+   * still counts.
+   * @returns {Record<string, string>}
+   */
+  #statChoices() {
+    const item = this.item;
+    const source = item._stats.compendiumSource;
+    const taken = new Set(
+      item.actor.items
+        .filter(
+          (i) =>
+            i.type === 'racialSkill' &&
+            i.id !== item.id &&
+            (i.name === item.name || (!!source && i._stats.compendiumSource === source))
+        )
+        .map((i) => i.system.stat)
+    );
+    return Object.fromEntries(Object.entries(CONFIG.NOQUARTER.stats).filter(([key]) => !taken.has(key)));
   }
 
   /** @override */

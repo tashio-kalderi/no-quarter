@@ -191,6 +191,23 @@ export class NoQuarterActor extends Actor {
   _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
     super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
     this.#syncDeathAfterItems(documents, userId);
+    this.#deleteLinkedSkills(documents, ids, userId);
+  }
+
+  /**
+   * Removing a racial skill that added a skill, such as a Profession, removes
+   * that skill too.
+   * @param {Document[]} documents   The deleted descendants
+   * @param {string[]} ids           Their ids
+   * @param {string} userId          The user who deleted them
+   */
+  #deleteLinkedSkills(documents, ids, userId) {
+    if (userId !== game.user.id) return;
+    const skillIds = documents
+      .filter((d) => d.type === 'racialSkill' && d.system.skillId)
+      .map((d) => d.system.skillId)
+      .filter((id) => !ids.includes(id) && this.items.get(id)?.type === 'skill');
+    if (skillIds.length) this.deleteEmbeddedDocuments('Item', skillIds);
   }
 
   /**

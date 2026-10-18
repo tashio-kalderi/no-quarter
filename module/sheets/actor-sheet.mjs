@@ -212,11 +212,12 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
             })
           );
         }
-        // What the player picked for it, such as a Stat Increase's stat.
-        const choice =
-          i.system.choice === 'stat' && i.system.stat
-            ? game.i18n.localize(CONFIG.NOQUARTER.stats[i.system.stat])
-            : '';
+        // What the player picked for it, such as a Stat Increase's stat or a
+        // Profession's skill.
+        let choice = '';
+        if (i.system.choice === 'stat' && i.system.stat) {
+          choice = game.i18n.localize(CONFIG.NOQUARTER.stats[i.system.stat]);
+        } else if (i.system.choice === 'skill') choice = i.system.skillName;
         return { _id: i.id, name: i.name, img: i.img || Item.DEFAULT_ICON, choice, summary: summary.join(' · ') };
       });
   }
@@ -332,13 +333,99 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       ui.notifications.warn(problem);
       return null;
     }
-    if (item.system.choice !== 'stat') return super._onDropItem(event, item);
+    const { choice } = item.system;
+    if (choice !== 'stat' && choice !== 'skill') return super._onDropItem(event, item);
 
-    const stat = await this.#chooseStat(item);
-    if (!stat) return null;
     const data = item.inCompendium ? game.items.fromCompendium(item, { clearFolder: true }) : item.toObject();
-    data.system.stat = stat;
-    return (await Item.implementation.create(data, { parent: this.actor })) ?? null;
+    if (choice === 'stat') {
+      const stat = await this.#chooseStat(item);
+      if (!stat) return null;
+      data.system.stat = stat;
+      return (await Item.implementation.create(data, { parent: this.actor })) ?? null;
+    }
+
+    // A Profession also adds the skill it's for to the character's skills,
+    // linked by id so that removing the Profession removes the skill too.
+    const skill = await this.#chooseSkill(item);
+    if (!skill) return null;
+    delete data._id;
+    skill._id = foundry.utils.randomID();
+    data.system.skill = skill.name;
+    data.system.skillId = skill._id;
+    const [created] = await this.actor.createEmbeddedDocuments('Item', [data, skill], { keepId: true });
+    return created ?? null;
+  }
+
+  /**
+   * Ask which skill a racial skill adds: one from the compendiums, or any
+   * skill typed by name. Skills the character already has aren't offered.
+   * @param {Item} item   The dropped racial skill
+   * @returns {Promise<object|null>}   The new skill's data, or null if none was chosen
+   */
+  async #chooseSkill(item) {
+    const owned = new Set(this.actor.items.filter((i) => i.type === 'skill').map((i) => i.name.toLowerCase()));
+    // Compendium skills by lowercase name, and grouped by their folder.
+    const byName = new Map();
+    const groups = new Map();
+    for (const pack of game.packs.filter((p) => p.documentName === 'Item' && p.visible)) {
+      const index = await pack.getIndex({ fields: ['type', 'folder'] });
+      for (const entry of index) {
+        const key = entry.name.toLowerCase();
+        if (entry.type !== 'skill' || owned.has(key) || byName.has(key)) continue;
+        byName.set(key, entry);
+        const group = pack.folders.get(entry.folder)?.name ?? pack.title;
+        if (!groups.has(group)) groups.set(group, []);
+        groups.get(group).push(entry);
+      }
+    }
+
+    const esc = foundry.utils.escapeHTML;
+    const optgroups = [...groups.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([group, entries]) => {
+        const options = entries
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((e) => `<option value="${e.uuid}">${esc(e.name)}</option>`);
+        return `<optgroup label="${esc(group)}">${options.join('')}</optgroup>`;
+      });
+    const i18n = (key) => game.i18n.localize(key);
+    const picked = await foundry.applications.api.DialogV2.prompt({
+      window: { title: item.name, icon: 'fa-solid fa-book' },
+      content: `<p>${game.i18n.format('NOQUARTER.RacialSkill.ChooseSkill', { name: item.name })}</p>
+        <div class="form-group">
+          <label>${i18n('NOQUARTER.RacialSkill.SkillFromCompendium')}</label>
+          <select name="uuid" autofocus><option value=""></option>${optgroups.join('')}</select>
+        </div>
+        <div class="form-group">
+          <label>${i18n('NOQUARTER.RacialSkill.SkillByName')}</label>
+          <input type="text" name="name">
+        </div>`,
+      ok: {
+        label: 'NOQUARTER.RacialSkill.Choose',
+        callback: (event, button) => ({
+          uuid: button.form.elements.uuid.value,
+          name: button.form.elements.name.value.trim(),
+        }),
+      },
+      rejectClose: false,
+    });
+    if (!picked) return null;
+
+    // A typed name wins over the list, and uses the compendium's skill if it has one by that name.
+    let uuid = picked.uuid;
+    if (picked.name) {
+      if (owned.has(picked.name.toLowerCase())) {
+        ui.notifications.warn(game.i18n.format('NOQUARTER.Skill.Duplicate', { name: picked.name }));
+        return null;
+      }
+      uuid = byName.get(picked.name.toLowerCase())?.uuid;
+      if (!uuid) return { name: picked.name, type: 'skill' };
+    }
+    if (!uuid) {
+      ui.notifications.warn('NOQUARTER.RacialSkill.NoSkillChosen', { localize: true });
+      return null;
+    }
+    return game.items.fromCompendium(await fromUuid(uuid), { clearFolder: true });
   }
 
   /**

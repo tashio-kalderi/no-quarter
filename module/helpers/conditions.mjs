@@ -63,6 +63,30 @@ export async function addStack(actor, statusId) {
 }
 
 /**
+ * Give an actor a number of stacks of a status, unless it already has as many
+ * or more. Stacks don't add up: the largest number applies, so 4 stacks of
+ * Poisoned stay at 4 when 1 more is inflicted, and 2 become 4 when 4 are.
+ * @param {Actor} actor
+ * @param {string} statusId
+ * @param {number} count
+ * @returns {Promise<void>}
+ */
+export async function raiseStacks(actor, statusId, count) {
+  if (count <= 0) return;
+  const existing = findStatusEffect(actor, statusId);
+  if (!existing) {
+    const ActiveEffectCls = getDocumentClass('ActiveEffect');
+    const effect = await ActiveEffectCls.fromStatusEffect(statusId, { parent: actor });
+    effect.updateSource({ [`flags.${FLAG_SCOPE}.${STACKS_FLAG}`]: count });
+    await ActiveEffectCls.create(effect.toObject(), { parent: actor, keepId: true });
+    return;
+  }
+  if (count > (existing.getFlag(FLAG_SCOPE, STACKS_FLAG) ?? 1)) {
+    await existing.setFlag(FLAG_SCOPE, STACKS_FLAG, count);
+  }
+}
+
+/**
  * Remove one stack of a status from an actor, deleting the effect once it
  * reaches 0. Does nothing if the actor doesn't have the status.
  * @param {Actor} actor

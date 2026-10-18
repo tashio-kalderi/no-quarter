@@ -83,6 +83,7 @@ NOQUARTER.visionTypes = {
  */
 NOQUARTER.racialSkillChoices = {
   stat: 'NOQUARTER.RacialSkill.Choice.stat',
+  skill: 'NOQUARTER.RacialSkill.Choice.skill',
 };
 
 /** How many racial skills a character can have. */

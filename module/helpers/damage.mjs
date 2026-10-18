@@ -1,4 +1,4 @@
-import { addStack } from './conditions.mjs';
+import { raiseStacks, stackCount } from './conditions.mjs';
 
 /**
  * Applying a hit from its chat card. Every attack that hits shows its damage
@@ -234,7 +234,8 @@ export async function applyHit(actor, hit) {
     lines.push(`${esc(game.i18n.format('NOQUARTER.Hit.Damage', { damage, type }))}${reduced}`);
   }
 
-  // Each target rolls its own stacks.
+  // Each target rolls its own stacks. They don't add to the stacks it already
+  // has: the larger number applies (see raiseStacks).
   const rolls = [];
   const stacks = [];
   for (const { id, formula } of hit.conditions ?? []) {
@@ -249,7 +250,10 @@ export async function applyHit(actor, hit) {
     stacks.push({ id, count });
     const name = conditionName(id);
     const shown = count === null ? name : `${name} ×${count}${rolled ? ` (${formula})` : ''}`;
-    lines.push(esc(game.i18n.format('NOQUARTER.Hit.Gains', { condition: shown })));
+    const current = count === null ? 0 : stackCount(actor, id);
+    const key =
+      current >= count ? 'NOQUARTER.Hit.Stays' : current ? 'NOQUARTER.Hit.Raised' : 'NOQUARTER.Hit.Gains';
+    lines.push(esc(game.i18n.format(key, { condition: shown, current })));
   }
   if (!lines.length) return;
 
@@ -282,7 +286,7 @@ async function applyChanges(actor, { damage, stacks }) {
   if (damage > 0) await actor.update({ 'system.health.value': actor.system.health.value - damage });
   for (const { id, count } of stacks) {
     if (count === null) await actor.toggleStatusEffect(id, { active: true });
-    else for (let i = 0; i < count; i++) await addStack(actor, id);
+    else await raiseStacks(actor, id, count);
   }
 }
 

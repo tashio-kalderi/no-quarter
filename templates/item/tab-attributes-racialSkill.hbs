@@ -44,8 +44,15 @@
     <div class="grid-span-1">
       <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Stat'}}</label>
       <select name="system.stat">
-        {{selectOptions config.stats selected=system.stat localize=true blank="-"}}
+        {{selectOptions statChoices selected=system.stat localize=true blank="-"}}
       </select>
+    </div>
+    {{/if}}
+    {{!-- The skill it added is on the character's skill list, so it isn't changed here. --}}
+    {{#if (and item.actor (eq system.choice "skill"))}}
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Skill'}}</label>
+      <input type="text" value="{{system.skillName}}" disabled/>
     </div>
     {{/if}}
   </div>

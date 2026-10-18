@@ -29,8 +29,9 @@ export default class NoQuarterRacialSkill extends NoQuarterItemBase {
     schema.repeatable = new fields.BooleanField();
     schema.exclusive = new fields.BooleanField();
     // Something the player picks when the skill is dropped onto a character,
-    // such as which stat a Stat Increase is for, and what they picked. Taken
-    // more than once, each copy must pick something different.
+    // such as which stat a Stat Increase is for or which skill a Profession
+    // adds, and what they picked. Taken more than once, each copy must pick
+    // something different.
     schema.choice = new fields.StringField({
       required: true,
       blank: true,
@@ -43,7 +44,28 @@ export default class NoQuarterRacialSkill extends NoQuarterItemBase {
       choices: ['', ...Object.keys(NOQUARTER.stats)],
       initial: '',
     });
+    // The skill it added to the character's skill list: its name when added,
+    // and its id, so it's removed along with this racial skill.
+    schema.skill = new fields.StringField({ required: true, blank: true, initial: '' });
+    schema.skillId = new fields.StringField({ required: true, blank: true, initial: '' });
 
     return schema;
+  }
+
+  /**
+   * The skill this racial skill added, if the character still has it.
+   * @type {Item|undefined}
+   */
+  get linkedSkill() {
+    const skill = this.skillId ? this.parent.actor?.items.get(this.skillId) : undefined;
+    return skill?.type === 'skill' ? skill : undefined;
+  }
+
+  /**
+   * The name of the skill it added, as it's called now if it was renamed.
+   * @type {string}
+   */
+  get skillName() {
+    return this.linkedSkill?.name ?? this.skill;
   }
 }
