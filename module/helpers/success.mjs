@@ -97,20 +97,22 @@ function bracketText(chances, tag) {
  * condition that forces advantage (such as Blessed), or a boss boon that
  * gives advantage (Powerhouse), likewise leaves only Advantage, and when
  * advantage and disadvantage are both forced they cancel out, leaving only
- * Normal.
- * Meant to grow into the place where optional abilities (such as ones that
- * cost stamina) are chosen.
+ * Normal. An ability added onto an attack that gives it advantage (Feint)
+ * counts like a boon. The supplemental abilities themselves are picked in
+ * the attack box before this (see helpers/attack-builder.mjs).
  * @param {object} options
  * @param {string} options.label    The name of the stat or ability being rolled
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {string} [options.tag]    Shown instead of the chances, see rollSuccess
  * @param {Actor} [options.actor]   The actor the roll is made for, to check for penalizing conditions
  * @param {boolean} [options.ability]  Whether this is an ability check rather than a stat check
- * @returns {Promise<{mode: 'normal'|'advantage'|'disadvantage', forced: boolean, penalty: number, cost: number, consumed: string[]}|null>}
- *   Null if the dialog is closed. `forced` is whether conditions picked the mode. Pass the result to
+ * @param {string[]} [options.grants]  Names of abilities giving this roll advantage, such as Feint
+ * @returns {Promise<{mode: 'normal'|'advantage'|'disadvantage', forced: boolean, penalty: number, cost: number, consumed: string[], grants: boolean}|null>}
+ *   Null if the dialog is closed. `forced` is whether conditions picked the mode, and `grants` whether
+ *   an ability gave advantage. Pass the result to
  *   `applyRollCosts` once the roll goes ahead, or to `attackRolls` first for an ability that makes several attacks.
  */
-export async function askRollMode({ label, chances, tag, actor, ability = false }) {
+export async function askRollMode({ label, chances, tag, actor, ability = false, grants = [] }) {
   const esc = foundry.utils.escapeHTML;
   const bracket = bracketText(chances, tag);
   const penalties = activeRollPenalties(actor);
@@ -136,7 +138,7 @@ export async function askRollMode({ label, chances, tag, actor, ability = false 
   const disLabels = labels(forcedDis);
   const stackLabels = labels(forcedAdv);
   const boonLabels = (actor?.advantageBoons ?? []).map((boon) => boon.name);
-  const advLabels = [...stackLabels, ...boonLabels];
+  const advLabels = [...stackLabels, ...boonLabels, ...grants];
   let forcedMode = null;
   let forcedRows = [];
   // The modes that can't be picked, and the one picked by default.
@@ -162,6 +164,7 @@ export async function askRollMode({ label, chances, tag, actor, ability = false 
     forcedRows = [
       ...stackLabels.map((condition) => game.i18n.format('NOQUARTER.RollMode.ForcedAdvantage', { condition })),
       ...boonLabels.map((boon) => game.i18n.format('NOQUARTER.RollMode.BoonAdvantage', { boon })),
+      ...grants.map((ability) => game.i18n.format('NOQUARTER.RollMode.AbilityAdvantage', { ability })),
     ];
   }
   if (forcedMode) {
@@ -183,7 +186,7 @@ export async function askRollMode({ label, chances, tag, actor, ability = false 
         if (checked) penalty += entry.amount;
         else if (entry.ignoreCost) cost += entry.ignoreCost;
       }
-      return { mode: action, forced: !!forcedMode, penalty, cost, consumed };
+      return { mode: action, forced: !!forcedMode, penalty, cost, consumed, grants: grants.length > 0 };
     },
   });
 
@@ -204,8 +207,8 @@ export async function askRollMode({ label, chances, tag, actor, ability = false 
  * forced-advantage condition (Blessed) is used up by each attack, so with one
  * stack only the first attack has advantage and the rest are made normally,
  * or with disadvantage when a forced disadvantage (Poisoned) is no longer
- * cancelled out. A boon that gives advantage (Powerhouse) applies to every
- * attack. Self-damage for ignoring a roll penalty (Burning) is paid
+ * cancelled out. A boon that gives advantage (Powerhouse), or an ability
+ * added onto the attack that does (Feint), applies to every attack. Self-damage for ignoring a roll penalty (Burning) is paid
  * for every attack. A mode the user picked freely is kept for all of them.
  * @param {Actor} actor
  * @param {object} asked   The result of askRollMode
@@ -220,7 +223,7 @@ export function attackRolls(actor, asked, attacks) {
   // Only abilities make several attacks.
   const disadvantage = Object.keys(activeForcedDisadvantage(actor, { ability: true })).length > 0;
   const stacks = Object.keys(activeForcedAdvantage(actor)).map((id) => ({ id, count: stackCount(actor, id) }));
-  const boonAdvantage = (actor?.advantageBoons ?? []).length > 0;
+  const boonAdvantage = (actor?.advantageBoons ?? []).length > 0 || !!asked.grants;
   const modes = [];
   const consumed = [];
   for (let i = 0; i < attacks; i++) {
@@ -246,11 +249,12 @@ export function attackRolls(actor, asked, attacks) {
  * @param {number|null} [options.damage]
  * @param {string} [options.damageType]
  * @param {{id: string, formula: string|null}[]} [options.conditions]   Inflicted on a hit
+ * @param {{value: number, sources: string[]}} [options.ignoreDr]   Damage reduction the hit ignores
  * @param {'normal'|'advantage'|'disadvantage'} options.mode
  * @param {number} options.index   Which attack this is, for the hit's `data-hit`
  * @returns {Promise<{roll: Roll, html: string, hit: object|null}>}  `hit` is what a hit applies, see helpers/damage.mjs
  */
-async function rollOnce({ chances, wounds, damage, damageType, conditions = [], mode, index }) {
+async function rollOnce({ chances, wounds, damage, damageType, conditions = [], ignoreDr, mode, index }) {
   const roll = await new Roll(mode === 'normal' ? '1d100' : '2d100').evaluate();
 
   // Both natural results, in the order they were rolled.
@@ -275,12 +279,17 @@ async function rollOnce({ chances, wounds, damage, damageType, conditions = [], 
   let hitHtml = '';
   if (hits) {
     hit = { damage: damage != null ? damage + bonus : null, damageType: damageType ?? '', conditions };
+    if (ignoreDr?.value) hit.ignoreDr = ignoreDr.value;
     let damageHtml = '';
     if (damage != null) {
       const breakdown = bonus ? ` (${damage} + ${bonus})` : '';
       const typeKey = NOQUARTER.damageTypes[damageType];
       const type = typeKey ? ` ${game.i18n.localize(typeKey)}` : '';
       damageHtml = `<div class="roll-damage">${game.i18n.localize('NOQUARTER.Chat.Damage')}: <strong>${hit.damage}</strong>${breakdown}${type}</div>`;
+      if (hit.ignoreDr) {
+        const text = game.i18n.format('NOQUARTER.Hit.IgnoresDr', { value: hit.ignoreDr, sources: ignoreDr.sources.join(', ') });
+        damageHtml += `<div class="roll-ignore-dr">${foundry.utils.escapeHTML(text)}</div>`;
+      }
     }
     hitHtml = `<div class="roll-hit" data-hit="${index}">
       <i class="fa-solid fa-grip-vertical roll-hit-grip" inert></i>
@@ -325,11 +334,13 @@ async function rollOnce({ chances, wounds, damage, damageType, conditions = [], 
  * @param {number|null} [options.damage]   Base damage; the degree of success adds to it
  * @param {string} [options.damageType]   A key of NOQUARTER.damageTypes, or '' when it isn't known
  * @param {{id: string, formula: string|null}[]} [options.conditions]   Conditions each hit inflicts, see parseConditions
+ * @param {{value: number, sources: string[]}} [options.ignoreDr]   Damage reduction each hit ignores, and the abilities it's from
  * @param {string} [options.note]   Plain text shown under the roll, such as a monster ability's effect
+ * @param {string[]} [options.details]   Plain-text lines shown under the name, such as the abilities added onto an attack
  * @param {string} [options.tag]   Text shown in brackets after the name instead of the success chances, such as a monster ability's damage type and range
  * @param {'normal'|'advantage'|'disadvantage'} [options.mode='normal']
  * @param {string[]} [options.modes]   The mode of each attack, from attackRolls; rolls that many times instead of once
- * @returns {Promise<Roll[]>}
+ * @returns {Promise<{rolls: Roll[], hits: (object|null)[]}>}   What each attack that hit applies, null for a miss
  */
 export async function rollSuccess({
   actor,
@@ -338,7 +349,9 @@ export async function rollSuccess({
   damage,
   damageType,
   conditions,
+  ignoreDr,
   note,
+  details = [],
   tag,
   mode = 'normal',
   modes = [mode],
@@ -348,7 +361,7 @@ export async function rollSuccess({
 
   const results = [];
   for (const [index, attackMode] of modes.entries()) {
-    results.push(await rollOnce({ chances, wounds, damage, damageType, conditions, mode: attackMode, index }));
+    results.push(await rollOnce({ chances, wounds, damage, damageType, conditions, ignoreDr, mode: attackMode, index }));
   }
   // What each attack that hit applies, by attack, for dragging onto a target.
   const hits = results.map(({ hit }) => (hit ? { ...hit, label } : null));
@@ -367,12 +380,14 @@ export async function rollSuccess({
           .join('');
 
   const noteHtml = note ? `<div class="roll-effect">${foundry.utils.escapeHTML(note)}</div>` : '';
+  const detailsHtml = details.map((line) => `<div class="roll-detail">${foundry.utils.escapeHTML(line)}</div>`).join('');
 
   const bracket = bracketText(chances, tag);
   const chancesHtml = bracket ? ` <span class="roll-chances">${foundry.utils.escapeHTML(bracket)}</span>` : '';
 
   const content = `<div class="no-quarter-roll">
     <div class="roll-title"><strong>${foundry.utils.escapeHTML(label)}</strong>${chancesHtml}</div>
+    ${detailsHtml}
     ${rollsHtml}
     ${noteHtml}
   </div>`;
@@ -388,5 +403,5 @@ export async function rollSuccess({
     },
     { messageMode: game.settings.get('core', 'messageMode') }
   );
-  return rolls;
+  return { rolls, hits };
 }

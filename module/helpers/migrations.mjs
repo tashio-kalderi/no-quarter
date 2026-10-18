@@ -54,6 +54,12 @@ export function registerMigrationSettings() {
     type: Boolean,
     default: false,
   });
+  game.settings.register('no-quarter', 'abilityAttackBoxMigrated', {
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false,
+  });
 }
 
 /** Run every migration that's needed. Only the active GM does this. */
@@ -63,6 +69,46 @@ export async function migrateWorld() {
   await migrateAbilityAttacks();
   await migrateAbilityActionTypes();
   await migrateBuildMode();
+  await migrateAbilityAttackBox();
+}
+
+/**
+ * The attack box applies some supplemental abilities by itself (Bludgeon,
+ * Lacerate, Feint, Strike Speed...), set by their automation, condition and
+ * attack limit. Copies of SRD abilities taken before that have none of it, so
+ * they get it from the compendium once. A copy that already has an automation
+ * or attack limit was set up by hand and is left alone.
+ */
+async function migrateAbilityAttackBox() {
+  if (game.settings.get('no-quarter', 'abilityAttackBoxMigrated')) return;
+  const pack = game.packs.get('no-quarter.srd-characters');
+  if (!pack) return;
+  const sources = new Map();
+  for (const doc of await pack.getDocuments({ type: 'ability' })) {
+    if (doc.system.automation || doc.system.attackLimit) sources.set(doc.uuid, doc.system);
+  }
+
+  const updates = (items) =>
+    items
+      .filter((i) => i.type === 'ability' && sources.has(i._stats.compendiumSource))
+      .filter((i) => !i.system.automation && !i.system.attackLimit)
+      .map((i) => {
+        const source = sources.get(i._stats.compendiumSource);
+        const update = { _id: i.id, 'system.automation': source.automation, 'system.attackLimit': source.attackLimit };
+        // A chosen condition (Impose Condition) stays as chosen.
+        if (!i.system.conditionChoice) update['system.condition'] = source.condition;
+        return update;
+      });
+  const options = { render: false };
+
+  const worldItems = updates(game.items);
+  if (worldItems.length) await Item.updateDocuments(worldItems, options);
+  for (const actor of game.actors) {
+    const data = updates(actor.items);
+    if (data.length) await actor.updateEmbeddedDocuments('Item', data, options);
+  }
+
+  await game.settings.set('no-quarter', 'abilityAttackBoxMigrated', true);
 }
 
 /**

@@ -30,7 +30,8 @@
     "range": "",
     "uses": null,
     "used": 0,
-    "basicKey": ""
+    "basicKey": "",
+    "attackLimit": ""
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",

@@ -17,6 +17,7 @@ import { registerTurnOrder, registerTurnReferee } from './helpers/turns.mjs';
 import { registerMovementRuler } from './helpers/movement-ruler.mjs';
 import { registerVision } from './helpers/vision.mjs';
 import { registerHits } from './helpers/damage.mjs';
+import { registerAttackBox } from './helpers/attack-builder.mjs';
 import { migrateWorld, registerMigrationSettings } from './helpers/migrations.mjs';
 import { registerProgressionSettings } from './helpers/progression.mjs';
 import { registerBuildModeSettings } from './helpers/build-mode.mjs';
@@ -72,6 +73,7 @@ Hooks.once('init', function () {
   // A hit in a roll's chat card can be dragged onto a token or actor sheet to
   // apply its damage and conditions, see helpers/damage.mjs.
   registerHits();
+  registerAttackBox();
 
   // Define custom Document and DataModel classes.
   // The types themselves are declared under `documentTypes` in system.json.

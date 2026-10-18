@@ -21,7 +21,7 @@
       "step": 1,
       "mode": "perRank"
     },
-    "automation": "",
+    "automation": "condition",
     "conditionChoice": true,
     "condition": "",
     "rank": null,
@@ -36,7 +36,8 @@
     "range": "",
     "uses": null,
     "used": 0,
-    "basicKey": ""
+    "basicKey": "",
+    "attackLimit": ""
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",

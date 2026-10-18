@@ -142,6 +142,7 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
           .sort((a, b) => a[1].localeCompare(b[1]))
       );
       context.automationChoices = { '': 'NOQUARTER.Automation.none', ...CONFIG.NOQUARTER.abilityAutomations };
+      context.attackLimitChoices = { '': 'NOQUARTER.AttackLimit.none', ...CONFIG.NOQUARTER.attackLimits };
       context.actionTypeChoices = Object.fromEntries(
         Object.entries(CONFIG.NOQUARTER.actionTypes).map(([key, { label }]) => [key, label])
       );

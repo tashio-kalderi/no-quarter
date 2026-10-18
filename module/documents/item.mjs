@@ -5,6 +5,7 @@ import { formatRange } from '../helpers/range.mjs';
 import { checkItemCreate, checkItemDelete, checkItemUpdate } from '../helpers/build-mode.mjs';
 import { rankableAbilities } from '../helpers/racial-skills.mjs';
 import { racialSkillChoice } from '../helpers/progression.mjs';
+import { attackWithBox } from '../helpers/attack-builder.mjs';
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -323,6 +324,9 @@ export class NoQuarterItem extends Item {
           { messageMode: game.settings.get('core', 'messageMode') }
         );
       }
+      // A character's basic attack first asks which supplemental abilities go on it.
+      if (item.system.basicKey && item.actor?.type === 'character') return attackWithBox(item);
+
       const isMonster = item.actor?.type === 'npc';
 
       // A monster ability with limited uses can only be used that many times

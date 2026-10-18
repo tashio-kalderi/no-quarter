@@ -17,7 +17,7 @@
       "step": 1,
       "mode": "everyOtherRank"
     },
-    "automation": "",
+    "automation": "advantage",
     "rank": null,
     "special": false,
     "minRank": 1,
@@ -30,7 +30,8 @@
     "range": "",
     "uses": null,
     "used": 0,
-    "basicKey": ""
+    "basicKey": "",
+    "attackLimit": "perTurn"
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",

@@ -218,6 +218,7 @@
       "Forced": "{condition} forces this roll to be made with disadvantage.",
       "ForcedAdvantage": "{condition} grants this roll advantage (uses 1 stack).",
       "BoonAdvantage": "{boon} grants this roll advantage.",
+      "AbilityAdvantage": "{ability} grants this roll advantage.",
       "Cancelled": "{advantage} and {disadvantage} cancel each other out, so this roll is made normally.",
       "CancelledStack": "{condition} still uses 1 stack.",
       "IgnoreCost": "(unchecking deals {cost} damage)"
@@ -266,7 +267,35 @@
       "Damage": "Takes {damage} damage ({type})",
       "Gains": "Gains {condition}",
       "Raised": "Gains {condition}, up from {current}",
-      "Stays": "Gains {condition}, but already has {current}, so it stays at {current}"
+      "Stays": "Gains {condition}, but already has {current}, so it stays at {current}",
+      "AlreadyHas": "Already has {condition}",
+      "IgnoresDr": "Ignores {value} DR ({sources})",
+      "DrIgnored": "{value} {label} ignored"
+    },
+    "AttackBox": {
+      "Attack": "Attack",
+      "Cancel": "Cancel",
+      "AttackOf": "Attack {number} of {total}",
+      "None": "No supplemental abilities can be added to this attack.",
+      "Always": "Always applied",
+      "Carried": "Carried over",
+      "Cost": "{cost} Stamina",
+      "Paid": "Paid",
+      "UsesLeft": "{left}/{max} left",
+      "Landed": "Already landed",
+      "StaminaLine": "Stamina cost: {cost} ({stamina} available)",
+      "NotEnough": "{name} doesn't have enough stamina ({cost} needed, {stamina} available).",
+      "GiveUpTitle": "Give up the attack?",
+      "GiveUp": "Give up the remaining {count} attack(s)? Stamina already spent isn't refunded.",
+      "With": "With {abilities}",
+      "PaidNote": "{name} (−{cost} Stamina)"
+    },
+    "AttackLimit": {
+      "label": "Attack Limit",
+      "hint": "How often this can be added onto attacks in the attack box. A limited ability is chosen again for each attack instead of carrying over.",
+      "none": "None (carries over to extra attacks)",
+      "perTurn": "Its value in attacks per turn",
+      "oneHit": "Until it lands one hit (one target)"
     },
     "Scaling": {
       "base": "Value at Min Rank",
@@ -292,6 +321,10 @@
       "damage": "Adds to basic attack damage",
       "pdr": "Adds to PDR",
       "mdr": "Adds to MDR",
+      "ignoreDr": "Hit ignores this much DR",
+      "condition": "Hit inflicts its condition",
+      "advantage": "Gives the attack advantage",
+      "extraAttacks": "Adds this many attacks",
       "DrTooltip": "Base {base}, +{bonus} from abilities",
       "DamageBase": "Base {base}"
     },

@@ -96,13 +96,34 @@ NOQUARTER.scalingModes = {
 /**
  * What the system does with an ability's scaling value by itself. "damage"
  * adds it to the damage of the basic attacks the ability is tied to; "pdr"
- * and "mdr" add it to the character's damage reduction.
+ * and "mdr" add it to the character's damage reduction. The others are for
+ * supplemental abilities added onto an attack in the attack box (see
+ * helpers/attack-builder.mjs): "ignoreDr" lets the hit ignore that much of the
+ * target's damage reduction, "condition" inflicts the ability's condition
+ * (that many stacks when it stacks), "advantage" gives the attack advantage,
+ * and "extraAttacks" adds that many attacks.
  * @type {Object}
  */
 NOQUARTER.abilityAutomations = {
   damage: 'NOQUARTER.Automation.damage',
   pdr: 'NOQUARTER.Automation.pdr',
   mdr: 'NOQUARTER.Automation.mdr',
+  ignoreDr: 'NOQUARTER.Automation.ignoreDr',
+  condition: 'NOQUARTER.Automation.condition',
+  advantage: 'NOQUARTER.Automation.advantage',
+  extraAttacks: 'NOQUARTER.Automation.extraAttacks',
+};
+
+/**
+ * How often a supplemental ability can be added onto attacks. "perTurn" means
+ * as many attacks per turn as its scaling value (Feint); "oneHit" means until
+ * it lands on one hit, so only one target gets it (Impose Condition:
+ * Restrained). Limited abilities are chosen again for each attack.
+ * @type {Object}
+ */
+NOQUARTER.attackLimits = {
+  perTurn: 'NOQUARTER.AttackLimit.perTurn',
+  oneHit: 'NOQUARTER.AttackLimit.oneHit',
 };
 
 NOQUARTER.basicAttacks = {

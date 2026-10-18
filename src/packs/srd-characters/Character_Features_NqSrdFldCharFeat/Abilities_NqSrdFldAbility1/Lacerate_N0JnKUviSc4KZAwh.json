@@ -17,7 +17,7 @@
       "step": 1,
       "mode": "perRank"
     },
-    "automation": "",
+    "automation": "condition",
     "rank": null,
     "special": true,
     "minRank": 1,
@@ -30,7 +30,9 @@
     "range": "",
     "uses": null,
     "used": 0,
-    "basicKey": ""
+    "basicKey": "",
+    "attackLimit": "",
+    "condition": "bleeding"
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",

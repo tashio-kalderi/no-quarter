@@ -21,7 +21,7 @@
       "step": 0,
       "mode": "fixed"
     },
-    "automation": "",
+    "automation": "condition",
     "rank": null,
     "special": false,
     "minRank": 3,
@@ -34,7 +34,9 @@
     "range": "",
     "uses": null,
     "used": 0,
-    "basicKey": ""
+    "basicKey": "",
+    "attackLimit": "oneHit",
+    "condition": "restrain"
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",

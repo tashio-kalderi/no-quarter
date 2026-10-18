@@ -3,7 +3,8 @@ import { raiseStacks, stackCount } from './conditions.mjs';
 /**
  * Applying a hit from its chat card. Every attack that hits shows its damage
  * and the conditions it inflicts in a block that can be dragged onto a token
- * or an actor sheet. Dropping it takes the target's PDR or MDR off the damage,
+ * or an actor sheet. Dropping it takes the target's PDR or MDR off the damage
+ * (less any the hit ignores, from an ability such as Bludgeon),
  * rolls any condition's stacks for that target (so each target of an area
  * attack gets their own duration) and applies the result.
  *
@@ -211,7 +212,7 @@ function askDamageType() {
  * its conditions, with their stacks rolled for this actor. The result is posted
  * to chat.
  * @param {Actor} actor
- * @param {{damage: number|null, damageType: string, conditions: {id: string, formula: string|null}[], label: string}} hit
+ * @param {{damage: number|null, damageType: string, conditions: {id: string, formula: string|null}[], ignoreDr?: number, label: string}} hit
  */
 export async function applyHit(actor, hit) {
   if (!actor) return;
@@ -227,10 +228,16 @@ export async function applyHit(actor, hit) {
     const damageType = hit.damageType || (await askDamageType());
     if (!damageType) return;
     const reduction = REDUCTIONS[damageType];
-    const dr = Number(actor.system[reduction?.field]) || 0;
+    // An ability such as Bludgeon ignores some of it, never below 0.
+    const fullDr = Number(actor.system[reduction?.field]) || 0;
+    const ignored = Math.min(fullDr, Math.max(0, Number(hit.ignoreDr) || 0));
+    const dr = fullDr - ignored;
     damage = Math.max(0, hit.damage - dr);
     const type = game.i18n.localize(CONFIG.NOQUARTER.damageTypes[damageType]);
-    const reduced = dr ? ` (${hit.damage} − ${dr} ${reduction.label})` : '';
+    const ignoredNote = ignored
+      ? `, ${game.i18n.format('NOQUARTER.Hit.DrIgnored', { value: ignored, label: reduction.label })}`
+      : '';
+    const reduced = fullDr ? ` (${hit.damage} − ${dr} ${reduction.label}${ignoredNote})` : '';
     lines.push(`${esc(game.i18n.format('NOQUARTER.Hit.Damage', { damage, type }))}${reduced}`);
   }
 
@@ -250,9 +257,11 @@ export async function applyHit(actor, hit) {
     stacks.push({ id, count });
     const name = conditionName(id);
     const shown = count === null ? name : `${name} ×${count}${rolled ? ` (${formula})` : ''}`;
+    // A condition that doesn't stack is either already on or not.
     const current = count === null ? 0 : stackCount(actor, id);
-    const key =
-      current >= count ? 'NOQUARTER.Hit.Stays' : current ? 'NOQUARTER.Hit.Raised' : 'NOQUARTER.Hit.Gains';
+    let key;
+    if (count === null) key = actor.statuses.has(id) ? 'NOQUARTER.Hit.AlreadyHas' : 'NOQUARTER.Hit.Gains';
+    else key = current >= count ? 'NOQUARTER.Hit.Stays' : current ? 'NOQUARTER.Hit.Raised' : 'NOQUARTER.Hit.Gains';
     lines.push(esc(game.i18n.format(key, { condition: shown, current })));
   }
   if (!lines.length) return;
@@ -312,6 +321,7 @@ function hitFromDrop(data) {
     damage: Number(data.damage) || 0,
     damageType: data.damageType ?? '',
     conditions: Array.isArray(data.conditions) ? data.conditions : [],
+    ignoreDr: Number(data.ignoreDr) || 0,
     label: data.label ?? '',
   };
 }

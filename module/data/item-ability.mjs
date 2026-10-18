@@ -47,6 +47,13 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
       choices: ['', ...Object.keys(NOQUARTER.abilityAutomations)],
       initial: '',
     });
+    // How often a supplemental ability can be added onto attacks; see NOQUARTER.attackLimits.
+    schema.attackLimit = new fields.StringField({
+      required: true,
+      blank: true,
+      choices: ['', ...Object.keys(NOQUARTER.attackLimits)],
+      initial: '',
+    });
     // Rank and stamina cost can be left empty; empty counts as 0.
     schema.rank = new fields.NumberField({
       required: true,
@@ -261,6 +268,27 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     if (!this.condition) return '';
     const status = statusList().find((s) => s.id === this.condition);
     return status ? game.i18n.localize(status.name) : this.condition;
+  }
+
+  /**
+   * The conditions a supplemental ability with the "condition" automation
+   * inflicts on a hit: its condition, with its scaling value as the stacks
+   * when the condition stacks (1 when it has no scaling value).
+   * @type {{id: string, formula: string|null}[]}
+   */
+  get attackConditions() {
+    if (this.automation !== 'condition' || !this.condition) return [];
+    const stackable = !!statusList().find((s) => s.id === this.condition)?.stackable;
+    return [{ id: this.condition, formula: stackable ? String(Math.max(1, this.scaledValue ?? 1)) : null }];
+  }
+
+  /**
+   * How many attacks a turn a "perTurn" ability can be added onto: its scaling
+   * value, at least 1.
+   * @type {number}
+   */
+  get usesPerTurn() {
+    return Math.max(1, this.scaledValue ?? 1);
   }
 
   /** Whether this is a Special supplemental ability (see `special`). */

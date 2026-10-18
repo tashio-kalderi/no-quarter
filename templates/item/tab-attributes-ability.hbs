@@ -109,7 +109,8 @@
         </select>
       </div>
     </div>
-    {{!-- An ability such as Impose Condition asks for its condition when a character takes it. --}}
+    {{!-- An ability such as Impose Condition asks for its condition when a character takes it.
+          One that inflicts a set condition on a hit (Lacerate) has it picked here. --}}
     <div class="grid grid-2col">
       <div class="grid-span-1">
         <label class="checkbox" data-tooltip="{{localize 'NOQUARTER.ImposeCondition.ChoiceHint'}}">
@@ -117,7 +118,7 @@
           {{localize 'NOQUARTER.ImposeCondition.ChoiceLabel'}}
         </label>
       </div>
-      {{#if system.conditionChoice}}
+      {{#if (or system.conditionChoice (eq system.automation "condition"))}}
       <div class="grid-span-1">
         <label class="resource-label">{{localize 'NOQUARTER.ImposeCondition.Condition'}}</label>
         <select name="system.condition" {{#if buildLocked}}disabled{{/if}}>
@@ -138,6 +139,17 @@
         <span class="ability-scaled">{{#if system.scaledLabel}}{{system.scaledLabel}}{{else}}-{{/if}}</span>
       </div>
     </div>
+    {{!-- How often a supplemental ability can be added onto attacks in the attack box. --}}
+    {{#if (eq system.actionType "supplemental")}}
+    <div class="grid grid-2col">
+      <div class="grid-span-1">
+        <label class="resource-label" data-tooltip="{{localize 'NOQUARTER.AttackLimit.hint'}}">{{localize 'NOQUARTER.AttackLimit.label'}}</label>
+        <select name="system.attackLimit">
+          {{selectOptions attackLimitChoices selected=system.attackLimit localize=true}}
+        </select>
+      </div>
+    </div>
+    {{/if}}
   {{/unless}}
   {{#if system.basicKey}}
     <div class="resource">

@@ -96,3 +96,73 @@
     font-weight: bold;
   }
 }
+
+// Lines under an attack's name: which attack it is and the supplemental
+// abilities added onto it (see helpers/attack-builder.mjs).
+.no-quarter-roll .roll-detail {
+  margin-bottom: 2px;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+// The attack box, where supplemental abilities are added onto a basic attack.
+.no-quarter-attack-box {
+  .nq-attack-counter {
+    margin-left: 4px;
+    font-style: italic;
+  }
+
+  .nq-attack-options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  .nq-attack-option {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+
+    &.disabled {
+      opacity: 0.55;
+    }
+  }
+
+  .nq-attack-name {
+    font-weight: bold;
+  }
+
+  .nq-attack-tag,
+  .nq-attack-value,
+  .nq-attack-cost,
+  .nq-attack-uses {
+    padding: 0 4px;
+    font-size: 0.85em;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+  }
+
+  .nq-attack-tag {
+    background: rgba(140, 60, 160, 0.2);
+  }
+
+  .nq-attack-cost {
+    background: rgba(60, 110, 170, 0.2);
+  }
+
+  .nq-attack-listed,
+  .nq-attack-none {
+    margin: 4px 0;
+  }
+
+  .nq-attack-stamina {
+    margin: 6px 0 0;
+
+    &.over {
+      color: #a02020;
+      font-weight: bold;
+    }
+  }
+}
