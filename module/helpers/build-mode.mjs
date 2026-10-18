@@ -13,7 +13,7 @@ import { earnedAtLevel } from './progression.mjs';
  */
 
 /** The ability fields that are part of building a character, not just notes. */
-const ABILITY_BUILD_FIELDS = ['rank', 'stats', 'actionType', 'minRank', 'maxRank'];
+const ABILITY_BUILD_FIELDS = ['rank', 'stats', 'actionType', 'special', 'minRank', 'maxRank'];
 
 /** The item types a character builds with. */
 const BUILD_ITEM_TYPES = ['ability', 'skill', 'racialSkill'];

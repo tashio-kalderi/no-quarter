@@ -158,8 +158,13 @@
               <input type="text" class="chance-box" value="{{item.chances.extreme}}" readonly tabindex="-1"/>
             </div>
           {{else}}
-            {{!-- Supplemental and passive abilities aren't rolled; neither is a full action with no stat. --}}
-            <div class="ability-passive">{{localize (lookup (lookup @root.config.actionTypes item.system.actionType) "label")}}</div>
+            {{!-- Supplemental and passive abilities aren't rolled; neither is a full action with no stat.
+            A Special supplemental ability is marked as Special. --}}
+            {{#if item.system.isSpecial}}
+            <div class="ability-passive"><span class="ability-special-tag" data-tooltip="{{localize 'NOQUARTER.ActionType.special.hint'}}">{{item.system.typeLabel}}</span></div>
+            {{else}}
+            <div class="ability-passive">{{item.system.typeLabel}}</div>
+            {{/if}}
           {{/if}}
           <div>
             <input type="text" class="ability-field" data-field="staminaCost" data-dtype="Number" data-nullable="true"

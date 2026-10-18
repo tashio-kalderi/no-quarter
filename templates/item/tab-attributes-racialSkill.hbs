@@ -37,10 +37,10 @@
     <div class="grid-span-1">
       <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Choice'}}</label>
       <select name="system.choice">
-        {{selectOptions config.racialSkillChoices selected=system.choice localize=true blank="-"}}
+        {{selectOptions config.racialSkillChoices selected=choice localize=true blank="-"}}
       </select>
     </div>
-    {{#if (and item.actor (eq system.choice "stat"))}}
+    {{#if (and item.actor (eq choice "stat"))}}
     <div class="grid-span-1">
       <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Stat'}}</label>
       <select name="system.stat">
@@ -49,10 +49,19 @@
     </div>
     {{/if}}
     {{!-- The skill it added is on the character's skill list, so it isn't changed here. --}}
-    {{#if (and item.actor (eq system.choice "skill"))}}
+    {{#if (and item.actor (eq choice "skill"))}}
     <div class="grid-span-1">
       <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Skill'}}</label>
       <input type="text" value="{{system.skillName}}" disabled/>
+    </div>
+    {{/if}}
+    {{!-- Changing the ability moves the rank this racial skill gives. --}}
+    {{#if (and item.actor (eq choice "ability"))}}
+    <div class="grid-span-1">
+      <label class="resource-label">{{localize 'NOQUARTER.RacialSkill.Field.Ability'}}</label>
+      <select name="system.abilityId">
+        {{selectOptions abilityChoices selected=system.abilityId blank="-"}}
+      </select>
     </div>
     {{/if}}
   </div>

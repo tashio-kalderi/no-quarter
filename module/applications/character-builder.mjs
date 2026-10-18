@@ -266,6 +266,7 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
           minRank,
           maxRank,
           statsLabel: this.#statsLabel(stats),
+          special: i.system.isSpecial,
           basic: !!i.system.basicKey,
           canUp: next <= maxRank && next <= this.#highestStat(stats) && next - current <= remaining,
           canDown: current > 0,
@@ -287,6 +288,7 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
           maxRank: e.system.maxRank ?? CONFIG.NOQUARTER.successRules.maxRank,
           statsLabel: this.#statsLabel(e.system.stats),
           effect: e.system.effect,
+          special: (e.system.actionType ?? 'full') === 'supplemental' && !!e.system.special,
           problem,
         };
       });

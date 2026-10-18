@@ -23,7 +23,11 @@
     "ActionType": {
       "full": { "label": "Full Action", "section": "Full Actions" },
       "supplemental": { "label": "Supplemental", "section": "Supplemental" },
-      "passive": { "label": "Passive", "section": "Passive" }
+      "passive": { "label": "Passive", "section": "Passive" },
+      "special": {
+        "label": "Special",
+        "hint": "A supplemental ability that can't be added onto the same attack as another Special ability. It can be combined with other supplemental abilities."
+      }
     },
     "AbilityRank": {
       "TooHigh": "{name}: rank {rank} is above its highest stat ({stat} {value}).",
@@ -124,6 +128,8 @@
       "SkillByName": "Or enter its name",
       "NoSkillChosen": "Pick a skill or enter one's name.",
       "ChooseAbility": "Which ability does {name} give a rank in?",
+      "AbilityNotAllowed": "{name} can't gain a rank from this: it's at its highest rank, needs a higher stat, or another copy is already for it.",
+      "Rank": "rank",
       "OwnedAbilities": "Your abilities",
       "NoAbilityLeft": "No ability can gain a rank from {name}: each one is at its highest rank, needs a higher stat, or already has it.",
       "Choice": {
@@ -146,7 +152,8 @@
         "Exclusive": "No other racial skills",
         "Choice": "Choose on drop",
         "Stat": "Stat",
-        "Skill": "Skill"
+        "Skill": "Skill",
+        "Ability": "Ability"
       }
     },
     "Vision": {

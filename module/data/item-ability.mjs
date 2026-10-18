@@ -30,6 +30,9 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
       min: 0,
       max: NOQUARTER.successRules.maxRank,
     });
+    // A Special supplemental ability: a character can have several, but only
+    // one can be added onto the same attack. Only used on supplemental abilities.
+    schema.special = new fields.BooleanField();
     // The lowest and highest rank a character can have the ability at. Taking
     // it costs its minimum rank in ability points; rank 0 means not taken yet.
     schema.minRank = new fields.NumberField({
@@ -141,6 +144,21 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     const rank = this.rank ?? 0;
     const cap = this.highestStat?.value;
     return cap === undefined ? rank : Math.min(rank, cap);
+  }
+
+  /** Whether this is a Special supplemental ability (see `special`). */
+  get isSpecial() {
+    return this.actionType === 'supplemental' && this.special;
+  }
+
+  /**
+   * The ability's type as shown: its action type, or "Special" for a Special
+   * supplemental ability.
+   * @type {string}
+   */
+  get typeLabel() {
+    if (this.isSpecial) return game.i18n.localize('NOQUARTER.ActionType.special.label');
+    return game.i18n.localize(NOQUARTER.actionTypes[this.actionType]?.label ?? 'NOQUARTER.Passive');
   }
 
   /** Whether the ability's rank is above its highest tied stat. */

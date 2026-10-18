@@ -2,6 +2,8 @@ import {
   effectActions,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
+import { rankableAbilities } from '../helpers/racial-skills.mjs';
+import { racialSkillChoice } from '../helpers/progression.mjs';
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ItemSheetV2 } = foundry.applications.sheets;
@@ -91,7 +93,20 @@ export class NoQuarterItemSheet extends HandlebarsApplicationMixin(ItemSheetV2) 
           `${game.i18n.localize(label)} (${range} ft.)`,
         ])
       );
-      if (item.actor) context.statChoices = this.#statChoices();
+      // The SRD Ability racial skill asks for an ability even if its choice wasn't saved.
+      context.choice = racialSkillChoice(item);
+      if (item.actor) {
+        context.statChoices = this.#statChoices();
+        if (context.choice === 'ability') {
+          // The abilities it could be for, and the one it's for now.
+          const options = rankableAbilities(item.actor, item);
+          const linked = item.system.linkedAbility;
+          if (linked && !options.includes(linked)) options.unshift(linked);
+          context.abilityChoices = Object.fromEntries(
+            options.map((i) => [i.id, `${i.name} (${game.i18n.localize('NOQUARTER.RacialSkill.Rank')} ${i.system.rank ?? 0})`])
+          );
+        }
+      }
     }
     if (item.type === 'ability') {
       context.chances = item.system.chances;

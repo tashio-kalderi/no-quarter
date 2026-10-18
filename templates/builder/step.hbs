@@ -63,7 +63,7 @@
       {{#each section.owned as |a|}}
       <li class="builder-row">
         <img src="{{a.img}}" width="24" height="24" alt=""/>
-        <span class="builder-name">{{a.name}} <span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}}</span></span>
+        <span class="builder-name">{{a.name}} {{#if a.special}}<span class="ability-special-tag" data-tooltip="{{localize 'NOQUARTER.ActionType.special.hint'}}">{{localize 'NOQUARTER.ActionType.special.label'}}</span> {{/if}}<span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}}</span></span>
         <button type="button" class="builder-icon" data-action="rankDown" data-item-id="{{a.id}}" {{#unless a.canDown}}disabled{{/unless}}><i class="fa-solid fa-minus"></i></button>
         <span class="builder-rank">{{a.rank}}</span>
         <button type="button" class="builder-icon" data-action="rankUp" data-item-id="{{a.id}}" {{#unless a.canUp}}disabled{{/unless}}><i class="fa-solid fa-plus"></i></button>
@@ -86,7 +86,7 @@
       <li class="builder-row {{#if a.problem}}unavailable{{/if}}"
           {{#if a.problem}}data-tooltip="{{a.problem}}"{{else if a.effect}}data-tooltip="{{a.effect}}"{{/if}}>
         <img src="{{a.img}}" width="24" height="24" alt=""/>
-        <span class="builder-name">{{a.name}} <span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}} · {{a.group}}</span></span>
+        <span class="builder-name">{{a.name}} {{#if a.special}}<span class="ability-special-tag" data-tooltip="{{localize 'NOQUARTER.ActionType.special.hint'}}">{{localize 'NOQUARTER.ActionType.special.label'}}</span> {{/if}}<span class="builder-note">{{a.statsLabel}} · {{localize 'NOQUARTER.Builder.RankRange' min=a.minRank max=a.maxRank}} · {{a.group}}</span></span>
         <span class="builder-cost">{{localize 'NOQUARTER.Builder.Cost' cost=a.minRank}}</span>
         <button type="button" class="builder-icon" data-action="addAbility" data-uuid="{{a.uuid}}"
                 {{#if a.problem}}disabled{{/if}} data-tooltip="{{localize 'NOQUARTER.Builder.Add'}}"><i class="fa-solid fa-plus"></i></button>

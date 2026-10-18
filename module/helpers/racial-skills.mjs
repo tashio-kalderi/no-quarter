@@ -1,4 +1,5 @@
 import { ABILITY_FIELDS, catalogItemData, itemCatalog } from './catalog.mjs';
+import { racialSkillChoice } from './progression.mjs';
 
 /**
  * Giving a character racial skills and skills, from a drop onto the sheet or
@@ -65,7 +66,8 @@ export async function addRacialSkill(actor, item) {
 
   const data = item.inCompendium ? game.items.fromCompendium(item, { clearFolder: true }) : item.toObject();
   delete data._id;
-  const { choice } = item.system;
+  const choice = racialSkillChoice(item);
+  data.system.choice = choice;
 
   if (choice === 'stat') {
     // A Stat Increase raises its stat a rank straight away. The racial skill
@@ -151,12 +153,11 @@ export async function addSkill(actor, data) {
 async function chooseStat(actor, item) {
   const taken = new Set(actor.items.filter((i) => isSameRacialSkill(i, item)).map((i) => i.system.stat));
   // A racial increase still can't take a stat past the cap for the
-  // character's level, so a player can't pick one that's already there.
-  if (!game.user.isGM) {
-    const { statCap } = actor.system.progression;
-    const stats = actor._source.system.stats;
-    for (const key of Object.keys(CONFIG.NOQUARTER.stats)) if ((stats[key]?.value ?? 0) >= statCap) taken.add(key);
-  }
+  // character's level, so one that's already there isn't offered, to the GM
+  // either. (The GM can still type any value on the sheet.)
+  const { statCap } = actor.system.progression;
+  const stats = actor._source.system.stats;
+  for (const key of Object.keys(CONFIG.NOQUARTER.stats)) if ((stats[key]?.value ?? 0) >= statCap) taken.add(key);
   const options = Object.entries(CONFIG.NOQUARTER.stats)
     .filter(([key]) => !taken.has(key))
     .map(([key, label]) => `<option value="${key}">${game.i18n.localize(label)}</option>`);
@@ -231,33 +232,22 @@ async function chooseSkill(actor, item) {
 /**
  * Ask which ability a racial Ability skill gives a rank in: one the character
  * has that can go a rank higher, or a new one whose minimum rank is 1. Each
- * copy of the racial skill must be for a different ability, and (for players)
- * the new rank can't be above the ability's highest stat.
+ * copy of the racial skill must be for a different ability, and the new rank
+ * can't be above the ability's highest stat.
  * @param {Actor} actor
  * @param {Item} item   The racial skill
  * @returns {Promise<{owned?: Item, data?: object}|null>}
  */
 async function chooseAbility(actor, item) {
-  const isGM = game.user.isGM;
   const base = actor._source.system.stats;
   const highest = (stats) => Math.max(0, ...[...(stats ?? [])].map((k) => base[k]?.value ?? 0));
-  const taken = new Set(
-    actor.items.filter((i) => isSameRacialSkill(i, item)).map((i) => i.system.abilityId).filter(Boolean)
-  );
-
-  const owned = actor.items.filter((i) => {
-    if (i.type !== 'ability' || taken.has(i.id)) return false;
-    const next = (i.system.rank ?? 0) + 1;
-    if (next < i.system.minRank && (i.system.rank ?? 0) === 0) return false;
-    if (next > i.system.maxRank) return false;
-    return isGM || next <= highest(i.system.stats);
-  });
+  const owned = rankableAbilities(actor, item);
   const ownedNames = new Set(actor.items.filter((i) => i.type === 'ability').map((i) => i.name.toLowerCase()));
   const catalog = (await itemCatalog('ability', ABILITY_FIELDS)).filter(
     (e) =>
       !ownedNames.has(e.name.toLowerCase()) &&
       (e.system.minRank ?? 1) <= 1 &&
-      (isGM || highest(e.system.stats) >= 1)
+      highest(e.system.stats) >= 1
   );
 
   if (!owned.length && !catalog.length) {
@@ -284,6 +274,35 @@ async function chooseAbility(actor, item) {
   if (!data) return null;
   delete data._id;
   return { data };
+}
+
+/**
+ * The character's abilities a racial Ability skill could give a rank in: ones
+ * the next rank is allowed for (within its range and not above its highest
+ * stat), leaving out ones other copies of the racial skill are already for.
+ * This applies to the GM too, like the builder; the GM can still type any
+ * rank on the sheet.
+ * @param {Actor} actor
+ * @param {Item} item   The racial skill
+ * @returns {Item[]}
+ */
+export function rankableAbilities(actor, item) {
+  const base = actor._source.system.stats;
+  const highest = (stats) => Math.max(0, ...[...(stats ?? [])].map((k) => base[k]?.value ?? 0));
+  const taken = new Set(
+    actor.items
+      .filter((i) => i.id !== item.id && isSameRacialSkill(i, item))
+      .map((i) => i.system.abilityId)
+      .filter(Boolean)
+  );
+  return actor.items.filter((i) => {
+    if (i.type !== 'ability' || taken.has(i.id)) return false;
+    const rank = i.system.rank ?? 0;
+    const next = rank + 1;
+    if (rank === 0 && next < i.system.minRank) return false;
+    if (next > i.system.maxRank) return false;
+    return next <= highest(i.system.stats);
+  });
 }
 
 /**

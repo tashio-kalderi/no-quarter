@@ -44,6 +44,13 @@
       <select name="system.actionType" {{#if (or system.basicKey buildLocked)}}disabled{{/if}}>
         {{selectOptions actionTypeChoices selected=system.actionType localize=true}}
       </select>
+      {{!-- Only supplemental abilities can be Special. --}}
+      {{#if (eq system.actionType "supplemental")}}
+      <label class="checkbox ability-special" data-tooltip="{{localize 'NOQUARTER.ActionType.special.hint'}}">
+        <input type="checkbox" name="system.special" {{checked system.special}} {{#if buildLocked}}disabled{{/if}}/>
+        {{localize 'NOQUARTER.ActionType.special.label'}}
+      </label>
+      {{/if}}
     </div>
     <div class="grid-span-1 ability-stats">
       {{!-- Rank can't go above the highest of these; a full action rolls with the highest. --}}

@@ -3,6 +3,8 @@ import { applyRollPenalty, applyRollCosts } from '../helpers/conditions.mjs';
 import { basicDamageType, parseConditions } from '../helpers/damage.mjs';
 import { formatRange } from '../helpers/range.mjs';
 import { checkItemCreate, checkItemDelete, checkItemUpdate } from '../helpers/build-mode.mjs';
+import { rankableAbilities } from '../helpers/racial-skills.mjs';
+import { racialSkillChoice } from '../helpers/progression.mjs';
 
 /**
  * Extend the basic Item with some very simple modifications.
@@ -74,6 +76,29 @@ export class NoQuarterItem extends Item {
       options.noQuarterStatMoved = { from: this.system.stat, to: stat };
     }
 
+    // An Ability racial skill pointed at another ability takes its rank with it (see _onUpdate).
+    const abilityId = foundry.utils.getProperty(changes, 'system.abilityId');
+    if (
+      this.type === 'racialSkill' &&
+      this.actor?.type === 'character' &&
+      abilityId !== undefined &&
+      abilityId !== this.system.abilityId
+    ) {
+      if (!user.isGM && !this.actor.system.building) {
+        ui.notifications.warn('NOQUARTER.Build.NotBuilding', { localize: true });
+        return false;
+      }
+      const target = abilityId ? this.actor.items.get(abilityId) : null;
+      if (abilityId && !rankableAbilities(this.actor, this).includes(target)) {
+        ui.notifications.warn(game.i18n.format('NOQUARTER.RacialSkill.AbilityNotAllowed', { name: target?.name ?? '' }));
+        return false;
+      }
+      foundry.utils.setProperty(changes, 'system.ability', target?.name ?? '');
+      // Copies taken before the racial skill had its choice get it now.
+      if (!this.system.choice) foundry.utils.setProperty(changes, 'system.choice', racialSkillChoice(this));
+      options.noQuarterAbilityMoved = { from: this.system.linkedAbility?.id ?? null, to: target?.id ?? null };
+    }
+
     const rank = foundry.utils.getProperty(changes, 'system.rank');
     const stats = foundry.utils.getProperty(changes, 'system.stats');
     if (rank !== undefined || stats !== undefined) {
@@ -103,18 +128,37 @@ export class NoQuarterItem extends Item {
   }
 
   /**
-   * Move a Stat Increase's rank when its stat changes.
+   * Move a racial skill's rank when what it's for changes: a Stat Increase's
+   * stat, or an Ability racial skill's ability.
    * @override
    */
   _onUpdate(changed, options, userId) {
     super._onUpdate(changed, options, userId);
+    if (userId !== game.user.id || !this.actor) return;
+    if (options.noQuarterAbilityMoved) this.#moveAbilityRank(options.noQuarterAbilityMoved);
     const moved = options.noQuarterStatMoved;
-    if (!moved || userId !== game.user.id || !this.actor) return;
+    if (!moved) return;
     const stats = this.actor._source.system.stats;
     const changes = {};
     if (moved.from) changes[`system.stats.${moved.from}.value`] = Math.max(0, (stats[moved.from]?.value ?? 0) - 1);
     if (moved.to) changes[`system.stats.${moved.to}.value`] = (stats[moved.to]?.value ?? 0) + 1;
     this.actor.update(changes, { noQuarterRacialStat: true });
+  }
+
+  /**
+   * Take a rank off the ability an Ability racial skill was for, then give one
+   * to the ability it's for now. Taking it off first frees the point.
+   * @param {{from: string|null, to: string|null}} moved   Ability ids
+   */
+  async #moveAbilityRank({ from, to }) {
+    const items = this.actor.items;
+    const old = from ? items.get(from) : null;
+    if (old) {
+      const rank = Math.max(0, (old.system.rank ?? 0) - 1);
+      await old.update({ 'system.rank': rank < old.system.minRank ? 0 : rank });
+    }
+    const target = to ? items.get(to) : null;
+    if (target) await target.update({ 'system.rank': (target.system.rank ?? 0) + 1 });
   }
 
   /**
@@ -224,9 +268,7 @@ export class NoQuarterItem extends Item {
       // Only full actions are rolled; post the others to chat instead.
       if (!item.system.chances) {
         const esc = foundry.utils.escapeHTML;
-        const typeLabel = game.i18n.localize(
-          CONFIG.NOQUARTER.actionTypes[item.system.actionType]?.label ?? 'NOQUARTER.Passive'
-        );
+        const typeLabel = item.system.typeLabel;
         const effect = item.system.effect
           ? `<div class="roll-effect">${esc(item.system.effect)}</div>`
           : '';

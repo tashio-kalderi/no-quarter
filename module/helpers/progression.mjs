@@ -103,17 +103,27 @@ export function earnedAtLevel(level) {
 }
 
 /**
- * The racial Ability skill gives a free rank in an ability. Copies made before
- * it had the `ability` choice are recognised by the compendium entry they came
- * from.
+ * What a racial skill asks for when it's taken: 'stat', 'skill', 'ability' or
+ * '' for nothing. The SRD Ability racial skill always asks for an ability,
+ * even from a compendium built before it had that choice, and so do copies
+ * taken from it before then.
+ * @param {Item} item   A racial skill, owned or not
+ * @returns {string}
+ */
+export function racialSkillChoice(item) {
+  if (item.system.choice) return item.system.choice;
+  const id = NOQUARTER.racialAbilityId;
+  const sources = [item.inCompendium ? item.uuid : null, item._stats?.compendiumSource];
+  return sources.some((s) => s?.endsWith(id)) ? 'ability' : '';
+}
+
+/**
+ * The racial Ability skill gives a free rank in an ability.
  * @param {Item} item
  * @returns {boolean}
  */
 function isRacialAbility(item) {
-  return (
-    item.type === 'racialSkill' &&
-    (item.system.choice === 'ability' || !!item._stats.compendiumSource?.endsWith(NOQUARTER.racialAbilityId))
-  );
+  return item.type === 'racialSkill' && racialSkillChoice(item) === 'ability';
 }
 
 /**
