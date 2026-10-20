@@ -120,10 +120,13 @@ export function checkActorUpdate(actor, changes, user, options = {}) {
   }
   if (user.isGM) return true;
 
-  // Only the GM adjusts damage reduction; abilities add to it by themselves.
-  for (const field of ['pdr', 'mdr']) {
+  // Only the GM adjusts Speed and damage reduction; racial skills and
+  // abilities add to them by themselves.
+  for (const field of ['speed', 'pdr', 'mdr']) {
     const value = get(`system.${field}`);
-    if (value !== undefined && value !== actor._source.system[field]) return refuse('DrGmOnly');
+    if (value !== undefined && value !== actor._source.system[field]) {
+      return refuse(field === 'speed' ? 'SpeedGmOnly' : 'DrGmOnly');
+    }
   }
 
   const locked = buildingLocked();

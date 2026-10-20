@@ -307,6 +307,10 @@ export class NoQuarterItem extends Item {
 
     // Abilities roll d100 against their success chances.
     if (item.type === 'ability') {
+      // An ability whose stat has dropped below its minimum rank can't be used.
+      if (item.system.disabled) {
+        return ui.notifications.warn(game.i18n.format('NOQUARTER.AbilityRank.DisabledWarn', { name: item.name }));
+      }
       // Only full actions are rolled; post the others to chat instead.
       if (!item.system.chances) {
         const esc = foundry.utils.escapeHTML;

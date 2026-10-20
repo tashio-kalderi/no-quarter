@@ -111,6 +111,27 @@
   font-weight: bold;
 }
 
+// The ability's stat is below its minimum rank, so it can't be used: the row is
+// faded and tagged Disabled until the stat is back up.
+.abilities-list .ability-disabled {
+  .item-name,
+  .ability-stat,
+  .ability-effect {
+    opacity: 0.55;
+  }
+}
+
+.ability-disabled-tag {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid #a01010;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #a01010;
+  background: rgba(160, 16, 16, 0.1);
+}
+
 // Special supplemental abilities are tagged wherever they're listed.
 .ability-special-tag {
   display: inline-block;

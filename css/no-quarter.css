@@ -917,6 +917,21 @@
   border-color: #a01010;
   font-weight: bold;
 }
+.no-quarter .abilities-list .ability-disabled .item-name,
+.no-quarter .abilities-list .ability-disabled .ability-stat,
+.no-quarter .abilities-list .ability-disabled .ability-effect {
+  opacity: 0.55;
+}
+.no-quarter .ability-disabled-tag {
+  display: inline-block;
+  padding: 0 5px;
+  border: 1px solid #a01010;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #a01010;
+  background: rgba(160, 16, 16, 0.1);
+}
 .no-quarter .ability-special-tag {
   display: inline-block;
   padding: 0 5px;

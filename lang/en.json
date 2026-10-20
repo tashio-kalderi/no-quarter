@@ -33,7 +33,10 @@
     "AbilityRank": {
       "TooHigh": "{name}: rank {rank} is above its highest stat ({stat} {value}).",
       "OutOfRange": "{name}: rank must be 0 (not taken) or from {min} to {max}.",
-      "Capped": "Used as rank {value}: {stat} is only {value}."
+      "Capped": "Used as rank {value}: {stat} is only {value}.",
+      "Disabled": "Disabled: needs {stat} {min}, which is only {value}. Works again when {stat} is back up.",
+      "DisabledLabel": "Disabled",
+      "DisabledWarn": "{name} is disabled: its stat is below the ability's minimum rank."
     },
     "Progression": {
       "Title": "Character Progression",
@@ -63,6 +66,7 @@
       "Locked": "Character building is locked by the GM.",
       "LevelLocked": "Only the GM can change a character's level while building is locked.",
       "DrGmOnly": "Only the GM can change a character's PDR and MDR.",
+      "SpeedGmOnly": "Only the GM can change a character's Speed.",
       "DamageGmOnly": "Only the GM can change a basic attack's damage.",
       "NotBuilding": "Enter build mode to change stats, ability ranks and skills.",
       "StatCap": "{stat} can't go above {cap} at level {level}.",

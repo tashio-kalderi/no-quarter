@@ -324,7 +324,7 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
    * highest one marked, the most a player may type in the rank box, and a
    * warning when an effect has lowered the stat below the ability's rank.
    * @param {Item} item
-   * @returns {{statList: object[], rankMax: number, cappedTooltip: string}}
+   * @returns {{statList: object[], rankMax: number, cappedTooltip: string, disabled: boolean}}
    * @protected
    */
   _abilityStatInfo(item) {
@@ -345,13 +345,15 @@ export class NoQuarterActorSheet extends HandlebarsApplicationMixin(ActorSheetV2
       const base = this.actor._source.system.stats;
       rankMax = Math.min(maxRank, Math.max(...[...stats].map((key) => base[key]?.value ?? 0)));
     }
-    const cappedTooltip = rankCapped
-      ? game.i18n.format('NOQUARTER.AbilityRank.Capped', {
-          stat: game.i18n.localize(CONFIG.NOQUARTER.stats[highestStat.key]),
-          value: effectiveRank,
-        })
-      : '';
-    return { statList, rankMax, cappedTooltip };
+    const disabled = item.system.disabled;
+    let cappedTooltip = '';
+    if (rankCapped) {
+      const stat = game.i18n.localize(CONFIG.NOQUARTER.stats[highestStat.key]);
+      cappedTooltip = disabled
+        ? game.i18n.format('NOQUARTER.AbilityRank.Disabled', { stat, min: item.system.minRank ?? 1, value: highestStat.value })
+        : game.i18n.format('NOQUARTER.AbilityRank.Capped', { stat, value: effectiveRank });
+    }
+    return { statList, rankMax, cappedTooltip, disabled };
   }
 
   /**

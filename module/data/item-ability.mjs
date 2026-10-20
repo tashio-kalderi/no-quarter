@@ -170,13 +170,27 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
   /**
    * The rank the ability is used at. It can't go above the highest tied stat,
    * so if an effect lowers that stat the ability keeps its rank but works as
-   * if it were the lower one.
+   * if it were the lower one. Below the ability's minimum rank there is no
+   * lower rank to use, so it is 0 and the ability is disabled (see `disabled`).
    * @type {number}
    */
   get effectiveRank() {
     const rank = this.rank ?? 0;
     const cap = this.highestStat?.value;
-    return cap === undefined ? rank : Math.min(rank, cap);
+    if (cap === undefined) return rank;
+    const effective = Math.min(rank, cap);
+    return effective < (this.minRank ?? 1) ? 0 : effective;
+  }
+
+  /**
+   * Whether a taken ability can't be used because its highest tied stat is
+   * below the ability's minimum rank, such as Counterattack (rank 3 and up)
+   * with its stat lowered to 2, or any ability with its stat at 0. It keeps its
+   * rank and works again once the stat is back up.
+   * @type {boolean}
+   */
+  get disabled() {
+    return this.parent?.actor?.type === 'character' && (this.rank ?? 0) >= 1 && this.effectiveRank < 1;
   }
 
   /**
@@ -307,7 +321,7 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     return game.i18n.localize(NOQUARTER.actionTypes[this.actionType]?.label ?? 'NOQUARTER.Passive');
   }
 
-  /** Whether the ability's rank is above its highest tied stat. */
+  /** Whether the ability's rank is above its highest tied stat (or disabled by it). */
   get rankCapped() {
     return (this.rank ?? 0) > this.effectiveRank;
   }
@@ -321,7 +335,7 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
   get chances() {
     const actor = this.parent?.actor;
     if (actor?.type === 'npc') return actor.system.chances;
-    if (this.actionType !== 'full' || !this.stats.size) return null;
+    if (this.actionType !== 'full' || !this.stats.size || this.disabled) return null;
     return abilityChances(this.highestStat?.value ?? 0, this.effectiveRank);
   }
 }

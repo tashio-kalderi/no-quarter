@@ -49,8 +49,9 @@
             <input type="text" disabled="true" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
                    data-tooltip="{{ localize "EFFECT.StatusRestrained" }}"/>
             {{else}}
-            {{!-- Shows Speed with racial skill bonuses; the sheet takes them off again when saving. --}}
-            <input type="text" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number"
+            {{!-- Shows Speed with racial skill bonuses; the sheet takes them off again when saving.
+            Only the GM changes it. --}}
+            <input type="text" name="system.speed" value="{{system.effectiveSpeed}}" data-dtype="Number" {{#if @root.build.gmLocked}}disabled{{/if}}
                    {{#if system.bonuses.speed}}data-tooltip="{{localize 'NOQUARTER.RacialSkill.SpeedTooltip' base=system.speed bonus=system.bonuses.speed}}"{{/if}}/>
             {{/if}}
             <label for="system.wounds" class="resource-label align-left vital-second">Wounds:</label>
@@ -128,7 +129,7 @@
         </div>
       </li>
       {{#each section.abilities as |item|}}
-        <li class="item ability-row draggable" data-item-id="{{item._id}}">
+        <li class="item ability-row draggable {{#if item.disabled}}ability-disabled{{/if}}" data-item-id="{{item._id}}">
           <div class="item-name">
             <a class="rollable" data-action="roll" data-roll-type="item">
               <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
@@ -150,7 +151,10 @@
                    {{#unless @root.build.canEdit}}disabled{{/unless}}
                    value="{{item.system.rank}}" {{#if item.cappedTooltip}}data-tooltip="{{item.cappedTooltip}}"{{/if}}/>
           </div>
-          {{#if item.chances}}
+          {{#if item.disabled}}
+            {{!-- The stat is below the ability's minimum rank, so it can't be used until it's back up. --}}
+            <div class="ability-passive"><span class="ability-disabled-tag" data-tooltip="{{item.cappedTooltip}}">{{localize 'NOQUARTER.AbilityRank.DisabledLabel'}}</span></div>
+          {{else if item.chances}}
             <div class="ability-chances rollable" data-action="roll" data-roll-type="item">
               {{!-- Styled like the read-only Health/Stamina max boxes: readonly (not disabled) so
               clicking still bubbles up to the rollable div above. --}}
