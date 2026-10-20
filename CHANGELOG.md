@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.4.1
+
+- Character builder: a search box next to "Available" on the Race, Abilities and Skills steps filters the list to pick from as you type. Every word typed has to appear in the entry's name or the note beside it, so a group or a stat such as "MIG" finds entries too. Headings with nothing left under them are hidden. Each step keeps its own search, and it stays after adding something.
+- Breather: conditions are now cleared before health and stamina are restored. This is meant to stop the health and stamina bars on tokens sometimes staying where they were after a breather. Health and stamina are also now filled to their maximum after the conditions are gone.
+
 ## 0.4.0
 
 - Character builder: a step-by-step window for building a character, with Race, Stats, Abilities, Skills and Details steps. It opens by itself when a character is created (for whoever made it) and when a character's level goes up (for the character's players who are online, or whoever raised the level if none are). It can also be opened from the character sheet. Steps can be taken in any order from the list at the top, and a bar under it shows the stat points, ability points and skills left and the stat cap. Every change is made to the character straight away, under the same rules as the sheet, so closing the builder part way loses nothing. Finish closes it and takes the character out of build mode.

@@ -123,6 +123,9 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
   /** Hooks that redraw the builder when the character changes. */
   #hooks = [];
 
+  /** What's typed in each step's search box, so it survives a redraw. */
+  #search = {};
+
   /** @override */
   get title() {
     const key = this.#limited ? 'NOQUARTER.Builder.LevelUpTitle' : 'NOQUARTER.Builder.Title';
@@ -141,6 +144,57 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
     for (const hook of ['updateActor', 'createItem', 'updateItem', 'deleteItem']) {
       this.#hooks.push([hook, Hooks.on(hook, redraw)]);
     }
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    const input = this.element.querySelector('.builder-search');
+    if (!input) return;
+    const step = context.step;
+    input.addEventListener('input', () => {
+      this.#search[step] = input.value;
+      this.#filterAvailable(input.value);
+    });
+    // Typing here isn't a change to the character, so keep it from submitting the form.
+    input.addEventListener('change', (event) => event.stopPropagation());
+    this.#filterAvailable(input.value);
+  }
+
+  /**
+   * Hide the rows to pick from that don't match the search: every word typed
+   * has to appear in the row's name or note (group, stats). Headings whose
+   * rows are all hidden go too. Done on the page, so nothing is redrawn.
+   * @param {string} query
+   */
+  #filterAvailable(query) {
+    const box = this.element.querySelector('.builder-available');
+    if (!box) return;
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    let anyShown = false;
+    for (const list of box.querySelectorAll('.builder-list')) {
+      let shown = false;
+      for (const row of list.querySelectorAll('.builder-row')) {
+        const text = row.querySelector('.builder-name')?.textContent.toLowerCase() ?? '';
+        const match = words.every((w) => text.includes(w));
+        row.hidden = !match;
+        shown ||= match;
+      }
+      for (const empty of list.querySelectorAll('.builder-empty')) empty.hidden = words.length > 0;
+      const hideList = words.length > 0 && !shown;
+      list.hidden = hideList;
+      const heading = list.previousElementSibling;
+      if (heading?.tagName === 'H4') heading.hidden = hideList;
+      anyShown ||= shown;
+    }
+    let none = box.querySelector('.builder-no-matches');
+    if (!none) {
+      none = document.createElement('p');
+      none.className = 'builder-empty builder-no-matches';
+      none.textContent = game.i18n.localize('NOQUARTER.Builder.NoMatches');
+      box.append(none);
+    }
+    none.hidden = !words.length || anyShown;
   }
 
   /** @override */
@@ -175,6 +229,7 @@ export class CharacterBuilder extends HandlebarsApplicationMixin(ApplicationV2) 
       })),
       isFirst: this.#step === 0,
       isLast: this.#step === this.#steps.length - 1,
+      search: this.#search[step] ?? '',
     });
     switch (step) {
       case 'race':

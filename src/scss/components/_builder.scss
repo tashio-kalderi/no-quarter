@@ -80,8 +80,23 @@
       background: rgba(255, 200, 0, 0.08);
     }
 
+    // "Available" with the search box beside it.
     .builder-available-title {
       flex: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0 4px;
+
+      h3 {
+        flex: none;
+        margin: 0;
+      }
+
+      .builder-search {
+        flex: 1;
+        min-width: 0;
+      }
     }
 
     .builder-available {
@@ -110,6 +125,11 @@
 
     &.unavailable {
       opacity: 0.5;
+    }
+
+    // Filtered out by the search box.
+    &[hidden] {
+      display: none;
     }
   }
 

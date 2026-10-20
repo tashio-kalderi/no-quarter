@@ -535,6 +535,18 @@
 }
 .character-builder .builder-body .builder-available-title {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.character-builder .builder-body .builder-available-title h3 {
+  flex: none;
+  margin: 0;
+}
+.character-builder .builder-body .builder-available-title .builder-search {
+  flex: 1;
+  min-width: 0;
 }
 .character-builder .builder-body .builder-available {
   flex: 1;
@@ -558,6 +570,9 @@
 }
 .character-builder .builder-row.unavailable {
   opacity: 0.5;
+}
+.character-builder .builder-row[hidden] {
+  display: none;
 }
 .character-builder .builder-name {
   flex: 1;

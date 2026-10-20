@@ -93,6 +93,8 @@
       "Add": "Add",
       "Remove": "Remove",
       "Available": "Available",
+      "Search": "Search...",
+      "NoMatches": "Nothing matches the search.",
       "Race": "Race",
       "Name": "Name",
       "Gender": "Gender",

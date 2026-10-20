@@ -21,7 +21,11 @@
       {{/each}}
     </ol>
   </div>
-  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available-title">
+    <h3>{{localize 'NOQUARTER.Builder.Available'}}</h3>
+    {{!-- No name, so it isn't saved with the form; it filters the list as you type. --}}
+    <input type="search" class="builder-search" value="{{search}}" placeholder="{{localize 'NOQUARTER.Builder.Search'}}"/>
+  </div>
   <div class="builder-available">
     <ol class="builder-list">
       {{#each racialSkillCatalog as |r|}}
@@ -77,7 +81,11 @@
     {{/if}}
     {{/each}}
   </div>
-  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available-title">
+    <h3>{{localize 'NOQUARTER.Builder.Available'}}</h3>
+    {{!-- No name, so it isn't saved with the form; it filters the list as you type. --}}
+    <input type="search" class="builder-search" value="{{search}}" placeholder="{{localize 'NOQUARTER.Builder.Search'}}"/>
+  </div>
   <div class="builder-available">
     {{#each abilitySections as |section|}}
     <h4>{{section.label}}</h4>
@@ -124,7 +132,11 @@
       </button>
     </div>
   </div>
-  <h3 class="builder-available-title">{{localize 'NOQUARTER.Builder.Available'}}</h3>
+  <div class="builder-available-title">
+    <h3>{{localize 'NOQUARTER.Builder.Available'}}</h3>
+    {{!-- No name, so it isn't saved with the form; it filters the list as you type. --}}
+    <input type="search" class="builder-search" value="{{search}}" placeholder="{{localize 'NOQUARTER.Builder.Search'}}"/>
+  </div>
   <div class="builder-available">
     {{#each skillGroups as |g|}}
     <h4>{{g.label}}</h4>

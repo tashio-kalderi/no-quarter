@@ -359,13 +359,16 @@ export class NoQuarterActor extends Actor {
       ui.notifications.warn('NOQUARTER.Breather.InCombat', { localize: true });
       return;
     }
-    const updates = { 'system.health.value': this.system.health.max };
-    if (this.system.stamina) updates['system.stamina.value'] = this.system.stamina.max;
-    await this.update(updates);
+    // Conditions go first so that restoring health and stamina is the last
+    // change: each change animates the token bars, and a second change straight
+    // after could leave a bar short of its new value.
     const conditions = this.effects
       .filter((e) => e.statuses.size && !e.statuses.has(CONFIG.specialStatusEffects.DEFEATED))
       .map((e) => e.id);
     if (conditions.length) await this.deleteEmbeddedDocuments('ActiveEffect', conditions);
+    const updates = { 'system.health.value': this.system.health.max };
+    if (this.system.stamina) updates['system.stamina.value'] = this.system.stamina.max;
+    await this.update(updates);
   }
 
   /**
