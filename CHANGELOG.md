@@ -3,7 +3,9 @@
 ## 0.4.1
 
 - Character builder: a search box next to "Available" on the Race, Abilities and Skills steps filters the list to pick from as you type. Every word typed has to appear in the entry's name or the note beside it, so a group or a stat such as "MIG" finds entries too. Headings with nothing left under them are hidden. Each step keeps its own search, and it stays after adding something.
-- Breather: conditions are now cleared before health and stamina are restored. This is meant to stop the health and stamina bars on tokens sometimes staying where they were after a breather. Health and stamina are also now filled to their maximum after the conditions are gone.
+- Characters' tokens are now linked to the character by default, so every token is the same character as its sheet. Before, Foundry made each token its own copy of the character. One symptom was the health and stamina bars on such a token not updating for the first change after the page was reloaded, such as a breather or paying stamina for an ability. New characters get linked tokens, and when the GM loads the world, existing characters' prototype tokens are switched to linked. Tokens already placed on a scene aren't changed, since an unlinked token may have changes of its own. To link one, replace it with a new token from the character, or tick Link Actor Data in its token settings.
+- Breather: conditions are now cleared before health and stamina are restored, so health and stamina are filled to their maximum once the conditions are gone.
+- Character sheet: the build mode bar now always sits on its own line under the header. Before, on a wide enough sheet it moved up beside the name and the Race, Gender, Alignment and Level boxes.
 
 ## 0.4.0
 

@@ -60,6 +60,12 @@ export function registerMigrationSettings() {
     type: Boolean,
     default: false,
   });
+  game.settings.register('no-quarter', 'characterTokenLinkMigrated', {
+    scope: 'world',
+    config: false,
+    type: Boolean,
+    default: false,
+  });
 }
 
 /** Run every migration that's needed. Only the active GM does this. */
@@ -70,6 +76,23 @@ export async function migrateWorld() {
   await migrateAbilityActionTypes();
   await migrateBuildMode();
   await migrateAbilityAttackBox();
+  await migrateCharacterTokenLink();
+}
+
+/**
+ * Characters' tokens are now linked to them by default (see
+ * NoQuarterActor#_preCreate). Characters made before that get linked
+ * prototype tokens once, so tokens placed from now on are linked. Tokens
+ * already on a scene are left alone, since an unlinked one may hold changes
+ * of its own that linking would drop.
+ */
+async function migrateCharacterTokenLink() {
+  if (game.settings.get('no-quarter', 'characterTokenLinkMigrated')) return;
+  const updates = game.actors
+    .filter((a) => a.type === 'character' && !a.prototypeToken.actorLink)
+    .map((a) => ({ _id: a.id, 'prototypeToken.actorLink': true }));
+  if (updates.length) await Actor.updateDocuments(updates, { render: false });
+  await game.settings.set('no-quarter', 'characterTokenLinkMigrated', true);
 }
 
 /**

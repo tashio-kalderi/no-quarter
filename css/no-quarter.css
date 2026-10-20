@@ -966,6 +966,7 @@
   margin-left: 4px;
 }
 .no-quarter .build-tracker {
+  flex: 1 0 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

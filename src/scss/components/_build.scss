@@ -6,6 +6,9 @@
 }
 
 .build-tracker {
+  // The header wraps its contents; the full width keeps the tracker on its own
+  // line under the name and fields, however wide the sheet is.
+  flex: 1 0 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

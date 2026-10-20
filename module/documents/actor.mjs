@@ -89,13 +89,18 @@ export class NoQuarterActor extends Actor {
   }
 
   /**
-   * A new monster's tokens start at the size for its size, unless it comes
-   * with a token size already (a copy or an import keeps its own).
+   * A new character's tokens are linked to it, so every token is the same
+   * character as the sheet. Foundry leaves tokens unlinked by default, which
+   * makes each token its own copy. A new monster's tokens start at the size
+   * for its size. Either way, a copy or an import keeps its own setting.
    * @override
    */
   async _preCreate(data, options, user) {
     const allowed = await super._preCreate(data, options, user);
     if (allowed === false) return false;
+    if (this.type === 'character' && data.prototypeToken?.actorLink === undefined) {
+      this.updateSource({ 'prototypeToken.actorLink': true });
+    }
     if (this.type !== 'npc' || data.prototypeToken?.width !== undefined) return;
     const size = NoQuarterActor.tokenSize(this.system.size);
     if (size) this.updateSource({ prototypeToken: size });
