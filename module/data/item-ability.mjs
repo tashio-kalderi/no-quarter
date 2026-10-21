@@ -40,6 +40,20 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     // a character takes it, and can be taken once for each condition.
     schema.conditionChoice = new fields.BooleanField();
     schema.condition = new fields.StringField({ required: true, blank: true, initial: '' });
+    // For a full action that inflicts its condition: whether the scaling value
+    // counts stacks or targets, and whether a better success adds stacks (see
+    // NOQUARTER.scalingTargets and NOQUARTER.successStacksModes).
+    schema.scalingTarget = new fields.StringField({
+      required: true,
+      choices: Object.keys(NOQUARTER.scalingTargets),
+      initial: 'stacks',
+    });
+    schema.successStacks = new fields.StringField({
+      required: true,
+      blank: true,
+      choices: Object.keys(NOQUARTER.successStacksModes),
+      initial: '',
+    });
     // What's done with the scaling value automatically; see NOQUARTER.abilityAutomations.
     schema.automation = new fields.StringField({
       required: true,
@@ -215,6 +229,7 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
   get scaledLabel() {
     const value = this.scaledValue;
     if (value === null) return '';
+    if (this.countsTargets) return game.i18n.format(value === 1 ? 'NOQUARTER.Targets.One' : 'NOQUARTER.Targets.Many', { count: value });
     return this.automation && value >= 0 ? `+${value}` : String(value);
   }
 
@@ -294,6 +309,53 @@ export default class NoQuarterAbility extends NoQuarterItemBase {
     if (this.automation !== 'condition' || !this.condition) return [];
     const stackable = !!statusList().find((s) => s.id === this.condition)?.stackable;
     return [{ id: this.condition, formula: stackable ? String(Math.max(1, this.scaledValue ?? 1)) : null }];
+  }
+
+  /** Whether this is a full action that inflicts its condition on a success. */
+  get inflictsOnSuccess() {
+    return this.actionType === 'full' && this.automation === 'condition' && !!this.condition;
+  }
+
+  /** Whether the scaling value is how many targets a full action's condition goes to. */
+  get countsTargets() {
+    return this.inflictsOnSuccess && this.scalingTarget === 'targets';
+  }
+
+  /**
+   * How many targets a full action's condition can be given to: its scaling
+   * value when that counts targets, otherwise 1.
+   * @type {number}
+   */
+  get targetCount() {
+    return this.countsTargets ? Math.max(1, this.scaledValue ?? 1) : 1;
+  }
+
+  /**
+   * The conditions a full action inflicts on a success of some degree, or none
+   * on a failure. A stacking condition gets the scaling value as its stacks (1
+   * when that counts targets), plus NOQUARTER.successStackBonus for the degree
+   * when the ability's success adds stacks. A critical success adds its bonus
+   * on top of the best tier the chances it was rolled at could reach.
+   * @param {string} degree   A key of NOQUARTER.successDegrees
+   * @param {{regular: number, greater: number, extreme: number}} chances
+   * @returns {{id: string, formula: string|null}[]}
+   */
+  actionConditions(degree, chances) {
+    const bonuses = NOQUARTER.successStackBonus;
+    if (!this.inflictsOnSuccess || bonuses[degree] === undefined) return [];
+    const stackable = !!statusList().find((s) => s.id === this.condition)?.stackable;
+    if (!stackable) return [{ id: this.condition, formula: null }];
+    const base = this.countsTargets ? 1 : Math.max(1, this.scaledValue ?? 1);
+    const addsStacks = this.successStacks ? this.successStacks === 'yes' : stackable;
+    let bonus = 0;
+    if (addsStacks) {
+      bonus = bonuses[degree];
+      if (degree === 'criticalSuccess') {
+        const best = chances.extreme ? 'extreme' : chances.greater ? 'greater' : 'regular';
+        bonus += bonuses[best];
+      }
+    }
+    return [{ id: this.condition, formula: String(base + bonus) }];
   }
 
   /**

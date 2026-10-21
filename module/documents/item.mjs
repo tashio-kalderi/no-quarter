@@ -351,6 +351,16 @@ export class NoQuarterItem extends Item {
         : undefined;
       const note = item.system.effectNote || undefined;
 
+      // A character's full action pays its stamina cost when the roll goes ahead.
+      const cost = item.actor?.type === 'character' ? (item.system.staminaCost ?? 0) : 0;
+      const enough = () => {
+        const stamina = item.actor.system.stamina?.value ?? 0;
+        if (cost <= stamina) return true;
+        ui.notifications.warn(game.i18n.format('NOQUARTER.AttackBox.NotEnough', { name: item.actor.name, cost, stamina }));
+        return false;
+      };
+      if (cost && !enough()) return;
+
       // Ask how the roll is made; closing the dialog cancels it without using up a use.
       const asked = await askRollMode({
         label: item.name,
@@ -360,6 +370,10 @@ export class NoQuarterItem extends Item {
         ability: true,
       });
       if (!asked) return;
+      if (cost) {
+        if (!enough()) return;
+        await item.actor.update({ 'system.stamina.value': item.actor.system.stamina.value - cost });
+      }
       if (limited) await item.update({ 'system.used': used + 1 });
       // Each attack counts as its own roll for the conditions' costs.
       const attacks = attackRolls(item.actor, asked, isMonster ? item.system.attacks : 1);
@@ -377,7 +391,10 @@ export class NoQuarterItem extends Item {
         damage: isMonster ? item.system.damage : item.system.basicKey ? item.system.totalDamage : undefined,
         damageType: isMonster ? item.system.damageType : basicDamageType(item.system.basicKey),
         // Conditions are read from a monster ability's effect text, such as "Poisoned for 1d4 turns".
-        conditions: isMonster ? parseConditions(item.system.effect) : [],
+        // A character's full action such as Skill Boost inflicts its own on a success.
+        conditions: isMonster ? parseConditions(item.system.effect) : (degree, chances) => item.system.actionConditions(degree, chances),
+        targets: item.system.inflictsOnSuccess ? item.system.targetCount : undefined,
+        details: cost ? [game.i18n.format('NOQUARTER.Chat.StaminaPaid', { cost })] : [],
       });
     }
 

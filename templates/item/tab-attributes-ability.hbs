@@ -139,6 +139,24 @@
         <span class="ability-scaled">{{#if system.scaledLabel}}{{system.scaledLabel}}{{else}}-{{/if}}</span>
       </div>
     </div>
+    {{!-- A full action that inflicts its condition on a success (Skill Boost): what its value
+          counts, and whether a better success adds stacks. --}}
+    {{#if (and (eq system.actionType "full") (eq system.automation "condition"))}}
+    <div class="grid grid-2col">
+      <div class="grid-span-1">
+        <label class="resource-label" data-tooltip="{{localize 'NOQUARTER.Scaling.targetHint'}}">{{localize 'NOQUARTER.Scaling.targetLabel'}}</label>
+        <select name="system.scalingTarget">
+          {{selectOptions config.scalingTargets selected=system.scalingTarget localize=true}}
+        </select>
+      </div>
+      <div class="grid-span-1">
+        <label class="resource-label" data-tooltip="{{localize 'NOQUARTER.SuccessStacks.hint'}}">{{localize 'NOQUARTER.SuccessStacks.label'}}</label>
+        <select name="system.successStacks">
+          {{selectOptions config.successStacksModes selected=system.successStacks localize=true}}
+        </select>
+      </div>
+    </div>
+    {{/if}}
     {{!-- How often a supplemental ability can be added onto attacks in the attack box. --}}
     {{#if (eq system.actionType "supplemental")}}
     <div class="grid grid-2col">

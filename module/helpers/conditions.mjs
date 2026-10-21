@@ -15,8 +15,29 @@ import { TURN_STATES } from './turns.mjs';
  */
 const STACKABLE_STATUS_IDS = ['bleeding', 'blind', 'poison', 'bless'];
 
+/**
+ * Status effects that help whoever has them (buffs), such as Blessed. Every
+ * other condition counts as harmful (a debuff). Foundry has no such marking of
+ * its own, so it's set on these as `beneficial` (see registerStackableConditions).
+ * Used to say a hit "grants" rather than "inflicts" them, and for cleansing.
+ * Movement modes and markers (Fly, the targeting icons) are neither, but they
+ * are never inflicted either (see damage.mjs).
+ * @type {string[]}
+ */
+const BENEFICIAL_STATUS_IDS = [
+  'bless', 'regen', 'upgrade', 'invisible', 'fireShield', 'coldShield', 'magicShield', 'holyShield',
+];
+
 const FLAG_SCOPE = 'no-quarter';
 const STACKS_FLAG = 'stacks';
+
+/**
+ * @param {string} statusId
+ * @returns {boolean} Whether a status is a buff rather than a debuff (see BENEFICIAL_STATUS_IDS).
+ */
+export function isBeneficial(statusId) {
+  return !!CONFIG.statusEffects[statusId]?.beneficial;
+}
 
 /* -------------------------------------------- */
 /*  Stack bookkeeping                            */
@@ -324,7 +345,7 @@ function stackAwareToken(BaseToken) {
 
 /**
  * Swap in the stack-aware TokenHUD and Token subclasses and mark which
- * statuses stack.
+ * statuses stack and which are buffs.
  */
 export function registerStackableConditions() {
   CONFIG.Token.hudClass = NoQuarterTokenHUD;
@@ -332,6 +353,10 @@ export function registerStackableConditions() {
   for (const id of STACKABLE_STATUS_IDS) {
     const status = CONFIG.statusEffects[id];
     if (status) status.stackable = true;
+  }
+  for (const id of BENEFICIAL_STATUS_IDS) {
+    const status = CONFIG.statusEffects[id];
+    if (status) status.beneficial = true;
   }
   // Registered at `ready` so it runs after every module's renderTokenHUD
   // hook (those are registered during init).

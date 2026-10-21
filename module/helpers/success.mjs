@@ -248,13 +248,15 @@ export function attackRolls(actor, asked, attacks) {
  * @param {number} options.wounds
  * @param {number|null} [options.damage]
  * @param {string} [options.damageType]
- * @param {{id: string, formula: string|null}[]} [options.conditions]   Inflicted on a hit
+ * @param {{id: string, formula: string|null}[]|Function} [options.conditions]   Inflicted on a hit, or a
+ *   function of the degree of success and the chances that returns them
  * @param {{value: number, sources: string[]}} [options.ignoreDr]   Damage reduction the hit ignores
+ * @param {number} [options.targets]   How many targets the hit can be given to, shown when given
  * @param {'normal'|'advantage'|'disadvantage'} options.mode
  * @param {number} options.index   Which attack this is, for the hit's `data-hit`
  * @returns {Promise<{roll: Roll, html: string, hit: object|null}>}  `hit` is what a hit applies, see helpers/damage.mjs
  */
-async function rollOnce({ chances, wounds, damage, damageType, conditions = [], ignoreDr, mode, index }) {
+async function rollOnce({ chances, wounds, damage, damageType, conditions = [], ignoreDr, targets, mode, index }) {
   const roll = await new Roll(mode === 'normal' ? '1d100' : '2d100').evaluate();
 
   // Both natural results, in the order they were rolled.
@@ -270,6 +272,7 @@ async function rollOnce({ chances, wounds, damage, damageType, conditions = [], 
 
   const degree = successDegree(natural, chances, wounds);
   const result = game.i18n.localize(NOQUARTER.successDegrees[degree]);
+  if (typeof conditions === 'function') conditions = conditions(degree, chances);
 
   // Only a success has a damage bonus. A hit's damage and conditions sit in a
   // block that can be dragged onto the target.
@@ -291,9 +294,12 @@ async function rollOnce({ chances, wounds, damage, damageType, conditions = [], 
         damageHtml += `<div class="roll-ignore-dr">${foundry.utils.escapeHTML(text)}</div>`;
       }
     }
+    const targetsHtml = targets
+      ? `<div class="roll-targets">${game.i18n.format(targets === 1 ? 'NOQUARTER.Hit.TargetsOne' : 'NOQUARTER.Hit.TargetsMany', { count: targets })}</div>`
+      : '';
     hitHtml = `<div class="roll-hit" data-hit="${index}">
       <i class="fa-solid fa-grip-vertical roll-hit-grip" inert></i>
-      <div class="roll-hit-body">${damageHtml}${conditionsHtml(conditions)}</div>
+      <div class="roll-hit-body">${damageHtml}${conditionsHtml(conditions)}${targetsHtml}</div>
     </div>`;
   }
 
@@ -333,7 +339,9 @@ async function rollOnce({ chances, wounds, damage, damageType, conditions = [], 
  * @param {{regular: number, greater: number, extreme: number}} options.chances
  * @param {number|null} [options.damage]   Base damage; the degree of success adds to it
  * @param {string} [options.damageType]   A key of NOQUARTER.damageTypes, or '' when it isn't known
- * @param {{id: string, formula: string|null}[]} [options.conditions]   Conditions each hit inflicts, see parseConditions
+ * @param {{id: string, formula: string|null}[]|Function} [options.conditions]   Conditions each hit inflicts, see
+ *   parseConditions, or a function of the degree of success and the chances that returns them (see rollOnce)
+ * @param {number} [options.targets]   How many targets each hit can be given to, shown on the hit
  * @param {{value: number, sources: string[]}} [options.ignoreDr]   Damage reduction each hit ignores, and the abilities it's from
  * @param {string} [options.note]   Plain text shown under the roll, such as a monster ability's effect
  * @param {string[]} [options.details]   Plain-text lines shown under the name, such as the abilities added onto an attack
@@ -350,6 +358,7 @@ export async function rollSuccess({
   damageType,
   conditions,
   ignoreDr,
+  targets,
   note,
   details = [],
   tag,
@@ -361,7 +370,9 @@ export async function rollSuccess({
 
   const results = [];
   for (const [index, attackMode] of modes.entries()) {
-    results.push(await rollOnce({ chances, wounds, damage, damageType, conditions, ignoreDr, mode: attackMode, index }));
+    results.push(
+      await rollOnce({ chances, wounds, damage, damageType, conditions, ignoreDr, targets, mode: attackMode, index })
+    );
   }
   // What each attack that hit applies, by attack, for dragging onto a target.
   const hits = results.map(({ hit }) => (hit ? { ...hit, label } : null));

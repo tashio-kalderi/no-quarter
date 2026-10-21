@@ -257,6 +257,7 @@
       }
     },
     "Chat": {
+      "StaminaPaid": "−{cost} Stamina",
       "Roll": "Roll",
       "WoundOne": "rolled {roll}, 1 wound",
       "WoundMany": "rolled {roll}, {count} wounds",
@@ -265,7 +266,10 @@
     },
     "Hit": {
       "Inflicts": "Inflicts",
+      "Grants": "Grants",
       "DragHint": "Drag onto a token or an actor sheet to apply",
+      "TargetsOne": "1 target",
+      "TargetsMany": "Up to {count} targets",
       "NoToken": "Drop the hit onto a token to apply it.",
       "NoGM": "A GM must be connected to apply a hit to {name}.",
       "AskType": "Damage type",
@@ -312,7 +316,22 @@
       "everyOtherRank": "Every other rank (3, 5)",
       "fixed": "Fixed",
       "currentLabel": "Current Value",
+      "targetLabel": "Value Counts",
+      "targetHint": "What the value is for a full action that inflicts its condition: the condition's stacks, or how many targets get it (with 1 stack each before any success bonus).",
+      "targetStacks": "Stacks",
+      "targetTargets": "Targets",
       "current": "Currently {value}"
+    },
+    "SuccessStacks": {
+      "label": "Success Adds Stacks",
+      "hint": "Whether a Greater (+1) or Extreme (+2) success adds stacks to the condition. A critical success adds 2 on top of the best tier the roll could reach. Auto: only if the condition stacks.",
+      "auto": "Auto (if the condition stacks)",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "Targets": {
+      "One": "1 target",
+      "Many": "{count} targets"
     },
     "ImposeCondition": {
       "ChoiceLabel": "Choose a condition when taken",
@@ -328,7 +347,7 @@
       "pdr": "Adds to PDR",
       "mdr": "Adds to MDR",
       "ignoreDr": "Hit ignores this much DR",
-      "condition": "Hit inflicts its condition",
+      "condition": "Inflicts its condition (on a hit or success)",
       "advantage": "Gives the attack advantage",
       "extraAttacks": "Adds this many attacks",
       "DrTooltip": "Base {base}, +{bonus} from abilities",

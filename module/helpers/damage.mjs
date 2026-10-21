@@ -1,4 +1,4 @@
-import { raiseStacks, stackCount } from './conditions.mjs';
+import { isBeneficial, raiseStacks, stackCount } from './conditions.mjs';
 
 /**
  * Applying a hit from its chat card. Every attack that hits shows its damage
@@ -152,16 +152,23 @@ function conditionName(id) {
 }
 
 /**
- * The line under a hit's damage listing the conditions it inflicts.
+ * The lines under a hit's damage listing the conditions it gives: "Grants" for
+ * buffs such as Blessed and "Inflicts" for the rest (see isBeneficial).
  * @param {{id: string, formula: string|null}[]} conditions
  * @returns {string}
  */
 export function conditionsHtml(conditions) {
   if (!conditions?.length) return '';
-  const list = conditions
-    .map(({ id, formula }) => (formula && formula !== '1' ? `${conditionName(id)} (${formula})` : conditionName(id)))
-    .join(', ');
-  return `<div class="roll-inflicts">${game.i18n.localize('NOQUARTER.Hit.Inflicts')}: ${foundry.utils.escapeHTML(list)}</div>`;
+  const line = (list, key) => {
+    if (!list.length) return '';
+    const names = list
+      .map(({ id, formula }) => (formula && formula !== '1' ? `${conditionName(id)} (${formula})` : conditionName(id)))
+      .join(', ');
+    return `<div class="roll-inflicts">${game.i18n.localize(key)}: ${foundry.utils.escapeHTML(names)}</div>`;
+  };
+  const buffs = conditions.filter(({ id }) => isBeneficial(id));
+  const debuffs = conditions.filter(({ id }) => !isBeneficial(id));
+  return line(buffs, 'NOQUARTER.Hit.Grants') + line(debuffs, 'NOQUARTER.Hit.Inflicts');
 }
 
 /**

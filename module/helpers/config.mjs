@@ -55,6 +55,20 @@ NOQUARTER.damageBonus = {
 };
 
 /**
+ * The extra stacks a full action's condition gets for a better success, when
+ * the ability's success adds stacks (see NoQuarterAbility#actionConditions). A
+ * critical success adds its number on top of the best tier the roll could
+ * reach, so with Regular and Greater unlocked it gives 1 + 2.
+ * @type {Object}
+ */
+NOQUARTER.successStackBonus = {
+  regular: 0,
+  greater: 1,
+  extreme: 2,
+  criticalSuccess: 2,
+};
+
+/**
  * How a character's ability is used, in the order the sections appear on the
  * sheet. Full actions take the character's turn and are rolled; supplemental
  * abilities are added onto a full action; passive abilities are always on.
@@ -100,7 +114,8 @@ NOQUARTER.scalingModes = {
  * supplemental abilities added onto an attack in the attack box (see
  * helpers/attack-builder.mjs): "ignoreDr" lets the hit ignore that much of the
  * target's damage reduction, "condition" inflicts the ability's condition
- * (that many stacks when it stacks), "advantage" gives the attack advantage,
+ * (that many stacks when it stacks; a full action inflicts it on a success, see
+ * `scalingTarget`), "advantage" gives the attack advantage,
  * and "extraAttacks" adds that many attacks.
  * @type {Object}
  */
@@ -112,6 +127,29 @@ NOQUARTER.abilityAutomations = {
   condition: 'NOQUARTER.Automation.condition',
   advantage: 'NOQUARTER.Automation.advantage',
   extraAttacks: 'NOQUARTER.Automation.extraAttacks',
+};
+
+/**
+ * What the scaling value of an ability that inflicts a condition counts: the
+ * condition's stacks (Lacerate), or for a full action, how many targets it
+ * can be given to (Skill Boost), which then get 1 stack before any success bonus.
+ * @type {Object}
+ */
+NOQUARTER.scalingTargets = {
+  stacks: 'NOQUARTER.Scaling.targetStacks',
+  targets: 'NOQUARTER.Scaling.targetTargets',
+};
+
+/**
+ * Whether a better success adds stacks to a full action's condition (see
+ * NOQUARTER.successStackBonus). Blank follows the condition: stacks if it
+ * stacks, none for an on/off condition.
+ * @type {Object}
+ */
+NOQUARTER.successStacksModes = {
+  '': 'NOQUARTER.SuccessStacks.auto',
+  yes: 'NOQUARTER.SuccessStacks.yes',
+  no: 'NOQUARTER.SuccessStacks.no',
 };
 
 /**

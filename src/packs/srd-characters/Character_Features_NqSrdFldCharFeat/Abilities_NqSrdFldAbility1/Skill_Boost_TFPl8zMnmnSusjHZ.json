@@ -15,7 +15,7 @@
       "step": 1,
       "mode": "everyOtherRank"
     },
-    "automation": "",
+    "automation": "condition",
     "rank": null,
     "special": false,
     "minRank": 1,
@@ -29,7 +29,10 @@
     "uses": null,
     "used": 0,
     "basicKey": "",
-    "attackLimit": ""
+    "attackLimit": "",
+    "condition": "bless",
+    "scalingTarget": "targets",
+    "successStacks": ""
   },
   "effects": [],
   "folder": "NqSrdFldAbility1",
